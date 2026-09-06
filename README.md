@@ -15,7 +15,9 @@ A deployed citizen-facing application for Central Government scheme discovery an
 
 ## Actual deployment and target architecture
 
-The live web application runs React/Vinext on Sites with a Cloudflare Worker API and D1. It uses the TypeScript deterministic engine by default. These hosting resources were available in this session; Azure infrastructure and paid-service credentials were not.
+The primary deployment runs React/Vinext directly on the project owner's Cloudflare Workers account with its own D1 database. Its address is https://scheme-sathi.contactamsmani.workers.dev. It uses the TypeScript deterministic engine by default. The earlier Sites deployment remains separately available with its existing database; sessions and tracker records do not transfer between addresses. Azure infrastructure and paid-service credentials have not been connected.
+
+See [Cloudflare deployment](docs/cloudflare-deployment.md) for deployment commands, authentication scopes, and resource configuration.
 
 The separately runnable Python service is under `backend/`. Set `RULE_SERVICE_URL` and `RULE_SERVICE_API_KEY` on the Worker to require evaluation by that service. Its result must match the local scheme/rule version and deterministic result; failures or disagreements force abstention. This version does **not** move the citizen session/tracker database to PostgreSQL. The full Azure consolidation described in [target architecture](docs/target-architecture.md) remains deployment work, not a claim about the current endpoint.
 

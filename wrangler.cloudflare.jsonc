@@ -1,0 +1,28 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "scheme-sathi",
+  "account_id": "b5d1b6fd9d8c0e1763f6c364d7b92e2a",
+  "main": "dist/server/index.js",
+  "compatibility_date": "2026-05-15",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "preview_urls": false,
+  "no_bundle": true,
+  "find_additional_modules": true,
+  "rules": [{ "type": "ESModule", "globs": ["**/*.js", "**/*.mjs"] }],
+  "assets": {
+    "directory": "./dist/client",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*", "/health/*"],
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "scheme-sathi-db",
+      "database_id": "7f8820a4-877a-4d4c-8e9d-60c8d51db78f",
+      "migrations_dir": "drizzle",
+    },
+  ],
+  "vars": { "HOSTING_PROVIDER": "Cloudflare Workers" },
+  "observability": { "enabled": false },
+}

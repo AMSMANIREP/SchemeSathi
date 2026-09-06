@@ -9,12 +9,14 @@
     "dev": "vinext dev",
     "build": "vinext build",
     "start": "wrangler dev --config dist/server/wrangler.json",
-    "lint": "oxlint app lib db tests scripts",
+    "lint": "oxlint app lib db tests scripts middleware.ts",
     "format": "oxfmt",
     "db:generate": "drizzle-kit generate",
     "typecheck": "tsc --noEmit",
     "test": "node --experimental-strip-types --test tests/rules.test.mjs",
-    "test:api": "node tests/api.test.mjs"
+    "test:api": "node tests/api.test.mjs",
+    "db:migrate:cloudflare": "wrangler d1 migrations apply DB --remote --config wrangler.cloudflare.jsonc",
+    "deploy:cloudflare": "node scripts/validate-release.mjs && pnpm build && pnpm run db:migrate:cloudflare && wrangler deploy --config wrangler.cloudflare.jsonc"
   },
   "dependencies": {
     "react": "19.2.6",

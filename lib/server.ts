@@ -12,6 +12,7 @@ type Session = {
   expires_at: number;
 };
 type Settings = {
+  HOSTING_PROVIDER?: string;
   DB: D1Database;
   RULE_SERVICE_URL?: string;
   RULE_SERVICE_API_KEY?: string;
@@ -232,7 +233,7 @@ export async function handle(req: Request, path: string[]) {
     if (p === 'capabilities') {
       const e = settings();
       return json({
-        hosting: 'Sites',
+        hosting: e.HOSTING_PROVIDER || 'Sites',
         storage: 'D1',
         ai: !!(
           e.AZURE_OPENAI_ENDPOINT &&
