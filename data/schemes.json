@@ -1,0 +1,1654 @@
+[
+  {
+    "id": "pm-kisan",
+    "name": "PM-KISAN Samman Nidhi",
+    "shortName": "PM-KISAN",
+    "category": "Agriculture",
+    "ministry": "Ministry of Agriculture and Farmers Welfare",
+    "summary": "Income support for eligible landholding farmer families.",
+    "benefit": "The official portal describes annual income support of ₹6,000 for eligible farmer families. Exclusions and land records require official checks.",
+    "source": "https://pmkisan.gov.in/",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": "2026-09-06T00:00:00Z",
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": [
+        {
+          "id": "pm-kisan-occupation",
+          "field": "occupation",
+          "op": "eq",
+          "value": "farmer",
+          "label": "Farmer-family context needs verification",
+          "source": "https://pmkisan.gov.in/"
+        },
+        {
+          "id": "pm-kisan-land",
+          "field": "land",
+          "op": "gt",
+          "value": 0,
+          "label": "Eligible landholding must be established",
+          "source": "https://pmkisan.gov.in/"
+        },
+        {
+          "id": "pm-kisan-taxpayer",
+          "field": "taxpayer",
+          "op": "eq",
+          "value": "no",
+          "label": "Income-tax exclusion needs family-level review",
+          "source": "https://pmkisan.gov.in/"
+        }
+      ]
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "agriculture",
+      "pm-kisan"
+    ]
+  },
+  {
+    "id": "pmfby",
+    "name": "Pradhan Mantri Fasal Bima Yojana",
+    "shortName": "PM Fasal Bima",
+    "category": "Agriculture",
+    "ministry": "Ministry of Agriculture and Farmers Welfare",
+    "summary": "Crop insurance for eligible notified crops and areas.",
+    "benefit": "Crop insurance for eligible notified crops and areas.",
+    "source": "https://pmfby.gov.in/",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": null,
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "agriculture",
+      "pm fasal bima"
+    ]
+  },
+  {
+    "id": "pm-kmy",
+    "name": "Pradhan Mantri Kisan Maandhan Yojana",
+    "shortName": "PM Kisan Maandhan",
+    "category": "Agriculture",
+    "ministry": "Ministry of Agriculture and Farmers Welfare",
+    "summary": "Contributory pension programme for eligible farmers.",
+    "benefit": "Contributory pension programme for eligible farmers.",
+    "source": "https://maandhan.in/",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": null,
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "agriculture",
+      "pm kisan maandhan"
+    ]
+  },
+  {
+    "id": "kcc",
+    "name": "Kisan Credit Card",
+    "shortName": "Kisan Credit Card",
+    "category": "Agriculture",
+    "ministry": "Ministry of Agriculture and Farmers Welfare",
+    "summary": "Institutional agricultural credit through participating banks.",
+    "benefit": "Institutional agricultural credit through participating banks.",
+    "source": "https://fasalrin.gov.in/",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": null,
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "agriculture",
+      "kisan credit card"
+    ]
+  },
+  {
+    "id": "pm-kusum",
+    "name": "Pradhan Mantri KUSUM",
+    "shortName": "PM-KUSUM",
+    "category": "Agriculture",
+    "ministry": "Ministry of New and Renewable Energy",
+    "summary": "Support for eligible agricultural solar energy installations.",
+    "benefit": "Support for eligible agricultural solar energy installations.",
+    "source": "https://pmkusum.mnre.gov.in/",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": null,
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "agriculture",
+      "pm-kusum"
+    ]
+  },
+  {
+    "id": "smam",
+    "name": "Sub Mission on Agricultural Mechanization",
+    "shortName": "Farm Mechanization",
+    "category": "Agriculture",
+    "ministry": "Ministry of Agriculture and Farmers Welfare",
+    "summary": "Agricultural equipment support through notified programmes.",
+    "benefit": "Agricultural equipment support through notified programmes.",
+    "source": "https://agrimachinery.nic.in/",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": null,
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "agriculture",
+      "farm mechanization"
+    ]
+  },
+  {
+    "id": "soil-health",
+    "name": "Soil Health Card Scheme",
+    "shortName": "Soil Health Card",
+    "category": "Agriculture",
+    "ministry": "Ministry of Agriculture and Farmers Welfare",
+    "summary": "Soil testing and nutrient guidance for farmers.",
+    "benefit": "Soil testing and nutrient guidance for farmers.",
+    "source": "https://soilhealth.dac.gov.in/",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": null,
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "agriculture",
+      "soil health card"
+    ]
+  },
+  {
+    "id": "aif",
+    "name": "Agriculture Infrastructure Fund",
+    "shortName": "Agriculture Infrastructure",
+    "category": "Agriculture",
+    "ministry": "Ministry of Agriculture and Farmers Welfare",
+    "summary": "Financing support for eligible agricultural infrastructure projects.",
+    "benefit": "Financing support for eligible agricultural infrastructure projects.",
+    "source": "https://agriinfra.dac.gov.in/",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": null,
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "agriculture",
+      "agriculture infrastructure"
+    ]
+  },
+  {
+    "id": "pmksy",
+    "name": "Pradhan Mantri Krishi Sinchayee Yojana",
+    "shortName": "PM Krishi Sinchayee",
+    "category": "Agriculture",
+    "ministry": "Ministry of Agriculture and Farmers Welfare",
+    "summary": "Irrigation and water efficiency support through programme components.",
+    "benefit": "Irrigation and water efficiency support through programme components.",
+    "source": "https://pmksy.gov.in/",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": null,
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "agriculture",
+      "pm krishi sinchayee"
+    ]
+  },
+  {
+    "id": "pmjay",
+    "name": "Ayushman Bharat Pradhan Mantri Jan Arogya Yojana",
+    "shortName": "Ayushman Bharat PM-JAY",
+    "category": "Health",
+    "ministry": "Ministry of Health and Family Welfare",
+    "summary": "Hospital treatment coverage for eligible beneficiaries.",
+    "benefit": "Hospital treatment coverage for eligible beneficiaries.",
+    "source": "https://nha.gov.in/PM-JAY",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": null,
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "health",
+      "ayushman bharat pm-jay"
+    ]
+  },
+  {
+    "id": "pmuy",
+    "name": "Pradhan Mantri Ujjwala Yojana",
+    "shortName": "Ujjwala Yojana",
+    "category": "Women & family",
+    "ministry": "Ministry of Petroleum and Natural Gas",
+    "summary": "LPG connection assistance for eligible women in poor households.",
+    "benefit": "LPG connection assistance. Poor-household declaration and official verification are required.",
+    "source": "https://www.pmuy.gov.in/",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": "2026-09-06T00:00:00Z",
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": [
+        {
+          "id": "pmuy-age",
+          "field": "age",
+          "op": "gte",
+          "value": 18,
+          "label": "Applicant is at least 18",
+          "source": "https://www.pmuy.gov.in/"
+        },
+        {
+          "id": "pmuy-gender",
+          "field": "gender",
+          "op": "eq",
+          "value": "female",
+          "label": "Applicant is a woman",
+          "source": "https://www.pmuy.gov.in/"
+        },
+        {
+          "id": "pmuy-lpg",
+          "field": "lpg",
+          "op": "eq",
+          "value": "no",
+          "label": "No other LPG connection in the household",
+          "source": "https://www.pmuy.gov.in/"
+        }
+      ]
+    },
+    "complete": false,
+    "documents": [
+      "KYC application form",
+      "Identity and applicable address evidence",
+      "Family-composition evidence or prescribed migrant declaration",
+      "Bank details and deprivation declaration (provide only to the official distributor)"
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "women & family",
+      "ujjwala yojana"
+    ]
+  },
+  {
+    "id": "pmmvy",
+    "name": "Pradhan Mantri Matru Vandana Yojana",
+    "shortName": "Matru Vandana Yojana",
+    "category": "Women & family",
+    "ministry": "Ministry of Women and Child Development",
+    "summary": "Maternity assistance under the programme conditions.",
+    "benefit": "Maternity assistance under the programme conditions.",
+    "source": "https://pmmvy.wcd.gov.in/",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": null,
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "women & family",
+      "matru vandana yojana"
+    ]
+  },
+  {
+    "id": "sukanya",
+    "name": "Sukanya Samriddhi Account Scheme",
+    "shortName": "Sukanya Samriddhi",
+    "category": "Women & family",
+    "ministry": "Ministry of Finance",
+    "summary": "Small savings account for eligible girl children.",
+    "benefit": "Small savings account for eligible girl children.",
+    "source": "https://www.indiapost.gov.in/",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": null,
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "women & family",
+      "sukanya samriddhi"
+    ]
+  },
+  {
+    "id": "pmjjby",
+    "name": "Pradhan Mantri Jeevan Jyoti Bima Yojana",
+    "shortName": "Jeevan Jyoti Bima",
+    "category": "Finance & pension",
+    "ministry": "Ministry of Finance",
+    "summary": "Renewable life insurance through participating institutions.",
+    "benefit": "Renewable life insurance through participating institutions.",
+    "source": "https://financialservices.gov.in/schemes-and-services",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": "2026-09-06T00:00:00Z",
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "finance & pension",
+      "jeevan jyoti bima"
+    ]
+  },
+  {
+    "id": "pmsby",
+    "name": "Pradhan Mantri Suraksha Bima Yojana",
+    "shortName": "Suraksha Bima",
+    "category": "Finance & pension",
+    "ministry": "Ministry of Finance",
+    "summary": "Accident insurance through participating institutions.",
+    "benefit": "Accident insurance through participating institutions.",
+    "source": "https://financialservices.gov.in/schemes-and-services",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": "2026-09-06T00:00:00Z",
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "finance & pension",
+      "suraksha bima"
+    ]
+  },
+  {
+    "id": "apy",
+    "name": "Atal Pension Yojana",
+    "shortName": "Atal Pension Yojana",
+    "category": "Finance & pension",
+    "ministry": "Ministry of Finance",
+    "summary": "Contributory pension programme with defined entry conditions.",
+    "benefit": "Contributory pension programme with defined entry conditions.",
+    "source": "https://financialservices.gov.in/schemes-and-services",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": "2026-09-06T00:00:00Z",
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "finance & pension",
+      "atal pension yojana"
+    ]
+  },
+  {
+    "id": "pmjdy",
+    "name": "Pradhan Mantri Jan Dhan Yojana",
+    "shortName": "Jan Dhan Yojana",
+    "category": "Finance & pension",
+    "ministry": "Ministry of Finance",
+    "summary": "Basic banking access through participating institutions.",
+    "benefit": "Basic banking access through participating institutions.",
+    "source": "https://pmjdy.gov.in/",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": "2026-09-06T00:00:00Z",
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "finance & pension",
+      "jan dhan yojana"
+    ]
+  },
+  {
+    "id": "scss",
+    "name": "Senior Citizens Savings Scheme",
+    "shortName": "Senior Citizens Savings",
+    "category": "Finance & pension",
+    "ministry": "Ministry of Finance",
+    "summary": "Small savings programme for eligible senior citizens.",
+    "benefit": "Small savings programme for eligible senior citizens.",
+    "source": "https://www.indiapost.gov.in/",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": null,
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "finance & pension",
+      "senior citizens savings"
+    ]
+  },
+  {
+    "id": "pmayg",
+    "name": "Pradhan Mantri Awaas Yojana Gramin",
+    "shortName": "PM Awaas Gramin",
+    "category": "Housing & utilities",
+    "ministry": "Ministry of Rural Development",
+    "summary": "Housing assistance for eligible rural households.",
+    "benefit": "Housing assistance for eligible rural households.",
+    "source": "https://pmayg.nic.in/",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": null,
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "housing & utilities",
+      "pm awaas gramin"
+    ]
+  },
+  {
+    "id": "pmayu",
+    "name": "Pradhan Mantri Awas Yojana Urban 2.0",
+    "shortName": "PM Awas Urban 2.0",
+    "category": "Housing & utilities",
+    "ministry": "Ministry of Housing and Urban Affairs",
+    "summary": "Housing assistance under eligible urban programme components.",
+    "benefit": "Housing assistance under eligible urban programme components.",
+    "source": "https://pmay-urban.gov.in/",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": null,
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "housing & utilities",
+      "pm awas urban 2.0"
+    ]
+  },
+  {
+    "id": "sbmg",
+    "name": "Swachh Bharat Mission Gramin",
+    "shortName": "Swachh Bharat Gramin",
+    "category": "Housing & utilities",
+    "ministry": "Ministry of Jal Shakti",
+    "summary": "Rural sanitation assistance through local implementation.",
+    "benefit": "Rural sanitation assistance through local implementation.",
+    "source": "https://swachhbharatmission.ddws.gov.in/",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": null,
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "housing & utilities",
+      "swachh bharat gramin"
+    ]
+  },
+  {
+    "id": "jjm",
+    "name": "Jal Jeevan Mission",
+    "shortName": "Jal Jeevan Mission",
+    "category": "Housing & utilities",
+    "ministry": "Ministry of Jal Shakti",
+    "summary": "Rural household water supply through community infrastructure.",
+    "benefit": "Rural household water supply through community infrastructure.",
+    "source": "https://jaljeevanmission.gov.in/",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": null,
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "housing & utilities",
+      "jal jeevan mission"
+    ]
+  },
+  {
+    "id": "mgnrega",
+    "name": "Mahatma Gandhi National Rural Employment Guarantee Scheme",
+    "shortName": "MGNREGA",
+    "category": "Jobs & skills",
+    "ministry": "Ministry of Rural Development",
+    "summary": "Demand-based unskilled wage employment for rural households.",
+    "benefit": "Demand-based unskilled wage employment for rural households.",
+    "source": "https://nrega.nic.in/",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": null,
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "jobs & skills",
+      "mgnrega"
+    ]
+  },
+  {
+    "id": "nrlm",
+    "name": "Deendayal Antyodaya Yojana National Rural Livelihoods Mission",
+    "shortName": "DAY-NRLM",
+    "category": "Jobs & skills",
+    "ministry": "Ministry of Rural Development",
+    "summary": "Self-help groups and livelihood support for rural households.",
+    "benefit": "Self-help groups and livelihood support for rural households.",
+    "source": "https://aajeevika.gov.in/",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": null,
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "jobs & skills",
+      "day-nrlm"
+    ]
+  },
+  {
+    "id": "ddugky",
+    "name": "Deen Dayal Upadhyaya Grameen Kaushalya Yojana",
+    "shortName": "DDU-GKY",
+    "category": "Jobs & skills",
+    "ministry": "Ministry of Rural Development",
+    "summary": "Employment-oriented training for eligible rural youth.",
+    "benefit": "Employment-oriented training for eligible rural youth.",
+    "source": "https://ddugky.gov.in/",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": null,
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "jobs & skills",
+      "ddu-gky"
+    ]
+  },
+  {
+    "id": "pmkvy",
+    "name": "Pradhan Mantri Kaushal Vikas Yojana",
+    "shortName": "PM Kaushal Vikas",
+    "category": "Jobs & skills",
+    "ministry": "Ministry of Skill Development and Entrepreneurship",
+    "summary": "Skill training through approved programme centres.",
+    "benefit": "Skill training through approved programme centres.",
+    "source": "https://www.msde.gov.in/",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": null,
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "jobs & skills",
+      "pm kaushal vikas"
+    ]
+  },
+  {
+    "id": "naps",
+    "name": "National Apprenticeship Promotion Scheme",
+    "shortName": "Apprenticeship Promotion",
+    "category": "Jobs & skills",
+    "ministry": "Ministry of Skill Development and Entrepreneurship",
+    "summary": "Apprenticeship opportunities with participating establishments.",
+    "benefit": "Apprenticeship opportunities with participating establishments.",
+    "source": "https://www.apprenticeshipindia.gov.in/",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": null,
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "jobs & skills",
+      "apprenticeship promotion"
+    ]
+  },
+  {
+    "id": "nats",
+    "name": "National Apprenticeship Training Scheme",
+    "shortName": "Apprenticeship Training",
+    "category": "Jobs & skills",
+    "ministry": "Ministry of Education",
+    "summary": "Practical apprenticeship training for eligible learners.",
+    "benefit": "Practical apprenticeship training for eligible learners.",
+    "source": "https://nats.education.gov.in/",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": null,
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "jobs & skills",
+      "apprenticeship training"
+    ]
+  },
+  {
+    "id": "vishwakarma",
+    "name": "PM Vishwakarma",
+    "shortName": "PM Vishwakarma",
+    "category": "Business",
+    "ministry": "Ministry of Micro Small and Medium Enterprises",
+    "summary": "Skills and enterprise support for eligible traditional artisans.",
+    "benefit": "Skills and enterprise support for eligible traditional artisans.",
+    "source": "https://pmvishwakarma.gov.in/",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": null,
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "business",
+      "pm vishwakarma"
+    ]
+  },
+  {
+    "id": "pmegp",
+    "name": "Prime Ministers Employment Generation Programme",
+    "shortName": "PMEGP",
+    "category": "Business",
+    "ministry": "Ministry of Micro Small and Medium Enterprises",
+    "summary": "Credit-linked assistance for eligible new micro enterprises.",
+    "benefit": "Credit-linked assistance for eligible new micro enterprises.",
+    "source": "https://pmegp.msme.gov.in/",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": null,
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "business",
+      "pmegp"
+    ]
+  },
+  {
+    "id": "mudra",
+    "name": "Pradhan Mantri MUDRA Yojana",
+    "shortName": "MUDRA Yojana",
+    "category": "Business",
+    "ministry": "Ministry of Finance",
+    "summary": "Institutional credit for eligible micro enterprises.",
+    "benefit": "Institutional credit for eligible micro enterprises.",
+    "source": "https://financialservices.gov.in/schemes-and-services",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": "2026-09-06T00:00:00Z",
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "business",
+      "mudra yojana"
+    ]
+  },
+  {
+    "id": "standup",
+    "name": "Stand Up India",
+    "shortName": "Stand Up India",
+    "category": "Business",
+    "ministry": "Ministry of Finance",
+    "summary": "Bank-financed enterprise support subject to current availability.",
+    "benefit": "Bank-financed enterprise support subject to current availability.",
+    "source": "https://financialservices.gov.in/schemes-and-services",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": "2026-09-06T00:00:00Z",
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "business",
+      "stand up india"
+    ]
+  },
+  {
+    "id": "svanidhi",
+    "name": "PM Street Vendors AtmaNirbhar Nidhi",
+    "shortName": "PM SVANidhi",
+    "category": "Business",
+    "ministry": "Ministry of Housing and Urban Affairs",
+    "summary": "Credit support for eligible street vendors.",
+    "benefit": "Credit support for eligible street vendors.",
+    "source": "https://pmsvanidhi.mohua.gov.in/",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": null,
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "business",
+      "pm svanidhi"
+    ]
+  },
+  {
+    "id": "pmfme",
+    "name": "PM Formalisation of Micro Food Processing Enterprises",
+    "shortName": "PMFME",
+    "category": "Business",
+    "ministry": "Ministry of Food Processing Industries",
+    "summary": "Support for eligible micro food processing enterprises.",
+    "benefit": "Support for eligible micro food processing enterprises.",
+    "source": "https://pmfme.mofpi.gov.in/",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": null,
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "business",
+      "pmfme"
+    ]
+  },
+  {
+    "id": "ignoaps",
+    "name": "Indira Gandhi National Old Age Pension Scheme",
+    "shortName": "National Old Age Pension",
+    "category": "Finance & pension",
+    "ministry": "Ministry of Rural Development",
+    "summary": "Pension assistance under National Social Assistance Programme rules.",
+    "benefit": "Pension assistance under National Social Assistance Programme rules.",
+    "source": "https://nsap.nic.in/",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": null,
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "finance & pension",
+      "national old age pension"
+    ]
+  },
+  {
+    "id": "ignwps",
+    "name": "Indira Gandhi National Widow Pension Scheme",
+    "shortName": "National Widow Pension",
+    "category": "Women & family",
+    "ministry": "Ministry of Rural Development",
+    "summary": "Pension assistance for eligible widows.",
+    "benefit": "Pension assistance for eligible widows.",
+    "source": "https://nsap.nic.in/",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": null,
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "women & family",
+      "national widow pension"
+    ]
+  },
+  {
+    "id": "igndps",
+    "name": "Indira Gandhi National Disability Pension Scheme",
+    "shortName": "National Disability Pension",
+    "category": "Disability support",
+    "ministry": "Ministry of Rural Development",
+    "summary": "Pension assistance for eligible persons with disabilities.",
+    "benefit": "Pension assistance for eligible persons with disabilities.",
+    "source": "https://nsap.nic.in/",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": null,
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "disability support",
+      "national disability pension"
+    ]
+  },
+  {
+    "id": "nfbs",
+    "name": "National Family Benefit Scheme",
+    "shortName": "National Family Benefit",
+    "category": "Women & family",
+    "ministry": "Ministry of Rural Development",
+    "summary": "Assistance after an eligible household loses its primary breadwinner.",
+    "benefit": "Assistance after an eligible household loses its primary breadwinner.",
+    "source": "https://nsap.nic.in/",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": null,
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "women & family",
+      "national family benefit"
+    ]
+  },
+  {
+    "id": "annapurna",
+    "name": "Annapurna Scheme",
+    "shortName": "Annapurna",
+    "category": "Food & essentials",
+    "ministry": "Ministry of Rural Development",
+    "summary": "Food assistance under applicable social assistance conditions.",
+    "benefit": "Food assistance under applicable social assistance conditions.",
+    "source": "https://nsap.nic.in/",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": null,
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "food & essentials",
+      "annapurna"
+    ]
+  },
+  {
+    "id": "csss",
+    "name": "Central Sector Scheme of Scholarships for College and University Students",
+    "shortName": "College Scholarships",
+    "category": "Education",
+    "ministry": "Ministry of Education",
+    "summary": "Scholarships for eligible higher education students.",
+    "benefit": "Scholarships for eligible higher education students.",
+    "source": "https://scholarships.gov.in/",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": null,
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "education",
+      "college scholarships"
+    ]
+  },
+  {
+    "id": "yasasvi",
+    "name": "PM Young Achievers Scholarship Award Scheme for Vibrant India",
+    "shortName": "PM YASASVI",
+    "category": "Education",
+    "ministry": "Ministry of Social Justice and Empowerment",
+    "summary": "Scholarship support through specified programme components.",
+    "benefit": "Scholarship support through specified programme components.",
+    "source": "https://socialjustice.gov.in/schemes",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": null,
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "education",
+      "pm yasasvi"
+    ]
+  },
+  {
+    "id": "sc-postmatric",
+    "name": "Post Matric Scholarship for SC Students",
+    "shortName": "SC Post Matric Scholarship",
+    "category": "Education",
+    "ministry": "Ministry of Social Justice and Empowerment",
+    "summary": "Post-matric education assistance under applicable guidelines.",
+    "benefit": "Post-matric education assistance under applicable guidelines.",
+    "source": "https://socialjustice.gov.in/schemes",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": null,
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "education",
+      "sc post matric scholarship"
+    ]
+  },
+  {
+    "id": "st-postmatric",
+    "name": "Post Matric Scholarship for ST Students",
+    "shortName": "ST Post Matric Scholarship",
+    "category": "Education",
+    "ministry": "Ministry of Tribal Affairs",
+    "summary": "Post-matric support for eligible Scheduled Tribe students.",
+    "benefit": "Post-matric support for eligible Scheduled Tribe students.",
+    "source": "https://tribal.nic.in/",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": null,
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "education",
+      "st post matric scholarship"
+    ]
+  },
+  {
+    "id": "sc-topclass",
+    "name": "Top Class Education for SC Students",
+    "shortName": "SC Top Class Education",
+    "category": "Education",
+    "ministry": "Ministry of Social Justice and Empowerment",
+    "summary": "Support at notified higher education institutions.",
+    "benefit": "Support at notified higher education institutions.",
+    "source": "https://socialjustice.gov.in/schemes",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": null,
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "education",
+      "sc top class education"
+    ]
+  },
+  {
+    "id": "st-topclass",
+    "name": "National Scholarship for Higher Education of ST Students",
+    "shortName": "ST Higher Education",
+    "category": "Education",
+    "ministry": "Ministry of Tribal Affairs",
+    "summary": "Scholarship support at notified institutions.",
+    "benefit": "Scholarship support at notified institutions.",
+    "source": "https://tribal.nic.in/",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": null,
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "education",
+      "st higher education"
+    ]
+  },
+  {
+    "id": "adip",
+    "name": "Assistance to Disabled Persons for Purchase or Fitting of Aids and Appliances",
+    "shortName": "ADIP Assistive Devices",
+    "category": "Disability support",
+    "ministry": "Ministry of Social Justice and Empowerment",
+    "summary": "Assistive devices for eligible persons with disabilities.",
+    "benefit": "Assistive devices for eligible persons with disabilities.",
+    "source": "https://depwd.gov.in/",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": null,
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "disability support",
+      "adip assistive devices"
+    ]
+  },
+  {
+    "id": "vayoshri",
+    "name": "Rashtriya Vayoshri Yojana",
+    "shortName": "Rashtriya Vayoshri",
+    "category": "Disability support",
+    "ministry": "Ministry of Social Justice and Empowerment",
+    "summary": "Assisted living devices for eligible senior citizens.",
+    "benefit": "Assisted living devices for eligible senior citizens.",
+    "source": "https://socialjustice.gov.in/schemes",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": null,
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "disability support",
+      "rashtriya vayoshri"
+    ]
+  },
+  {
+    "id": "pmsym",
+    "name": "Pradhan Mantri Shram Yogi Maandhan",
+    "shortName": "Shram Yogi Maandhan",
+    "category": "Finance & pension",
+    "ministry": "Ministry of Labour and Employment",
+    "summary": "Contributory pension for eligible unorganised workers.",
+    "benefit": "Contributory pension for eligible unorganised workers.",
+    "source": "https://maandhan.in/",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": null,
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "finance & pension",
+      "shram yogi maandhan"
+    ]
+  },
+  {
+    "id": "suryaghar",
+    "name": "PM Surya Ghar Muft Bijli Yojana",
+    "shortName": "PM Surya Ghar",
+    "category": "Housing & utilities",
+    "ministry": "Ministry of New and Renewable Energy",
+    "summary": "Residential rooftop solar support under current programme rules.",
+    "benefit": "Residential rooftop solar support under current programme rules.",
+    "source": "https://pmsuryaghar.gov.in/",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": null,
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "housing & utilities",
+      "pm surya ghar"
+    ]
+  },
+  {
+    "id": "nos",
+    "name": "National Overseas Scholarship for SC and Other Eligible Categories",
+    "shortName": "National Overseas Scholarship",
+    "category": "Education",
+    "ministry": "Ministry of Social Justice and Empowerment",
+    "summary": "Overseas study assistance for eligible applicants.",
+    "benefit": "Overseas study assistance for eligible applicants.",
+    "source": "https://socialjustice.gov.in/schemes/28",
+    "sourceTitle": "Official programme or ministry reference",
+    "sourceCheckedAt": null,
+    "reviewStatus": "DRAFT",
+    "version": "draft-2026-09-06",
+    "rules": {
+      "all": []
+    },
+    "complete": false,
+    "documents": [
+      "Check the current document list on the official source.",
+      "Prepare only the records requested by the responsible authority."
+    ],
+    "steps": [
+      "Open the official programme or ministry reference.",
+      "Confirm the current application window and all eligibility conditions.",
+      "Follow the official portal or local office instructions.",
+      "Record your own progress here after taking action."
+    ],
+    "tags": [
+      "education",
+      "national overseas scholarship"
+    ]
+  }
+]

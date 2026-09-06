@@ -1,0 +1,37 @@
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: sathi
+      POSTGRES_USER: sathi
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+    volumes:
+      - sathi_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U sathi']
+      interval: 5s
+      retries: 10
+  migrate:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    command: [python, migrate.py]
+    environment:
+      DATABASE_URL: postgresql://sathi:${POSTGRES_PASSWORD}@postgres:5432/sathi
+    depends_on:
+      postgres:
+        condition: service_healthy
+  rules:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    ports: ['127.0.0.1:8000:8000']
+    environment:
+      DATABASE_URL: postgresql://sathi:${POSTGRES_PASSWORD}@postgres:5432/sathi
+      SERVICE_API_KEY: ${SERVICE_API_KEY:?Set SERVICE_API_KEY}
+      STORAGE_MODE: postgres
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+volumes:
+  sathi_pg:

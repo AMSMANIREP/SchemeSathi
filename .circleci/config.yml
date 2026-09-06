@@ -1,0 +1,12 @@
+version: 2.1
+jobs:
+  regression:
+    docker:
+      - image: cimg/python:3.12-node
+    steps:
+      - checkout
+      - run: pip install -r backend/requirements.lock
+      - run: cd backend && python -m pytest -q
+workflows:
+  quality:
+    jobs: [regression]

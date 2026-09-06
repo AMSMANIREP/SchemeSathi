@@ -1,0 +1,2417 @@
+{
+  "notice": "216 synthetic regression cases, not domain-expert approved golden data",
+  "scheme": {
+    "id": "synthetic-only",
+    "version": "test-1",
+    "source": "https://example.gov.in/test",
+    "sourceCheckedAt": "2026-09-06T00:00:00Z",
+    "reviewStatus": "VERIFIED",
+    "complete": true,
+    "rules": {
+      "all": [
+        {
+          "id": "a",
+          "field": "age",
+          "op": "gte",
+          "value": 18,
+          "label": "Synthetic adult criterion",
+          "source": "https://example.gov.in/test"
+        },
+        {
+          "id": "g",
+          "field": "gender",
+          "op": "eq",
+          "value": "female",
+          "label": "Synthetic gender criterion",
+          "source": "https://example.gov.in/test"
+        },
+        {
+          "id": "l",
+          "field": "lpg",
+          "op": "eq",
+          "value": "no",
+          "label": "Synthetic household criterion",
+          "source": "https://example.gov.in/test"
+        }
+      ]
+    }
+  },
+  "cases": [
+    {
+      "id": 1,
+      "profile": {
+        "age": 0,
+        "gender": "female",
+        "lpg": "yes"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "LIKELY_NOT_ELIGIBLE"
+    },
+    {
+      "id": 2,
+      "profile": {
+        "age": 0,
+        "gender": "female",
+        "lpg": "yes"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 3,
+      "profile": {
+        "age": 0,
+        "gender": "female",
+        "lpg": "yes"
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 4,
+      "profile": {
+        "age": 0,
+        "gender": "female",
+        "lpg": "yes"
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 5,
+      "profile": {
+        "age": 0,
+        "gender": "female",
+        "lpg": "no"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "LIKELY_NOT_ELIGIBLE"
+    },
+    {
+      "id": 6,
+      "profile": {
+        "age": 0,
+        "gender": "female",
+        "lpg": "no"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 7,
+      "profile": {
+        "age": 0,
+        "gender": "female",
+        "lpg": "no"
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 8,
+      "profile": {
+        "age": 0,
+        "gender": "female",
+        "lpg": "no"
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 9,
+      "profile": {
+        "age": 0,
+        "gender": "female",
+        "lpg": null
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "LIKELY_NOT_ELIGIBLE"
+    },
+    {
+      "id": 10,
+      "profile": {
+        "age": 0,
+        "gender": "female",
+        "lpg": null
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 11,
+      "profile": {
+        "age": 0,
+        "gender": "female",
+        "lpg": null
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 12,
+      "profile": {
+        "age": 0,
+        "gender": "female",
+        "lpg": null
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 13,
+      "profile": {
+        "age": 0,
+        "gender": "male",
+        "lpg": "yes"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "LIKELY_NOT_ELIGIBLE"
+    },
+    {
+      "id": 14,
+      "profile": {
+        "age": 0,
+        "gender": "male",
+        "lpg": "yes"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 15,
+      "profile": {
+        "age": 0,
+        "gender": "male",
+        "lpg": "yes"
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 16,
+      "profile": {
+        "age": 0,
+        "gender": "male",
+        "lpg": "yes"
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 17,
+      "profile": {
+        "age": 0,
+        "gender": "male",
+        "lpg": "no"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "LIKELY_NOT_ELIGIBLE"
+    },
+    {
+      "id": 18,
+      "profile": {
+        "age": 0,
+        "gender": "male",
+        "lpg": "no"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 19,
+      "profile": {
+        "age": 0,
+        "gender": "male",
+        "lpg": "no"
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 20,
+      "profile": {
+        "age": 0,
+        "gender": "male",
+        "lpg": "no"
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 21,
+      "profile": {
+        "age": 0,
+        "gender": "male",
+        "lpg": null
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "LIKELY_NOT_ELIGIBLE"
+    },
+    {
+      "id": 22,
+      "profile": {
+        "age": 0,
+        "gender": "male",
+        "lpg": null
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 23,
+      "profile": {
+        "age": 0,
+        "gender": "male",
+        "lpg": null
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 24,
+      "profile": {
+        "age": 0,
+        "gender": "male",
+        "lpg": null
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 25,
+      "profile": {
+        "age": 0,
+        "gender": null,
+        "lpg": "yes"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "LIKELY_NOT_ELIGIBLE"
+    },
+    {
+      "id": 26,
+      "profile": {
+        "age": 0,
+        "gender": null,
+        "lpg": "yes"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 27,
+      "profile": {
+        "age": 0,
+        "gender": null,
+        "lpg": "yes"
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 28,
+      "profile": {
+        "age": 0,
+        "gender": null,
+        "lpg": "yes"
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 29,
+      "profile": {
+        "age": 0,
+        "gender": null,
+        "lpg": "no"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "LIKELY_NOT_ELIGIBLE"
+    },
+    {
+      "id": 30,
+      "profile": {
+        "age": 0,
+        "gender": null,
+        "lpg": "no"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 31,
+      "profile": {
+        "age": 0,
+        "gender": null,
+        "lpg": "no"
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 32,
+      "profile": {
+        "age": 0,
+        "gender": null,
+        "lpg": "no"
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 33,
+      "profile": {
+        "age": 0,
+        "gender": null,
+        "lpg": null
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "LIKELY_NOT_ELIGIBLE"
+    },
+    {
+      "id": 34,
+      "profile": {
+        "age": 0,
+        "gender": null,
+        "lpg": null
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 35,
+      "profile": {
+        "age": 0,
+        "gender": null,
+        "lpg": null
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 36,
+      "profile": {
+        "age": 0,
+        "gender": null,
+        "lpg": null
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 37,
+      "profile": {
+        "age": 17,
+        "gender": "female",
+        "lpg": "yes"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "LIKELY_NOT_ELIGIBLE"
+    },
+    {
+      "id": 38,
+      "profile": {
+        "age": 17,
+        "gender": "female",
+        "lpg": "yes"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 39,
+      "profile": {
+        "age": 17,
+        "gender": "female",
+        "lpg": "yes"
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 40,
+      "profile": {
+        "age": 17,
+        "gender": "female",
+        "lpg": "yes"
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 41,
+      "profile": {
+        "age": 17,
+        "gender": "female",
+        "lpg": "no"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "LIKELY_NOT_ELIGIBLE"
+    },
+    {
+      "id": 42,
+      "profile": {
+        "age": 17,
+        "gender": "female",
+        "lpg": "no"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 43,
+      "profile": {
+        "age": 17,
+        "gender": "female",
+        "lpg": "no"
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 44,
+      "profile": {
+        "age": 17,
+        "gender": "female",
+        "lpg": "no"
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 45,
+      "profile": {
+        "age": 17,
+        "gender": "female",
+        "lpg": null
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "LIKELY_NOT_ELIGIBLE"
+    },
+    {
+      "id": 46,
+      "profile": {
+        "age": 17,
+        "gender": "female",
+        "lpg": null
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 47,
+      "profile": {
+        "age": 17,
+        "gender": "female",
+        "lpg": null
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 48,
+      "profile": {
+        "age": 17,
+        "gender": "female",
+        "lpg": null
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 49,
+      "profile": {
+        "age": 17,
+        "gender": "male",
+        "lpg": "yes"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "LIKELY_NOT_ELIGIBLE"
+    },
+    {
+      "id": 50,
+      "profile": {
+        "age": 17,
+        "gender": "male",
+        "lpg": "yes"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 51,
+      "profile": {
+        "age": 17,
+        "gender": "male",
+        "lpg": "yes"
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 52,
+      "profile": {
+        "age": 17,
+        "gender": "male",
+        "lpg": "yes"
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 53,
+      "profile": {
+        "age": 17,
+        "gender": "male",
+        "lpg": "no"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "LIKELY_NOT_ELIGIBLE"
+    },
+    {
+      "id": 54,
+      "profile": {
+        "age": 17,
+        "gender": "male",
+        "lpg": "no"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 55,
+      "profile": {
+        "age": 17,
+        "gender": "male",
+        "lpg": "no"
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 56,
+      "profile": {
+        "age": 17,
+        "gender": "male",
+        "lpg": "no"
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 57,
+      "profile": {
+        "age": 17,
+        "gender": "male",
+        "lpg": null
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "LIKELY_NOT_ELIGIBLE"
+    },
+    {
+      "id": 58,
+      "profile": {
+        "age": 17,
+        "gender": "male",
+        "lpg": null
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 59,
+      "profile": {
+        "age": 17,
+        "gender": "male",
+        "lpg": null
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 60,
+      "profile": {
+        "age": 17,
+        "gender": "male",
+        "lpg": null
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 61,
+      "profile": {
+        "age": 17,
+        "gender": null,
+        "lpg": "yes"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "LIKELY_NOT_ELIGIBLE"
+    },
+    {
+      "id": 62,
+      "profile": {
+        "age": 17,
+        "gender": null,
+        "lpg": "yes"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 63,
+      "profile": {
+        "age": 17,
+        "gender": null,
+        "lpg": "yes"
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 64,
+      "profile": {
+        "age": 17,
+        "gender": null,
+        "lpg": "yes"
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 65,
+      "profile": {
+        "age": 17,
+        "gender": null,
+        "lpg": "no"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "LIKELY_NOT_ELIGIBLE"
+    },
+    {
+      "id": 66,
+      "profile": {
+        "age": 17,
+        "gender": null,
+        "lpg": "no"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 67,
+      "profile": {
+        "age": 17,
+        "gender": null,
+        "lpg": "no"
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 68,
+      "profile": {
+        "age": 17,
+        "gender": null,
+        "lpg": "no"
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 69,
+      "profile": {
+        "age": 17,
+        "gender": null,
+        "lpg": null
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "LIKELY_NOT_ELIGIBLE"
+    },
+    {
+      "id": 70,
+      "profile": {
+        "age": 17,
+        "gender": null,
+        "lpg": null
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 71,
+      "profile": {
+        "age": 17,
+        "gender": null,
+        "lpg": null
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 72,
+      "profile": {
+        "age": 17,
+        "gender": null,
+        "lpg": null
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 73,
+      "profile": {
+        "age": 18,
+        "gender": "female",
+        "lpg": "yes"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "LIKELY_NOT_ELIGIBLE"
+    },
+    {
+      "id": 74,
+      "profile": {
+        "age": 18,
+        "gender": "female",
+        "lpg": "yes"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 75,
+      "profile": {
+        "age": 18,
+        "gender": "female",
+        "lpg": "yes"
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 76,
+      "profile": {
+        "age": 18,
+        "gender": "female",
+        "lpg": "yes"
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 77,
+      "profile": {
+        "age": 18,
+        "gender": "female",
+        "lpg": "no"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "LIKELY_ELIGIBLE"
+    },
+    {
+      "id": 78,
+      "profile": {
+        "age": 18,
+        "gender": "female",
+        "lpg": "no"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 79,
+      "profile": {
+        "age": 18,
+        "gender": "female",
+        "lpg": "no"
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 80,
+      "profile": {
+        "age": 18,
+        "gender": "female",
+        "lpg": "no"
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 81,
+      "profile": {
+        "age": 18,
+        "gender": "female",
+        "lpg": null
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 82,
+      "profile": {
+        "age": 18,
+        "gender": "female",
+        "lpg": null
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 83,
+      "profile": {
+        "age": 18,
+        "gender": "female",
+        "lpg": null
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 84,
+      "profile": {
+        "age": 18,
+        "gender": "female",
+        "lpg": null
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 85,
+      "profile": {
+        "age": 18,
+        "gender": "male",
+        "lpg": "yes"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "LIKELY_NOT_ELIGIBLE"
+    },
+    {
+      "id": 86,
+      "profile": {
+        "age": 18,
+        "gender": "male",
+        "lpg": "yes"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 87,
+      "profile": {
+        "age": 18,
+        "gender": "male",
+        "lpg": "yes"
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 88,
+      "profile": {
+        "age": 18,
+        "gender": "male",
+        "lpg": "yes"
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 89,
+      "profile": {
+        "age": 18,
+        "gender": "male",
+        "lpg": "no"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "LIKELY_NOT_ELIGIBLE"
+    },
+    {
+      "id": 90,
+      "profile": {
+        "age": 18,
+        "gender": "male",
+        "lpg": "no"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 91,
+      "profile": {
+        "age": 18,
+        "gender": "male",
+        "lpg": "no"
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 92,
+      "profile": {
+        "age": 18,
+        "gender": "male",
+        "lpg": "no"
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 93,
+      "profile": {
+        "age": 18,
+        "gender": "male",
+        "lpg": null
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "LIKELY_NOT_ELIGIBLE"
+    },
+    {
+      "id": 94,
+      "profile": {
+        "age": 18,
+        "gender": "male",
+        "lpg": null
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 95,
+      "profile": {
+        "age": 18,
+        "gender": "male",
+        "lpg": null
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 96,
+      "profile": {
+        "age": 18,
+        "gender": "male",
+        "lpg": null
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 97,
+      "profile": {
+        "age": 18,
+        "gender": null,
+        "lpg": "yes"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "LIKELY_NOT_ELIGIBLE"
+    },
+    {
+      "id": 98,
+      "profile": {
+        "age": 18,
+        "gender": null,
+        "lpg": "yes"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 99,
+      "profile": {
+        "age": 18,
+        "gender": null,
+        "lpg": "yes"
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 100,
+      "profile": {
+        "age": 18,
+        "gender": null,
+        "lpg": "yes"
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 101,
+      "profile": {
+        "age": 18,
+        "gender": null,
+        "lpg": "no"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 102,
+      "profile": {
+        "age": 18,
+        "gender": null,
+        "lpg": "no"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 103,
+      "profile": {
+        "age": 18,
+        "gender": null,
+        "lpg": "no"
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 104,
+      "profile": {
+        "age": 18,
+        "gender": null,
+        "lpg": "no"
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 105,
+      "profile": {
+        "age": 18,
+        "gender": null,
+        "lpg": null
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 106,
+      "profile": {
+        "age": 18,
+        "gender": null,
+        "lpg": null
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 107,
+      "profile": {
+        "age": 18,
+        "gender": null,
+        "lpg": null
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 108,
+      "profile": {
+        "age": 18,
+        "gender": null,
+        "lpg": null
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 109,
+      "profile": {
+        "age": 19,
+        "gender": "female",
+        "lpg": "yes"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "LIKELY_NOT_ELIGIBLE"
+    },
+    {
+      "id": 110,
+      "profile": {
+        "age": 19,
+        "gender": "female",
+        "lpg": "yes"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 111,
+      "profile": {
+        "age": 19,
+        "gender": "female",
+        "lpg": "yes"
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 112,
+      "profile": {
+        "age": 19,
+        "gender": "female",
+        "lpg": "yes"
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 113,
+      "profile": {
+        "age": 19,
+        "gender": "female",
+        "lpg": "no"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "LIKELY_ELIGIBLE"
+    },
+    {
+      "id": 114,
+      "profile": {
+        "age": 19,
+        "gender": "female",
+        "lpg": "no"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 115,
+      "profile": {
+        "age": 19,
+        "gender": "female",
+        "lpg": "no"
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 116,
+      "profile": {
+        "age": 19,
+        "gender": "female",
+        "lpg": "no"
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 117,
+      "profile": {
+        "age": 19,
+        "gender": "female",
+        "lpg": null
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 118,
+      "profile": {
+        "age": 19,
+        "gender": "female",
+        "lpg": null
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 119,
+      "profile": {
+        "age": 19,
+        "gender": "female",
+        "lpg": null
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 120,
+      "profile": {
+        "age": 19,
+        "gender": "female",
+        "lpg": null
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 121,
+      "profile": {
+        "age": 19,
+        "gender": "male",
+        "lpg": "yes"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "LIKELY_NOT_ELIGIBLE"
+    },
+    {
+      "id": 122,
+      "profile": {
+        "age": 19,
+        "gender": "male",
+        "lpg": "yes"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 123,
+      "profile": {
+        "age": 19,
+        "gender": "male",
+        "lpg": "yes"
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 124,
+      "profile": {
+        "age": 19,
+        "gender": "male",
+        "lpg": "yes"
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 125,
+      "profile": {
+        "age": 19,
+        "gender": "male",
+        "lpg": "no"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "LIKELY_NOT_ELIGIBLE"
+    },
+    {
+      "id": 126,
+      "profile": {
+        "age": 19,
+        "gender": "male",
+        "lpg": "no"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 127,
+      "profile": {
+        "age": 19,
+        "gender": "male",
+        "lpg": "no"
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 128,
+      "profile": {
+        "age": 19,
+        "gender": "male",
+        "lpg": "no"
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 129,
+      "profile": {
+        "age": 19,
+        "gender": "male",
+        "lpg": null
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "LIKELY_NOT_ELIGIBLE"
+    },
+    {
+      "id": 130,
+      "profile": {
+        "age": 19,
+        "gender": "male",
+        "lpg": null
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 131,
+      "profile": {
+        "age": 19,
+        "gender": "male",
+        "lpg": null
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 132,
+      "profile": {
+        "age": 19,
+        "gender": "male",
+        "lpg": null
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 133,
+      "profile": {
+        "age": 19,
+        "gender": null,
+        "lpg": "yes"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "LIKELY_NOT_ELIGIBLE"
+    },
+    {
+      "id": 134,
+      "profile": {
+        "age": 19,
+        "gender": null,
+        "lpg": "yes"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 135,
+      "profile": {
+        "age": 19,
+        "gender": null,
+        "lpg": "yes"
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 136,
+      "profile": {
+        "age": 19,
+        "gender": null,
+        "lpg": "yes"
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 137,
+      "profile": {
+        "age": 19,
+        "gender": null,
+        "lpg": "no"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 138,
+      "profile": {
+        "age": 19,
+        "gender": null,
+        "lpg": "no"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 139,
+      "profile": {
+        "age": 19,
+        "gender": null,
+        "lpg": "no"
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 140,
+      "profile": {
+        "age": 19,
+        "gender": null,
+        "lpg": "no"
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 141,
+      "profile": {
+        "age": 19,
+        "gender": null,
+        "lpg": null
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 142,
+      "profile": {
+        "age": 19,
+        "gender": null,
+        "lpg": null
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 143,
+      "profile": {
+        "age": 19,
+        "gender": null,
+        "lpg": null
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 144,
+      "profile": {
+        "age": 19,
+        "gender": null,
+        "lpg": null
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 145,
+      "profile": {
+        "age": 120,
+        "gender": "female",
+        "lpg": "yes"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "LIKELY_NOT_ELIGIBLE"
+    },
+    {
+      "id": 146,
+      "profile": {
+        "age": 120,
+        "gender": "female",
+        "lpg": "yes"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 147,
+      "profile": {
+        "age": 120,
+        "gender": "female",
+        "lpg": "yes"
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 148,
+      "profile": {
+        "age": 120,
+        "gender": "female",
+        "lpg": "yes"
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 149,
+      "profile": {
+        "age": 120,
+        "gender": "female",
+        "lpg": "no"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "LIKELY_ELIGIBLE"
+    },
+    {
+      "id": 150,
+      "profile": {
+        "age": 120,
+        "gender": "female",
+        "lpg": "no"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 151,
+      "profile": {
+        "age": 120,
+        "gender": "female",
+        "lpg": "no"
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 152,
+      "profile": {
+        "age": 120,
+        "gender": "female",
+        "lpg": "no"
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 153,
+      "profile": {
+        "age": 120,
+        "gender": "female",
+        "lpg": null
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 154,
+      "profile": {
+        "age": 120,
+        "gender": "female",
+        "lpg": null
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 155,
+      "profile": {
+        "age": 120,
+        "gender": "female",
+        "lpg": null
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 156,
+      "profile": {
+        "age": 120,
+        "gender": "female",
+        "lpg": null
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 157,
+      "profile": {
+        "age": 120,
+        "gender": "male",
+        "lpg": "yes"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "LIKELY_NOT_ELIGIBLE"
+    },
+    {
+      "id": 158,
+      "profile": {
+        "age": 120,
+        "gender": "male",
+        "lpg": "yes"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 159,
+      "profile": {
+        "age": 120,
+        "gender": "male",
+        "lpg": "yes"
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 160,
+      "profile": {
+        "age": 120,
+        "gender": "male",
+        "lpg": "yes"
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 161,
+      "profile": {
+        "age": 120,
+        "gender": "male",
+        "lpg": "no"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "LIKELY_NOT_ELIGIBLE"
+    },
+    {
+      "id": 162,
+      "profile": {
+        "age": 120,
+        "gender": "male",
+        "lpg": "no"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 163,
+      "profile": {
+        "age": 120,
+        "gender": "male",
+        "lpg": "no"
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 164,
+      "profile": {
+        "age": 120,
+        "gender": "male",
+        "lpg": "no"
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 165,
+      "profile": {
+        "age": 120,
+        "gender": "male",
+        "lpg": null
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "LIKELY_NOT_ELIGIBLE"
+    },
+    {
+      "id": 166,
+      "profile": {
+        "age": 120,
+        "gender": "male",
+        "lpg": null
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 167,
+      "profile": {
+        "age": 120,
+        "gender": "male",
+        "lpg": null
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 168,
+      "profile": {
+        "age": 120,
+        "gender": "male",
+        "lpg": null
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 169,
+      "profile": {
+        "age": 120,
+        "gender": null,
+        "lpg": "yes"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "LIKELY_NOT_ELIGIBLE"
+    },
+    {
+      "id": 170,
+      "profile": {
+        "age": 120,
+        "gender": null,
+        "lpg": "yes"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 171,
+      "profile": {
+        "age": 120,
+        "gender": null,
+        "lpg": "yes"
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 172,
+      "profile": {
+        "age": 120,
+        "gender": null,
+        "lpg": "yes"
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 173,
+      "profile": {
+        "age": 120,
+        "gender": null,
+        "lpg": "no"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 174,
+      "profile": {
+        "age": 120,
+        "gender": null,
+        "lpg": "no"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 175,
+      "profile": {
+        "age": 120,
+        "gender": null,
+        "lpg": "no"
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 176,
+      "profile": {
+        "age": 120,
+        "gender": null,
+        "lpg": "no"
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 177,
+      "profile": {
+        "age": 120,
+        "gender": null,
+        "lpg": null
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 178,
+      "profile": {
+        "age": 120,
+        "gender": null,
+        "lpg": null
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 179,
+      "profile": {
+        "age": 120,
+        "gender": null,
+        "lpg": null
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 180,
+      "profile": {
+        "age": 120,
+        "gender": null,
+        "lpg": null
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 181,
+      "profile": {
+        "age": null,
+        "gender": "female",
+        "lpg": "yes"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "LIKELY_NOT_ELIGIBLE"
+    },
+    {
+      "id": 182,
+      "profile": {
+        "age": null,
+        "gender": "female",
+        "lpg": "yes"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 183,
+      "profile": {
+        "age": null,
+        "gender": "female",
+        "lpg": "yes"
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 184,
+      "profile": {
+        "age": null,
+        "gender": "female",
+        "lpg": "yes"
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 185,
+      "profile": {
+        "age": null,
+        "gender": "female",
+        "lpg": "no"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 186,
+      "profile": {
+        "age": null,
+        "gender": "female",
+        "lpg": "no"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 187,
+      "profile": {
+        "age": null,
+        "gender": "female",
+        "lpg": "no"
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 188,
+      "profile": {
+        "age": null,
+        "gender": "female",
+        "lpg": "no"
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 189,
+      "profile": {
+        "age": null,
+        "gender": "female",
+        "lpg": null
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 190,
+      "profile": {
+        "age": null,
+        "gender": "female",
+        "lpg": null
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 191,
+      "profile": {
+        "age": null,
+        "gender": "female",
+        "lpg": null
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 192,
+      "profile": {
+        "age": null,
+        "gender": "female",
+        "lpg": null
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 193,
+      "profile": {
+        "age": null,
+        "gender": "male",
+        "lpg": "yes"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "LIKELY_NOT_ELIGIBLE"
+    },
+    {
+      "id": 194,
+      "profile": {
+        "age": null,
+        "gender": "male",
+        "lpg": "yes"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 195,
+      "profile": {
+        "age": null,
+        "gender": "male",
+        "lpg": "yes"
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 196,
+      "profile": {
+        "age": null,
+        "gender": "male",
+        "lpg": "yes"
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 197,
+      "profile": {
+        "age": null,
+        "gender": "male",
+        "lpg": "no"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "LIKELY_NOT_ELIGIBLE"
+    },
+    {
+      "id": 198,
+      "profile": {
+        "age": null,
+        "gender": "male",
+        "lpg": "no"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 199,
+      "profile": {
+        "age": null,
+        "gender": "male",
+        "lpg": "no"
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 200,
+      "profile": {
+        "age": null,
+        "gender": "male",
+        "lpg": "no"
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 201,
+      "profile": {
+        "age": null,
+        "gender": "male",
+        "lpg": null
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "LIKELY_NOT_ELIGIBLE"
+    },
+    {
+      "id": 202,
+      "profile": {
+        "age": null,
+        "gender": "male",
+        "lpg": null
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 203,
+      "profile": {
+        "age": null,
+        "gender": "male",
+        "lpg": null
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 204,
+      "profile": {
+        "age": null,
+        "gender": "male",
+        "lpg": null
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 205,
+      "profile": {
+        "age": null,
+        "gender": null,
+        "lpg": "yes"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "LIKELY_NOT_ELIGIBLE"
+    },
+    {
+      "id": 206,
+      "profile": {
+        "age": null,
+        "gender": null,
+        "lpg": "yes"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 207,
+      "profile": {
+        "age": null,
+        "gender": null,
+        "lpg": "yes"
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 208,
+      "profile": {
+        "age": null,
+        "gender": null,
+        "lpg": "yes"
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 209,
+      "profile": {
+        "age": null,
+        "gender": null,
+        "lpg": "no"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 210,
+      "profile": {
+        "age": null,
+        "gender": null,
+        "lpg": "no"
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 211,
+      "profile": {
+        "age": null,
+        "gender": null,
+        "lpg": "no"
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 212,
+      "profile": {
+        "age": null,
+        "gender": null,
+        "lpg": "no"
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 213,
+      "profile": {
+        "age": null,
+        "gender": null,
+        "lpg": null
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 214,
+      "profile": {
+        "age": null,
+        "gender": null,
+        "lpg": null
+      },
+      "confirmed": ["age", "gender", "lpg"],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    },
+    {
+      "id": 215,
+      "profile": {
+        "age": null,
+        "gender": null,
+        "lpg": null
+      },
+      "confirmed": [],
+      "reviewed": true,
+      "expected": "POSSIBLY_ELIGIBLE"
+    },
+    {
+      "id": 216,
+      "profile": {
+        "age": null,
+        "gender": null,
+        "lpg": null
+      },
+      "confirmed": [],
+      "reviewed": false,
+      "expected": "UNABLE_TO_DETERMINE"
+    }
+  ]
+}
