@@ -15,7 +15,7 @@ A deployed citizen-facing application for Central Government scheme discovery an
 
 ## Actual deployment and target architecture
 
-The primary deployment runs React/Vinext directly on the project owner's Cloudflare Workers account with its own D1 database. Its address is https://scheme-sathi.scheme-sathi.workers.dev. It uses the TypeScript deterministic engine by default. The earlier Sites deployment remains separately available with its existing database; sessions and tracker records do not transfer between addresses. Azure infrastructure and paid-service credentials have not been connected.
+The primary deployment runs React/Vinext directly on the project owner's Cloudflare Workers account with its own D1 database. Its address is https://india.scheme-sathi.workers.dev. It uses the TypeScript deterministic engine by default. The earlier Sites deployment remains separately available with its existing database; sessions and tracker records do not transfer between addresses. Azure infrastructure and paid-service credentials have not been connected.
 
 See [Cloudflare deployment](docs/cloudflare-deployment.md) for deployment commands, authentication scopes, and resource configuration.
 

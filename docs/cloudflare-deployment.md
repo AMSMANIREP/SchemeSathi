@@ -1,12 +1,12 @@
 # Cloudflare deployment
 
-Public endpoint: https://scheme-sathi.scheme-sathi.workers.dev
+Public endpoint: https://india.scheme-sathi.workers.dev
 
 The app is deployed directly on Cloudflare Workers, using the account's workers.dev subdomain. No custom domain registration is needed. The Worker and D1 database use Cloudflare's Free plan subject to its usage limits. No paid subscription was selected.
 
 ## Resources
 
-- Worker: `scheme-sathi`
+- Worker: `india`
 - D1 database: `scheme-sathi-db`, location hint APAC (not an India-only data-residency guarantee)
 - D1 binding: `DB`
 - Static asset binding: `ASSETS`
@@ -32,8 +32,8 @@ The login flow also requests offline access for token refresh. Cloudflare may wa
 ## Verify
 
 ```sh
-curl https://scheme-sathi.scheme-sathi.workers.dev/health/ready
-curl https://scheme-sathi.scheme-sathi.workers.dev/api/v1/capabilities
+curl https://india.scheme-sathi.workers.dev/health/ready
+curl https://india.scheme-sathi.workers.dev/api/v1/capabilities
 ```
 
 The capabilities response reports `Cloudflare Workers`. HTTP page/API requests redirect to HTTPS, and HTTPS responses set HSTS. Sessions use Secure, HttpOnly cookies on this hostname. No sign-in gate is configured for the public site; application and profile data remain isolated by session.
@@ -48,7 +48,7 @@ Configure provider values as Cloudflare secrets with `wrangler secret put KEY --
 
 ## Operations
 
-The account-level subdomain is `scheme-sathi.workers.dev`; the Worker name supplies the first `scheme-sathi` prefix. The former `contactamsmani.workers.dev` account subdomain no longer resolves. Use the full public endpoint above and update any older bookmarks. The Worker deployment has preview URLs disabled and no paid plan or custom domain is required. Observability logging is disabled in this configuration to avoid collecting unnecessary request metadata. Rate limits and one-hour session retention behavior are documented in the main README.
+The account-level subdomain is `scheme-sathi.workers.dev`; the Worker name `india` supplies the first part of the address. The Worker was renamed from `scheme-sathi` with its existing D1 database retained. Use the full public endpoint above and update bookmarks for earlier addresses. Browser session cookies are specific to the hostname, so a visit to the new address starts a new session. The Worker deployment has preview URLs disabled and no paid plan or custom domain is required. Observability logging is disabled in this configuration to avoid collecting unnecessary request metadata. Rate limits and one-hour session retention behavior are documented in the main README.
 
 Official references:
 - [Workers pricing](https://developers.cloudflare.com/workers/platform/pricing/)

@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "scheme-sathi",
+  "name": "india",
   "account_id": "b5d1b6fd9d8c0e1763f6c364d7b92e2a",
   "main": "dist/server/index.js",
   "compatibility_date": "2026-05-15",
