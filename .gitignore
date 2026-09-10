@@ -43,3 +43,6 @@ next-env.d.ts
 *.pyc
 *.tsbuildinfo
 /work/
+
+# impeccable: platform binaries are re-downloaded on first run
+**/skills/impeccable/scripts/bin/
