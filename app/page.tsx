@@ -1,7 +1,18 @@
 'use client';
 import { useState, useSyncExternalStore } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, Loader2, LockKeyhole, PenLine, X } from 'lucide-react';
+import {
+  ArrowRight,
+  Loader2,
+  LockKeyhole,
+  PenLine,
+  X,
+  Mic,
+  Square,
+  Trash2,
+  PanelLeftOpen,
+  PanelLeftClose,
+} from 'lucide-react';
 import { useApp } from './providers';
 
 const SEEN_KEY = 'schemesathi.introSeen';
@@ -61,10 +72,63 @@ function IntroPanel({ onClose }: { onClose: () => void }) {
   );
 }
 
+function HistoryRail({
+  open,
+  onToggle,
+  onPick,
+}: {
+  open: boolean;
+  onToggle: () => void;
+  onPick: (text: string) => void;
+}) {
+  const { t, history, clearHistory } = useApp();
+  return (
+    <aside className={'histrail' + (open ? ' open' : '')}>
+      <button
+        className="histtoggle"
+        onClick={onToggle}
+        aria-expanded={open}
+        aria-controls="history-column"
+        title={t.historyTitle}
+      >
+        {open ? <PanelLeftClose size={16} /> : <PanelLeftOpen size={16} />}
+        <span className="histtoggle-text">{t.historyTitle}</span>
+        {history.length > 0 && (
+          <span className="histcount data">{history.length}</span>
+        )}
+      </button>
+
+      <div className="histcol" id="history-column" hidden={!open}>
+        {history.length ? (
+          <>
+            <ul className="histlist">
+              {history.map((h) => (
+                <li key={h.at}>
+                  <button onClick={() => onPick(h.text)}>{h.text}</button>
+                </li>
+              ))}
+            </ul>
+            <div className="histcol-foot">
+              <span className="label">{t.historyScope}</span>
+              <button onClick={clearHistory}>
+                <Trash2 size={12} />
+                {t.historyClear}
+              </button>
+            </div>
+          </>
+        ) : (
+          <p className="histempty">{t.historyEmpty}</p>
+        )}
+      </div>
+    </aside>
+  );
+}
+
 export default function ChatLanding() {
-  const { t, ask, busy, loading, openProfile } = useApp();
+  const { t, ask, busy, loading, openProfile, record, recording } = useApp();
   const [message, setMessage] = useState('');
   const [dismissed, setDismissed] = useState(false);
+  const [histOpen, setHistOpen] = useState(false);
   const router = useRouter();
 
   const introSeen = useSyncExternalStore(
@@ -89,8 +153,15 @@ export default function ChatLanding() {
   };
 
   return (
-    <div className="chatwrap">
-      <h1>{t.chatTitle}</h1>
+    <div className={'chatpage' + (histOpen ? ' hist-open' : '')}>
+      <HistoryRail
+        open={histOpen}
+        onToggle={() => setHistOpen((v) => !v)}
+        onPick={setMessage}
+      />
+
+      <div className="chatwrap">
+        <h1>{t.chatTitle}</h1>
       <p className="lede">{t.chatLede}</p>
 
       {showIntro && <IntroPanel onClose={dismissIntro} />}
@@ -107,16 +178,24 @@ export default function ChatLanding() {
           }}
         />
         <div className="composer-bar">
-          <span className="label">EN · HI · KN</span>
-          <span className="label" style={{ marginLeft: 'auto' }}>
-            {message.length}/1800
-          </span>
+          <button
+            className={'micbtn' + (recording ? ' recording' : '')}
+            onClick={() => void record(setMessage)}
+            disabled={busy && !recording}
+            aria-pressed={recording}
+            aria-label={recording ? t.stop : t.record}
+          >
+            {recording ? <Square size={15} /> : <Mic size={16} />}
+            {recording ? t.stop : t.record}
+          </button>
+
+          <span className="label composer-count">{message.length}/1800</span>
           <button
             className="btn"
             onClick={() => void submit()}
             disabled={busy || loading || !message.trim()}
           >
-            {busy ? (
+            {busy && !recording ? (
               <Loader2 className="spin" size={15} />
             ) : (
               <ArrowRight size={15} />
@@ -152,6 +231,7 @@ export default function ChatLanding() {
           <LockKeyhole size={12} style={{ display: 'inline', marginRight: 5 }} />
           {t.private} · 60 min
         </span>
+        </div>
       </div>
     </div>
   );

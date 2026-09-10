@@ -288,6 +288,34 @@
      "#fff6bf",
      "#fffdf2"
     ]
+   },
+   "accent-go": {
+    "displayName": "Accent Green",
+    "purpose": "Affirmative accent: progress fill, active nav underline, voice button, source-link underline, privacy shield. A mark, never a field.",
+    "tonalRamp": [
+     "#04231a",
+     "#0a3b2d",
+     "#10614a",
+     "#1a8767",
+     "#31ab88",
+     "#71c9ae",
+     "#d7ece3",
+     "#f4faf7"
+    ]
+   },
+   "accent-go-soft": {
+    "displayName": "Accent Green Soft",
+    "purpose": "The hover ground beneath the voice button; the only tinted use of the green accent.",
+    "tonalRamp": [
+     "#0a3b2d",
+     "#10614a",
+     "#1a8767",
+     "#31ab88",
+     "#71c9ae",
+     "#b3e0d1",
+     "#d7ece3",
+     "#f4faf7"
+    ]
    }
   },
   "typographyMeta": {
@@ -340,40 +368,50 @@
     "purpose": "Pass-cell figures, page-head counts, footer stamp, nav counts. Tabular numerals."
    }
   },
-  "shadows": [
-   {
-    "name": "focus-wash",
+  "shadows": {
+   "shadow-sm": {
+    "value": "0 1px 2px rgb(11 13 16 / 0.04), 0 2px 6px -1px rgb(11 13 16 / 0.05)",
+    "purpose": "Resting state of a document surface: panel, board, pass, intro panel, composer."
+   },
+   "shadow-md": {
+    "value": "0 2px 4px rgb(11 13 16 / 0.04), 0 10px 22px -8px rgb(11 13 16 / 0.13)",
+    "purpose": "Lifted state: hovered pass, focused composer, history popover. Paired with at most a 2px move."
+   },
+   "focus-wash": {
     "value": "0 0 0 3px rgb(11 13 16 / 0.07)",
-    "purpose": "The only shadow in the system. Fires on :focus-within for the composer and search box and on :focus for a text field, always alongside border-color: ink. A state response, not elevation."
+    "purpose": "State response on the search box, alongside border-color: ink. Not elevation."
    }
-  ],
-  "motion": [
-   {
-    "name": "state-quick",
-    "value": "0.14s ease",
-    "purpose": "Default for every colour, border and background state change: buttons, nav, chips, icon buttons, board row hover."
-   },
-   {
-    "name": "border-settle",
-    "value": "0.15s ease",
-    "purpose": "Composer border going to ink on focus-within."
-   },
-   {
-    "name": "ease-emphasis",
+  },
+  "motion": {
+   "ease-out": {
     "value": "cubic-bezier(0.16, 1, 0.3, 1)",
-    "purpose": "Entrances and value changes: the intro panel's 0.34s rise, the progress bar's 0.4s scale."
+    "purpose": "The single easing curve; everything decelerates into place."
    },
-   {
-    "name": "spin",
-    "value": "0.9s linear infinite",
-    "purpose": "The loading rotation on the Loader2 glyph."
+   "deal": {
+    "value": "0.5s ease-out, 26ms stagger, first 16 rows",
+    "purpose": "The authored moment: the board deals its rows once on arrival."
    },
-   {
-    "name": "reduced-motion",
-    "value": "prefers-reduced-motion: reduce -> 0.01ms",
-    "purpose": "All animation and transition durations collapse; honoured globally."
+   "rise": {
+    "value": "0.24s-0.34s ease-out from translateY(6-8px)",
+    "purpose": "Intro panel and history popover entering."
+   },
+   "mark": {
+    "value": "background-size 0.26s ease-out",
+    "purpose": "The yellow stroke drawing in under a scheme name on hover."
+   },
+   "lift": {
+    "value": "transform 0.12s-0.22s ease-out, max 2px",
+    "purpose": "Buttons, example chips and pass cards responding to the pointer."
+   },
+   "breathe": {
+    "value": "1.6s ease-in-out infinite",
+    "purpose": "The recording state of the voice button; the only looping animation, and only while recording."
+   },
+   "reduced-motion": {
+    "value": "all durations collapse to 0.01ms",
+    "purpose": "prefers-reduced-motion is honoured globally."
    }
-  ],
+  },
   "breakpoints": []
  },
  "components": [

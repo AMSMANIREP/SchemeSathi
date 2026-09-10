@@ -248,6 +248,7 @@ An achromatic ink-on-paper palette with one held-back yellow and a four-value st
 - **Ink** (`ink`): The near-black that carries every primary surface: button fills, the board bar, the pass header, the intro header, active nav underline, focus rings, and all body text. When something in this system is emphatic, it is ink, not a colour.
 - **Alert Yellow** (`alert`): Held for change and attention only — the left edge and tinted field of a changed board row, the CHANGED tag, the saved-state icon button, the signal block on a notice, text selection, and the ink-fill button on hover. It is never used to decorate a surface, tint a panel, or brighten a heading.
 - **Alert Ink** (`alert-ink`): The only text colour permitted on an alert-yellow ground; it clears contrast where black-on-yellow would glare.
+- **Accent Green** (`accent-go`, `#1a8767`, with `accent-go-soft` `#d7ece3`): The affirmative accent, drawn from the `go` tonal ramp. It marks progress and the citizen's own position — the preparation progress fill, the active nav underline, the voice button, the underline beneath an official source link, the privacy shield. Where yellow means *something changed, look*, green means *this is moving, and it is yours*. Like yellow it is a mark, never a field: it never fills a panel or tints a row.
 
 ### Secondary — Status
 Four verdicts, each a paired text/field couple so the pill reads at 10px.
@@ -271,6 +272,8 @@ Four verdicts, each a paired text/field couple so the pill reads at 10px.
 **The Reserved Yellow Rule.** Alert yellow means *this changed* or *look here now*. If a proposed yellow is neither, it is wrong. The only standing exception in the build is the 26px brand mark, which carries an alert glyph on ink; do not extend that exception to any other surface.
 
 **The Honest Grey Rule.** UNKNOWN is styled at the same size, weight and letter-spacing as every other verdict. It is never faded, never italicised, never smaller.
+
+**The Marked Word Rule.** Both accents may underline a word, and only underline it — a stroke sitting behind the baseline (`background-image` on the text, sized in `em`), never a filled highlight and never coloured type. Yellow marks a thing you can act on: a scheme name draws its stroke in on hover. Green marks a thing that is already true: the official-source link carries a standing green rule. The word keeps full ink contrast in both cases, so the accent adds emphasis without ever costing legibility.
 
 ## Typography
 
@@ -315,15 +318,17 @@ Spacing runs on a coarse rhythm rather than a strict multiple: 6/8/10/14/18/22/2
 
 ## Elevation & Depth
 
-**This system has no shadows.** Every surface is flat and separated by a 1px hairline in `rule`, applied globally as the default border colour. Depth is expressed three ways instead: **stacking bands** (ink bar over white body over paper stub), **tonal recession** (paper for furniture, white for content), and **the hairline itself**, including its dashed variant for anything that is meant to be torn or printed.
+Depth is carried first by **stacking bands** (ink bar over white body over paper stub), **tonal recession** (paper for furniture, white for content), and **the hairline** in `rule`, including its dashed variant for anything meant to be torn or printed. Those still do most of the work, and they are what survives printing.
 
-The only `box-shadow` in the build is a focus glow — a 3px ink wash at 7% opacity around a focused composer, search box or text field, paired with the border going to full ink. That is a state response, not elevation. Dialogs are the component library's own overlay; they do not add a drop shadow to the world.
+On top of that sits a two-step shadow scale used sparingly, so a document surface reads as a sheet resting on the paper ground rather than a shape drawn onto it. Every shadow carries a vertical offset and a soft blur; there are no zero-offset glows in the system.
 
 ### Shadow Vocabulary
-- **Focus wash** (`box-shadow: 0 0 0 3px rgb(11 13 16 / 0.07)`): The only shadow. Fires on `:focus-within` for the composer and search box, and on `:focus` for a text field, always alongside `border-color: ink`.
+- **`shadow-sm`** (`0 1px 2px rgb(11 13 16 / 0.04), 0 2px 6px -1px rgb(11 13 16 / 0.05)`): The resting state of a document surface — panel, board, pass, intro panel, composer. Barely visible, and that is the point.
+- **`shadow-md`** (`0 2px 4px rgb(11 13 16 / 0.04), 0 10px 22px -8px rgb(11 13 16 / 0.13)`): The lifted state — a hovered pass, a focused composer, the history popover. Always paired with a movement of at most 2px.
+- **Focus wash** (`box-shadow: 0 0 0 3px rgb(11 13 16 / 0.07)`): A state response, not elevation. Fires on `:focus-within` for the search box, alongside `border-color: ink`.
 
 ### Named Rules
-**The Flat Paper Rule.** No drop shadows, no offset shadows, no glows. If a surface needs to separate from another, give it a hairline or set it on paper. Depth in this world is printable.
+**The Resting Sheet Rule.** A shadow says a surface is a sheet on a ground; it never says a surface is important. `shadow-sm` at rest, `shadow-md` only under the pointer or focus, nothing heavier. Print drops all of it — depth in this world still has to survive a laser printer.
 
 ## Shapes
 

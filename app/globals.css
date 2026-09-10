@@ -61,6 +61,17 @@
   --paper: #f2f2f0;
   --alert: #ffd400;
   --alert-ink: #4a3c00;
+  /* Accent green, taken from the documented ink-of-go tonal ramp. Used for
+     affirmation and progress; --go stays the status text colour. */
+  --accent-go: #1a8767;
+  --accent-go-soft: #d7ece3;
+
+  /* Shadows carry an offset and a soft blur; no zero-offset halos. */
+  --shadow-sm:
+    0 1px 2px rgb(11 13 16 / 0.04), 0 2px 6px -1px rgb(11 13 16 / 0.05);
+  --shadow-md:
+    0 2px 4px rgb(11 13 16 / 0.04), 0 10px 22px -8px rgb(11 13 16 / 0.13);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 
   /* Status. Rides pills and row edges only, never the reading field. */
   --go: #10614a;
@@ -217,6 +228,23 @@ h3 {
   color: var(--steel);
 }
 
+/* Marker underline. Sits behind the baseline like a pen stroke, so the word
+   keeps full contrast and the accent never becomes a highlight block. */
+.mark-y,
+.mark-g {
+  background-repeat: no-repeat;
+  background-position: 0 88%;
+  background-size: 100% 0.34em;
+  padding-bottom: 0.04em;
+}
+.mark-y {
+  background-image: linear-gradient(var(--alert), var(--alert));
+}
+.mark-g {
+  background-image: linear-gradient(var(--accent-go), var(--accent-go));
+  background-size: 100% 0.12em;
+}
+
 /* ============================ shell ============================ */
 
 .skip-link {
@@ -241,6 +269,9 @@ h3 {
   height: 58px;
   background: var(--surface);
   border-bottom: 1px solid var(--rule);
+  position: sticky;
+  top: 0;
+  z-index: 41;
 }
 .brand {
   display: flex;
@@ -283,10 +314,14 @@ h3 {
   align-items: center;
   gap: 14px;
 }
+.privacy-pill svg {
+  color: var(--accent-go);
+}
 .privacy-pill {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  --icon: var(--accent-go);
   font-family: var(--font-mono-stack);
   font-size: 10px;
   letter-spacing: 0.13em;
@@ -297,12 +332,17 @@ h3 {
   border-radius: 4px;
 }
 
+/* Pinned under the top bar so the four surfaces stay reachable while a
+   citizen is deep in a fifty-row board. The two stick as one unit. */
 .mainnav {
   display: flex;
   gap: 2px;
   padding: 0 28px;
   background: var(--surface);
   border-bottom: 1px solid var(--rule);
+  position: sticky;
+  top: 58px;
+  z-index: 40;
 }
 .mainnav a {
   display: inline-flex;
@@ -326,7 +366,7 @@ h3 {
 }
 .mainnav a[aria-current='page'] {
   color: var(--ink);
-  border-bottom-color: var(--ink);
+  border-bottom-color: var(--accent-go);
 }
 .mainnav a svg {
   width: 15px;
@@ -373,6 +413,7 @@ h3 {
   background: var(--surface);
   border: 1px solid var(--rule);
   border-radius: 10px;
+  box-shadow: var(--shadow-sm);
 }
 .panel-head {
   display: flex;
@@ -404,14 +445,22 @@ h3 {
   text-transform: uppercase;
   cursor: pointer;
   transition:
-    background 0.14s ease,
-    color 0.14s ease,
-    border-color 0.14s ease;
+    background 0.16s var(--ease-out),
+    color 0.16s var(--ease-out),
+    border-color 0.16s var(--ease-out),
+    box-shadow 0.16s var(--ease-out),
+    transform 0.12s var(--ease-out);
 }
 .btn:hover:not(:disabled) {
   background: var(--alert);
   border-color: var(--alert);
   color: var(--ink);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+.btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: none;
 }
 .btn:disabled {
   opacity: 0.4;
@@ -525,6 +574,7 @@ textarea.textfield {
   border: 1px solid var(--rule);
   border-radius: 10px;
   overflow: hidden;
+  box-shadow: var(--shadow-sm);
 }
 .board-bar {
   background: var(--ink);
@@ -590,6 +640,7 @@ textarea.textfield {
   color: var(--steel);
 }
 .board-row {
+  animation: deal 0.5s var(--ease-out) backwards;
   min-height: 58px;
   border-bottom: 1px solid var(--rule);
   border-left: 3px solid transparent;
@@ -602,6 +653,57 @@ textarea.textfield {
 .board-row:hover {
   background: var(--paper);
 }
+@keyframes deal {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+.board-row:nth-child(3) {
+  animation-delay: 0ms;
+}
+.board-row:nth-child(4) {
+  animation-delay: 26ms;
+}
+.board-row:nth-child(5) {
+  animation-delay: 52ms;
+}
+.board-row:nth-child(6) {
+  animation-delay: 78ms;
+}
+.board-row:nth-child(7) {
+  animation-delay: 104ms;
+}
+.board-row:nth-child(8) {
+  animation-delay: 130ms;
+}
+.board-row:nth-child(9) {
+  animation-delay: 156ms;
+}
+.board-row:nth-child(10) {
+  animation-delay: 182ms;
+}
+.board-row:nth-child(11) {
+  animation-delay: 208ms;
+}
+.board-row:nth-child(12) {
+  animation-delay: 234ms;
+}
+.board-row:nth-child(13) {
+  animation-delay: 260ms;
+}
+.board-row:nth-child(14) {
+  animation-delay: 286ms;
+}
+.board-row:nth-child(15) {
+  animation-delay: 312ms;
+}
+.board-row:nth-child(16) {
+  animation-delay: 338ms;
+}
+.board-row:nth-child(n + 17) {
+  animation: none;
+}
 button.rowopen {
   text-align: left;
   background: none;
@@ -613,8 +715,16 @@ button.rowopen {
   color: var(--ink);
   cursor: pointer;
 }
-button.rowopen:hover {
-  text-decoration: underline;
+button.rowopen {
+  background-image: linear-gradient(var(--alert), var(--alert));
+  background-repeat: no-repeat;
+  background-position: 0 92%;
+  background-size: 0% 0.32em;
+  transition: background-size 0.26s var(--ease-out);
+}
+button.rowopen:hover,
+button.rowopen:focus-visible {
+  background-size: 100% 0.32em;
 }
 button.rowopen small {
   display: block;
@@ -676,6 +786,14 @@ button.rowopen small {
   border: 1px solid var(--rule);
   border-radius: 10px;
   overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition:
+    box-shadow 0.22s var(--ease-out),
+    transform 0.22s var(--ease-out);
+}
+.appgrid .pass:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
 }
 .pass-head {
   background: var(--ink);
@@ -757,11 +875,21 @@ button.rowopen small {
   background: var(--surface);
   border: 1px solid var(--rule);
   border-radius: 12px;
-  overflow: hidden;
-  transition: border-color 0.15s ease;
+  overflow: visible;
+  box-shadow: var(--shadow-sm);
+  transition:
+    border-color 0.18s var(--ease-out),
+    box-shadow 0.18s var(--ease-out);
 }
 .composer:focus-within {
   border-color: var(--ink);
+  box-shadow: var(--shadow-md);
+}
+.composer textarea {
+  border-radius: 12px 12px 0 0;
+}
+.composer-bar {
+  border-radius: 0 0 12px 12px;
 }
 .composer textarea {
   width: 100%;
@@ -813,6 +941,15 @@ button.rowopen small {
 .examples button:hover {
   border-color: var(--ink);
   background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+}
+.examples button {
+  transition:
+    border-color 0.16s var(--ease-out),
+    background 0.16s var(--ease-out),
+    box-shadow 0.16s var(--ease-out),
+    transform 0.16s var(--ease-out);
 }
 .chat-reply {
   display: block;
@@ -834,6 +971,7 @@ button.rowopen small {
   background: var(--surface);
   overflow: hidden;
   margin-bottom: 22px;
+  box-shadow: var(--shadow-sm);
   animation: rise 0.34s cubic-bezier(0.16, 1, 0.3, 1);
 }
 @keyframes rise {
@@ -1251,6 +1389,15 @@ button.rowopen small {
 .sourcebox a {
   color: var(--ink);
   font-weight: 500;
+  text-decoration: none;
+  background-image: linear-gradient(var(--accent-go), var(--accent-go));
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 100% 0.1em;
+  transition: background-size 0.2s var(--ease-out);
+}
+.sourcebox a:hover {
+  background-size: 100% 0.28em;
 }
 
 /* The dialog itself owns the height budget; the scroll region takes whatever
@@ -1295,7 +1442,7 @@ button.rowopen small {
   display: block;
   height: 100%;
   width: 100%;
-  background: var(--ink);
+  background: var(--accent-go);
   border-radius: 99px;
   transform-origin: left center;
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -1375,4 +1522,194 @@ button.rowopen small {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+
+/* ============================ voice + history ============================ */
+
+.micbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 15px 9px 12px;
+  border: 1px solid var(--accent-go);
+  background: var(--go-field);
+  color: var(--go);
+  border-radius: 99px;
+  font-family: var(--font-mono-stack);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    background 0.16s var(--ease-out),
+    box-shadow 0.16s var(--ease-out),
+    transform 0.12s var(--ease-out);
+}
+.micbtn:hover:not(:disabled) {
+  background: var(--accent-go-soft);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+.micbtn:active:not(:disabled) {
+  transform: translateY(0);
+}
+.micbtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.micbtn.recording {
+  background: var(--stop-field);
+  border-color: var(--stop);
+  color: var(--stop);
+  animation: breathe 1.6s ease-in-out infinite;
+}
+@keyframes breathe {
+  50% {
+    box-shadow: 0 0 0 5px rgb(143 43 33 / 0.12);
+  }
+}
+
+/* History lives in a rail at the top left of the chat surface. Collapsed it is
+   just its toggle; open it is a column beside the conversation, never over it. */
+.chatpage {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0;
+  align-items: start;
+}
+.chatpage.hist-open {
+  gap: 28px;
+}
+
+.histrail {
+  position: sticky;
+  top: 118px;
+  padding-top: 64px;
+  width: auto;
+}
+.histrail.open {
+  width: 268px;
+}
+
+.histtoggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--rule);
+  background: var(--surface);
+  border-radius: 8px;
+  color: var(--steel);
+  cursor: pointer;
+  font-family: var(--font-mono-stack);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  transition:
+    color 0.16s var(--ease-out),
+    border-color 0.16s var(--ease-out),
+    box-shadow 0.16s var(--ease-out);
+}
+.histtoggle:hover {
+  color: var(--ink);
+  border-color: var(--steel);
+  box-shadow: var(--shadow-sm);
+}
+.histtoggle svg {
+  flex: none;
+}
+.histtoggle-text {
+  display: none;
+}
+.histrail.open .histtoggle-text {
+  display: inline;
+}
+.histrail.open .histcount {
+  margin-left: auto;
+}
+.histrail.open .histtoggle {
+  color: var(--ink);
+  width: 100%;
+}
+.histcount {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--panel);
+  border-radius: 99px;
+  padding: 1px 6px;
+}
+
+.histcol {
+  margin-top: 10px;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  animation: rise 0.24s var(--ease-out);
+}
+.histlist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 46vh;
+  overflow-y: auto;
+}
+.histlist li + li {
+  border-top: 1px solid var(--rule);
+}
+.histlist button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: 0;
+  padding: 11px 13px;
+  font: inherit;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--slate);
+  cursor: pointer;
+  transition: background 0.14s var(--ease-out);
+}
+.histlist button:hover {
+  background: var(--paper);
+}
+.histcol-foot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 13px;
+  border-top: 1px solid var(--rule);
+  background: var(--paper);
+}
+.histcol-foot button {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12.5px;
+  color: var(--steel);
+}
+.histcol-foot button:hover {
+  color: var(--stop);
+}
+.histempty {
+  padding: 14px 13px;
+  font-size: 12.5px;
+  color: var(--steel);
+}
+.composer-count {
+  margin-left: auto;
 }

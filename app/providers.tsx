@@ -30,6 +30,29 @@ export type Capabilities = {
   retrieval: boolean;
 };
 
+const HISTORY_KEY = 'schemesathi.history';
+
+export type HistoryEntry = { at: number; text: string };
+
+/** Session-scoped: survives a refresh, dies with the tab, cleared by
+ *  "delete my data". Deliberately not localStorage — a citizen's described
+ *  situation must not outlive the private session the product promises. */
+function readHistory(): HistoryEntry[] {
+  try {
+    return JSON.parse(sessionStorage.getItem(HISTORY_KEY) || '[]');
+  } catch {
+    return [];
+  }
+}
+
+function writeHistory(entries: HistoryEntry[]) {
+  try {
+    sessionStorage.setItem(HISTORY_KEY, JSON.stringify(entries.slice(0, 30)));
+  } catch {
+    /* storage unavailable: history is a convenience, not a requirement */
+  }
+}
+
 export async function api<T = Record<string, unknown>>(
   path: string,
   method = 'GET',
@@ -85,6 +108,10 @@ type Ctx = {
   sendFeedback: (rating: string, comment: string) => Promise<void>;
   setMemoryConsent: (v: boolean) => Promise<void>;
   refreshApps: () => Promise<void>;
+  recording: boolean;
+  record: (onText: (text: string) => void) => Promise<void>;
+  history: HistoryEntry[];
+  clearHistory: () => void;
 };
 
 const AppContext = createContext<Ctx | null>(null);
@@ -116,7 +143,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [chat, setChat] = useState('');
   const [detail, setDetail] = useState<Scheme | null>(null);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [recording, setRecording] = useState(false);
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
   const initialized = useRef(false);
+  const recorder = useRef<MediaRecorder | null>(null);
+  const stream = useRef<MediaStream | null>(null);
 
   const t = copy[language];
   const li = language === 'en' ? 0 : language === 'hi' ? 1 : 2;
@@ -166,8 +197,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (initialized.current) return;
     initialized.current = true;
+    setHistory(readHistory());
     void load();
   }, [load]);
+
+  useEffect(
+    () => () => {
+      stream.current?.getTracks().forEach((tr) => tr.stop());
+    },
+    [],
+  );
 
   useEffect(() => {
     document.documentElement.lang = language;
@@ -226,6 +265,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const ask = async (message: string) => {
     if (!message.trim()) return;
+    const entries = [
+      { at: Date.now(), text: message.trim() },
+      ...history.filter((h) => h.text !== message.trim()),
+    ].slice(0, 30);
+    setHistory(entries);
+    writeHistory(entries);
     setBusy(true);
     setError('');
     try {
@@ -289,6 +334,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setDraft({});
       setChat('');
       setSession(null);
+      setHistory([]);
+      writeHistory([]);
       const s = await api<Session>('sessions', 'POST', { language });
       setSession(s);
       setNotice(t.deleted);
@@ -308,6 +355,65 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setError((e as Error).message);
     } finally {
       setBusy(false);
+    }
+  };
+
+  const clearHistory = () => {
+    setHistory([]);
+    writeHistory([]);
+  };
+
+  const record = async (onText: (text: string) => void) => {
+    if (recording) {
+      recorder.current?.stop();
+      setRecording(false);
+      return;
+    }
+    if (!caps.voice) {
+      setNotice(t.voiceOff);
+      return;
+    }
+    try {
+      const media = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.current = media;
+      const mr = new MediaRecorder(media);
+      recorder.current = mr;
+      const chunks: Blob[] = [];
+      mr.ondataavailable = (e) => chunks.push(e.data);
+      mr.onstop = async () => {
+        media.getTracks().forEach((tr) => tr.stop());
+        setRecording(false);
+        setBusy(true);
+        try {
+          const form = new FormData();
+          form.append(
+            'file',
+            new Blob(chunks, { type: mr.mimeType }),
+            'voice.webm',
+          );
+          const r = await fetch('/api/v1/voice/transcribe', {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'SchemeSathi' },
+            body: form,
+          });
+          const b = (await r.json()) as { error: string; text: string };
+          if (!r.ok) throw new Error(b.error);
+          onText(b.text);
+          setChat(t.transcript);
+        } catch (e) {
+          setError((e as Error).message);
+        } finally {
+          setBusy(false);
+        }
+      };
+      mr.start();
+      setRecording(true);
+      // hard stop so a forgotten recording cannot run on indefinitely
+      setTimeout(() => {
+        if (mr.state === 'recording') mr.stop();
+      }, 20000);
+    } catch (e) {
+      setError((e as Error).message);
     }
   };
 
@@ -358,6 +464,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         sendFeedback,
         setMemoryConsent,
         refreshApps,
+        recording,
+        record,
+        history,
+        clearHistory,
       }}
     >
       {children}
