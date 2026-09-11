@@ -131,9 +131,18 @@ export async function limit(key: string, max = 20) {
 export async function external(url: string, init: RequestInit) {
   const r = await fetch(url, {
     ...init,
-    redirect: 'error',
+    // Workers does not implement redirect: 'error' — it throws on the option
+    // itself, which broke every outbound call. 'manual' keeps the intent: a
+    // redirect is surfaced as a 3xx rather than silently followed to another
+    // host, and the !r.ok check below rejects it.
+    redirect: 'manual',
     signal: AbortSignal.timeout(20000),
   });
+  if (r.status >= 300 && r.status < 400)
+    throw new HttpError(
+      502,
+      'The connected service redirected unexpectedly. Please try again later.',
+    );
   if (!r.ok)
     throw new HttpError(
       503,

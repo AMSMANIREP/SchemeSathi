@@ -129,7 +129,15 @@ await a(
   { rating: 5, comment: 'Synthetic test feedback' },
   201,
 );
-await a('voice/synthesize', 'POST', { schemeId: all[0].id }, 503);
+// Voice is optional: unconfigured it must abstain with a clear 503, and
+// configured it must actually return audio. Both are correct — which one
+// applies is a property of the environment, not of the code.
+await a(
+  'voice/synthesize',
+  'POST',
+  { schemeId: all[0].id },
+  caps.voice ? 200 : 503,
+);
 await a('me/data', 'DELETE');
 await a('sessions', 'GET', undefined, 401);
 await a('applications', 'GET', undefined, 401);
