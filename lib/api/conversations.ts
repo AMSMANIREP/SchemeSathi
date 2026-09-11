@@ -412,6 +412,8 @@ async function runTurn(
       });
 
       const modelAsked = spoken?.asking ?? null;
+      // True when the model's own words are shown in place of the planner's.
+      const modelSpoke = !!spoken?.text;
 
       // Validation happens here rather than at generation, because it needs
       // the verdicts the planner just computed. Prose that overreaches is
@@ -427,7 +429,14 @@ async function runTurn(
           schemes: live,
           decisions: plan.decisions,
         });
-        const wouldContradict = !modelAsked && plan.checkpoint === 'ASKED';
+        // The model reliably asks good questions and just as reliably declines
+        // to call ask_about for them, so its words were being thrown away.
+        // A question only contradicts the buttons if buttons are shown, so
+        // when it speaks without the tool we keep its wording and show none —
+        // and drop the planner's field with them, because coercing the next
+        // reply against a field the citizen was never asked about is how "2
+        // acres" becomes an age of 2.
+        const wouldContradict = false;
         if (!verdict.ok)
           console.log(
             JSON.stringify({
@@ -451,12 +460,13 @@ async function runTurn(
       // own, the chips and the field are ours, and the answer is coerced
       // against that field exactly as before. The planner's own question is
       // the fallback for when no model is configured.
-      const blocks = modelAsked
+      const blocks = modelAsked || (modelSpoke && plan.checkpoint === 'ASKED')
         ? [
             ...plan.blocks.filter(
               (b) => b.kind === 'profile_updated' || b.kind === 'notice',
             ),
-            ...(modelAsked.options.length
+            // Chips only when the model actually asked through the tool.
+            ...(modelAsked && modelAsked.options.length
               ? [
                   {
                     kind: 'answer_chips' as const,
@@ -467,7 +477,11 @@ async function runTurn(
               : []),
           ]
         : plan.blocks;
-      const askedFieldOut = modelAsked ? modelAsked.field : plan.askedField;
+      const askedFieldOut = modelAsked
+        ? modelAsked.field
+        : modelSpoke && plan.checkpoint === 'ASKED'
+          ? '' // its question, our field: never coerce against the mismatch
+          : plan.askedField;
 
       const assistant = {
         id: crypto.randomUUID(),
