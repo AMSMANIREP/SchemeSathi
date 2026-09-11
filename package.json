@@ -13,7 +13,7 @@
     "format": "oxfmt",
     "db:generate": "drizzle-kit generate",
     "typecheck": "tsc --noEmit",
-    "test": "node --experimental-strip-types --test tests/rules.test.mjs tests/retrieval.test.mjs tests/turn.test.mjs tests/steps.test.mjs",
+    "test": "node --experimental-strip-types --test tests/rules.test.mjs tests/retrieval.test.mjs tests/turn.test.mjs tests/steps.test.mjs tests/focus.test.mjs",
     "test:api": "node tests/api.test.mjs",
     "db:migrate:cloudflare": "wrangler d1 migrations apply DB --remote --config wrangler.cloudflare.jsonc",
     "deploy:cloudflare": "node scripts/validate-release.mjs && pnpm build && pnpm run db:migrate:cloudflare && wrangler deploy --config wrangler.cloudflare.jsonc",

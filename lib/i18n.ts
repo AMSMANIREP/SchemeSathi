@@ -206,6 +206,8 @@ export const copy = {
     profileFirstNote:
       'The more of this we know, the fewer questions we have to ask later. Leave anything blank that you do not know or would rather not say — blank never counts against you.',
     skipForNow: 'Skip for now',
+    declineHint: 'Or just say no thanks',
+    reportReady: 'Your next steps are ready.',
     landingTitle: 'You describe your life. We find what you are owed.',
     landingLede:
       'Most services guess, then send you to an office to find out they were wrong. Scheme Sathi checks fifty Central Government programmes against fixed rules, tells you plainly what it cannot determine, and gives you the documents and the order to do them in — before you travel.',
@@ -418,6 +420,8 @@ export const copy = {
     profileFirstNote:
       'जितना अधिक हम जानेंगे, बाद में उतने ही कम सवाल पूछने होंगे। जो न जानते हों या न बताना चाहें, उसे खाली छोड़ दें — खाली होना कभी आपके विरुद्ध नहीं जाता।',
     skipForNow: 'अभी छोड़ें',
+    declineHint: 'या बस मना कर दीजिए',
+    reportReady: 'आपके अगले कदम तैयार हैं।',
     landingTitle: 'आप अपना जीवन बताइए। हम पता लगाएँगे कि आपका क्या हक़ है।',
     landingLede:
       'ज़्यादातर सेवाएँ अंदाज़ा लगाती हैं और फिर आपको दफ़्तर भेज देती हैं, जहाँ पता चलता है कि वे ग़लत थीं। योजना साथी पचास केंद्र सरकार की योजनाओं को तय नियमों पर परखता है, जो तय नहीं हो सकता उसे साफ़ बताता है, और यात्रा से पहले ही दस्तावेज़ और क्रम आपके हाथ में देता है।',
@@ -631,6 +635,8 @@ export const copy = {
     profileFirstNote:
       'ನಮಗೆ ಹೆಚ್ಚು ತಿಳಿದಷ್ಟೂ ನಂತರ ಕೇಳಬೇಕಾದ ಪ್ರಶ್ನೆಗಳು ಕಡಿಮೆ. ಗೊತ್ತಿಲ್ಲದ್ದನ್ನು ಅಥವಾ ಹೇಳಲು ಇಷ್ಟವಿಲ್ಲದ್ದನ್ನು ಖಾಲಿ ಬಿಡಿ — ಖಾಲಿ ಇರುವುದು ಎಂದಿಗೂ ನಿಮ್ಮ ವಿರುದ್ಧ ಆಗುವುದಿಲ್ಲ.',
     skipForNow: 'ಸದ್ಯಕ್ಕೆ ಬಿಟ್ಟುಬಿಡಿ',
+    declineHint: 'ಅಥವಾ ಬೇಡ ಎಂದು ಹೇಳಿ',
+    reportReady: 'ನಿಮ್ಮ ಮುಂದಿನ ಹೆಜ್ಜೆಗಳು ಸಿದ್ಧವಾಗಿವೆ.',
     landingTitle: 'ನಿಮ್ಮ ಬದುಕನ್ನು ಹೇಳಿ. ನಿಮಗೆ ಸಲ್ಲಬೇಕಾದದ್ದನ್ನು ನಾವು ಹುಡುಕುತ್ತೇವೆ.',
     landingLede:
       'ಬಹುತೇಕ ಸೇವೆಗಳು ಊಹಿಸಿ ನಿಮ್ಮನ್ನು ಕಚೇರಿಗೆ ಕಳಿಸುತ್ತವೆ, ಅಲ್ಲಿ ಅವು ತಪ್ಪಾಗಿದ್ದವು ಎಂದು ತಿಳಿಯುತ್ತದೆ. ಯೋಜನಾ ಸಾಥಿ ಐವತ್ತು ಕೇಂದ್ರ ಸರ್ಕಾರದ ಯೋಜನೆಗಳನ್ನು ನಿಗದಿತ ನಿಯಮಗಳ ಮೇಲೆ ಪರಿಶೀಲಿಸುತ್ತದೆ, ನಿರ್ಧರಿಸಲಾಗದ್ದನ್ನು ಸ್ಪಷ್ಟವಾಗಿ ಹೇಳುತ್ತದೆ, ಮತ್ತು ಪ್ರಯಾಣಕ್ಕೂ ಮೊದಲೇ ದಾಖಲೆಗಳನ್ನು ಮತ್ತು ಕ್ರಮವನ್ನು ನಿಮ್ಮ ಕೈಗೆ ಕೊಡುತ್ತದೆ.',

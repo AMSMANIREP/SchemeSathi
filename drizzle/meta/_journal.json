@@ -29,6 +29,13 @@
       "when": 1789116701536,
       "tag": "0003_exotic_bishop",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1789118274825,
+      "tag": "0004_brown_gladiator",
+      "breakpoints": true
     }
   ]
 }

@@ -372,9 +372,35 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const saveScheme = async (s: Scheme) => {
     setBusy(true);
     try {
-      await api('applications', 'POST', { schemeId: s.id });
-      await refreshApps();
+      await api('applications', 'POST', {
+        schemeId: s.id,
+        conversationId,
+      });
+      const r = await api<{ applications: ApplicationRecord[] }>('applications');
+      setApplications(r.applications);
       setNotice(t.saved);
+
+      // Saving from the transcript answers the offer, so the answer belongs
+      // in the transcript: a receipt that leads straight to the next steps.
+      const saved = r.applications.find((a) => a.schemeId === s.id);
+      if (conversationId && saved)
+        setMessages((m) => [
+          ...m,
+          {
+            id: 'receipt-' + saved.id,
+            role: 'assistant',
+            text: '',
+            inputMode: 'text',
+            blocks: [
+              {
+                kind: 'saved_receipt',
+                applicationId: saved.id,
+                schemeId: s.id,
+              },
+            ],
+            createdAt: new Date().toISOString(),
+          },
+        ]);
     } catch (e) {
       setError((e as Error).message);
     } finally {

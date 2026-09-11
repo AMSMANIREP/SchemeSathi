@@ -2272,3 +2272,32 @@ button.rowopen small {
     break-inside: avoid;
   }
 }
+
+/* The save offer: an unissued pass, not a hidden one. */
+.blk-save {
+  max-width: 420px;
+}
+.blk-save .pass-body h3 {
+  font-size: 16px;
+  margin: 0 0 4px;
+}
+.blk-saved b {
+  color: var(--accent-go);
+}
+.blk-profile button {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--steel);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  font: inherit;
+}
+.blk-profile button:hover {
+  color: var(--ink);
+}

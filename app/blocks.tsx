@@ -1,6 +1,14 @@
 'use client';
 import Link from 'next/link';
-import { ArrowUpRight, Bookmark, Check, Info, PenLine } from 'lucide-react';
+import {
+  ArrowUpRight,
+  Bookmark,
+  Check,
+  FileText,
+  Info,
+  PenLine,
+} from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useApp } from './providers';
 import { StatusTag } from './dialogs';
 import { categoryText, statusNames } from '@/lib/i18n';
@@ -37,6 +45,7 @@ function One({
 }) {
   const { t, li, language, schemes, applications, saveScheme, setDetail, busy } =
     useApp();
+  const router = useRouter();
 
   switch (block.kind) {
     case 'profile_updated': {
@@ -127,6 +136,76 @@ function One({
         </article>
       );
     }
+
+    case 'save_prompt': {
+      const s = schemes.find((x) => x.id === block.schemeId);
+      if (!s) return null;
+      const already = applications.some((a) => a.schemeId === s.id);
+      if (already) return null;
+      // A pass-blank: the full document structure with its figures unfilled.
+      // An unissued pass, not a hidden one.
+      return (
+        <article className="pass pass-blank blk-save">
+          <div className="pass-head">
+            <span className="label">{t.tracker}</span>
+            <span className="label" style={{ marginLeft: 'auto' }}>
+              — — — —
+            </span>
+          </div>
+          <div className="pass-body">
+            <h3>{s.shortName}</h3>
+            {block.reason && <p className="muted">{block.reason}</p>}
+          </div>
+          <div className="perforate" />
+          <div className="pass-stub blk-stub">
+            <button
+              className="btn btn-sm"
+              disabled={busy}
+              onClick={() => void saveScheme(s)}
+            >
+              <Bookmark size={14} />
+              {t.save}
+            </button>
+            <span className="label">{t.declineHint}</span>
+          </div>
+        </article>
+      );
+    }
+
+    case 'saved_receipt': {
+      const s = schemes.find((x) => x.id === block.schemeId);
+      return (
+        <div className="blk-profile blk-saved">
+          <Check size={13} />
+          <span>
+            {t.saved}: <b>{s?.shortName || block.schemeId}</b>
+          </span>
+          <button
+            onClick={() =>
+              router.push(`/applications/${block.applicationId}/report`)
+            }
+          >
+            <FileText size={12} />
+            {t.openReport}
+          </button>
+        </div>
+      );
+    }
+
+    case 'report_ready':
+      return (
+        <div className="blk-profile">
+          <FileText size={13} />
+          <span>{t.reportReady}</span>
+          <button
+            onClick={() =>
+              router.push(`/applications/${block.applicationId}/report`)
+            }
+          >
+            {t.openReport}
+          </button>
+        </div>
+      );
 
     case 'sources':
       return (

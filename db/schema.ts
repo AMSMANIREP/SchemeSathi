@@ -91,6 +91,11 @@ export const conversations = sqliteTable(
     // The field the last assistant turn asked about. A reply while this is
     // set counts as a direct answer, so it is confirmed rather than inferred.
     askedField: text('asked_field').notNull().default(''),
+    // Turn counter and decline memory, so a save offer that was turned down
+    // is not repeated at the citizen on the very next turn.
+    turns: integer('turns').notNull().default(0),
+    declinedSchemeId: text('declined_scheme_id'),
+    declinedAtTurn: integer('declined_at_turn').notNull().default(0),
     createdAt: text('created_at').notNull(),
     updatedAt: text('updated_at').notNull(),
   },

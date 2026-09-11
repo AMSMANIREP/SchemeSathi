@@ -599,8 +599,13 @@ Two deviations found while building it. **`fuse.ts` was not written** — recipr
 **Phase 2 — Conversation store (~1 day) — ✅ done**
 `conversations` + `messages` in `db/schema.ts`, `pnpm db:generate`. Conversation endpoints, no agent yet — assistant turns come from the existing extractor and deterministic blocks. The chat page becomes a real transcript. **This is the phase that proves the block protocol** with zero model risk.
 
-**Phase 3 — Agent loop (~2 days) — next**
-`lib/agent/{loop,tools,prompt,validate,checkpoints}.ts`. SSE streaming. Tool-calling against the Azure deployment. Checkpoint machine and jump points. Feature-flagged: `capabilities.ai === false` keeps Phase 2 behaviour exactly.
+**Phase 3 — Jump points ✅ done · agent loop — remaining**
+
+*Jump points (done).* `lib/agent/focus.ts` implements §6's focus signal and the save offer. Focus is deterministic and conservative: naming a scheme is the strongest signal, a single presented card the next, otherwise the previous focus carries forward — **four presented cards are not a focus**, because the citizen has not chosen anything and manufacturing a choice is how an advocate becomes a funnel. `shouldOfferSave()` reads only server-owned state, so a model can influence the focus but never fire the offer. Declining is remembered for three turns, per scheme. The `save_prompt` renders as a `pass-blank`, saving emits a `saved_receipt` into the transcript, and that leads straight to the report. 13 tests in `tests/focus.test.mjs`.
+
+Verified live: a broad turn offers nothing, naming PM-KISAN fires the offer with a rule-derived reason, "no thanks" is respected and is *not* read as a profile answer, and re-mentioning inside the cooldown stays suppressed.
+
+*Agent loop (remaining).* `lib/agent/{loop,tools,prompt,validate}.ts`, SSE streaming, tool-calling against the Azure deployment. Feature-flagged: `capabilities.ai === false` keeps the deterministic planner exactly as it is. **Blocked on credentials** — no `AZURE_OPENAI_*` values are configured, so the model path cannot be built against anything real.
 
 **Phase 4 — Chat UI, blocks, and the profile route (~2.5 days) — ✅ done (ahead of Phase 3)**
 Built before the agent loop because the deterministic planner made it possible, and because it proves the block protocol with zero model risk. `app/page.tsx` is now a transcript; `app/blocks.tsx` renders one component per block kind; `app/profile/page.tsx` owns the profile with per-field provenance and the alert edge on unconfirmed inferences; the nav carries a fifth route. `ProfileDialog` and `ProfileFields` are deleted along with the provider state that drove them — the chat no longer has a modal in it at all.
