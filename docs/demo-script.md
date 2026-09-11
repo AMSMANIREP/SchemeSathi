@@ -153,15 +153,20 @@ Type:
 SATHI: PM Vishwakarma — likely eligible. Skills and enterprise support for
        eligible traditional artisans. Would you like to keep this one in My
        applications, so you have the next steps to hand?
-       · PM Vishwakarma  (leads the cards)
+       · PM Vishwakarma            LIKELY ELIGIBLE   ← the only card
        · [an unissued pass]  PM Vishwakarma
          "You work in one of the recognised traditional trades"
 ```
 
-Naming a scheme changes the answer: it leads the cards and the reply is about
-that scheme — its verdict, what it offers, and anything still unestablished.
-Every part of that sentence comes from the rule engine and the catalogue, so
-it is the same sentence every time and in every language.
+**Naming a scheme narrows the answer to that scheme.** One question, one
+answer: the card list collapses to the one she asked about, and the reply is
+about it — its verdict, what it offers, and anything still unestablished.
+Every part of that sentence is assembled from the rule engine and the
+catalogue, so it is the same sentence every run and in every language.
+
+Ask something general next ("what else is there for me") and the list opens
+back up. The narrowing follows what she named in *that* message, not a focus
+inherited from an earlier one — she is allowed to move on.
 
 **The offer only appears now.** Say why: it needs a single scheme in focus, a
 verdict of likely or possibly eligible, and at least one rule already passing.

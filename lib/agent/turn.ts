@@ -27,6 +27,8 @@ export type TurnInput = {
   savedSchemeIds: string[];
   /** The scheme this conversation is actually about, if one has emerged. */
   focus?: string | null;
+  /** True when this message named that scheme, rather than inheriting it. */
+  focusNamed?: boolean;
   declinedSchemeId?: string | null;
   declinedAtTurn?: number;
   turn?: number;
@@ -109,6 +111,7 @@ export function planTurn(input: TurnInput): TurnPlan {
     changed,
     savedSchemeIds,
     focus,
+    focusNamed,
     unreadAnswer,
     questionsAsked,
     language,
@@ -132,7 +135,11 @@ export function planTurn(input: TurnInput): TurnPlan {
   // Ask only while an answer could still move something, and only within the
   // budget. Otherwise show what we have — a citizen who has answered twice
   // deserves to see something.
-  if (!conclusive && questionsAsked < QUESTION_BUDGET) {
+  //
+  // A direct question about a named scheme is never answered with a question
+  // of our own. What is missing is said in the reply instead, so they learn
+  // the gap without having their question deflected.
+  if (!focusNamed && !conclusive && questionsAsked < QUESTION_BUDGET) {
     // Ask about what the citizen just raised. Scoring the whole catalogue
     // first would ask a farmer their age simply because 'age' sorts earlier.
     const relevant = schemes.filter((s) => candidates.includes(s.id));
@@ -164,12 +171,17 @@ export function planTurn(input: TurnInput): TurnPlan {
       candidates.indexOf(a) - candidates.indexOf(b),
   );
 
-  // When the citizen named a scheme, that scheme leads and is always present.
-  // Ranking it away answers a question they did not ask.
+  // A scheme the citizen named in this message is the whole answer. They
+  // asked one question; surrounding it with three others is a re-listing, and
+  // it muddies a save offer that refers to exactly one of them. A focus that
+  // only carried over from an earlier turn leads but does not narrow, because
+  // they may have moved on.
   const asked = focus && schemes.some((s) => s.id === focus) ? focus : null;
-  const shown = (
-    asked ? [asked, ...ranked.filter((id) => id !== asked)] : ranked
-  ).slice(0, MAX_CARDS);
+  const shown = asked
+    ? focusNamed
+      ? [asked]
+      : [asked, ...ranked.filter((id) => id !== asked)].slice(0, MAX_CARDS)
+    : ranked.slice(0, MAX_CARDS);
 
   for (const id of shown) {
     const scheme = schemes.find((s) => s.id === id)!;

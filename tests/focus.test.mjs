@@ -33,39 +33,39 @@ const base = {
   turn: 5,
 };
 
-test('naming a scheme focuses it', () => {
+test('naming a scheme focuses it, and marks it as named', () => {
   const focus = detectFocus({
     schemes,
     lastPresented: ['pmuy'],
     previousFocus: null,
     text: 'tell me more about PM-KISAN',
   });
-  assert.equal(focus, 'pm-kisan');
+  assert.deepEqual(focus, { schemeId: 'pm-kisan', named: true });
 });
 
-test('a single presented card becomes the focus', () => {
-  assert.equal(
+test('a single presented card becomes the focus, but is not "named"', () => {
+  assert.deepEqual(
     detectFocus({ schemes, lastPresented: ['pmuy'], previousFocus: null, text: 'go on' }),
-    'pmuy',
+    { schemeId: 'pmuy', named: false },
   );
 });
 
 test('four presented cards are not a focus — a choice was not made', () => {
-  assert.equal(
+  assert.deepEqual(
     detectFocus({
       schemes,
       lastPresented: ['pm-kisan', 'pmuy', 'a', 'b'],
       previousFocus: null,
       text: 'ok',
     }),
-    null,
+    { schemeId: null, named: false },
   );
 });
 
-test('focus carries forward when this turn names nothing', () => {
-  assert.equal(
+test('focus carries forward when this turn names nothing, unnamed', () => {
+  assert.deepEqual(
     detectFocus({ schemes, lastPresented: [], previousFocus: 'pmuy', text: 'and then?' }),
-    'pmuy',
+    { schemeId: 'pmuy', named: false },
   );
 });
 

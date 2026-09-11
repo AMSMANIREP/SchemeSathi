@@ -205,19 +205,21 @@ export const conversations: SessionRoute = async ({
         .filter((b) => b.kind === 'scheme_card' && b.schemeId)
         .map((b) => b.schemeId as string);
 
-      const focus = declining
-        ? null
+      const detected = declining
+        ? { schemeId: null, named: false }
         : detectFocus({
             schemes: live,
             lastPresented,
             previousFocus: (conversation.focus_scheme_id as string) || null,
             text,
           });
+      const focus = detected.schemeId;
 
       const plan = planTurn({
         schemes: live,
         candidates,
         focus,
+        focusNamed: detected.named,
         declinedSchemeId: declining
           ? (conversation.focus_scheme_id as string) || null
           : (conversation.declined_scheme_id as string) || null,

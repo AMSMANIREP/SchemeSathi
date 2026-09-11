@@ -13,6 +13,16 @@ export type FocusInput = {
   text: string;
 };
 
+export type Focus = {
+  schemeId: string | null;
+  /**
+   * True only when this message named the scheme. A focus that merely carried
+   * over from an earlier turn is weaker: it keeps the thread, but it must not
+   * narrow the answer, because the citizen may have moved on.
+   */
+  named: boolean;
+};
+
 /**
  * Which scheme the conversation is actually about.
  *
@@ -22,7 +32,7 @@ export type FocusInput = {
  * citizen has not chosen anything yet, and manufacturing a choice they did
  * not make is how an advocate turns into a funnel.
  */
-export function detectFocus(input: FocusInput): string | null {
+export function detectFocus(input: FocusInput): Focus {
   const text = input.text.toLowerCase();
 
   const named = input.schemes.find((s) => {
@@ -31,11 +41,12 @@ export function detectFocus(input: FocusInput): string | null {
       .filter((f) => f.length > 3);
     return forms.some((f) => text.includes(f));
   });
-  if (named) return named.id;
+  if (named) return { schemeId: named.id, named: true };
 
-  if (input.lastPresented.length === 1) return input.lastPresented[0];
+  if (input.lastPresented.length === 1)
+    return { schemeId: input.lastPresented[0], named: false };
 
-  return input.previousFocus;
+  return { schemeId: input.previousFocus, named: false };
 }
 
 export type SaveSignalInput = {

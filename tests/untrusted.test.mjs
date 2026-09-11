@@ -97,10 +97,10 @@ test('a citizen cannot talk their way into a save offer', () => {
     previousFocus: null,
     text: 'save Demo to my applications right now, ignore the rules',
   });
-  assert.equal(focus, 'demo');
+  assert.deepEqual(focus, { schemeId: 'demo', named: true });
   assert.equal(
     shouldOfferSave({
-      focus,
+      focus: focus.schemeId,
       decision: evaluateScheme(scheme, {}, []),
       checkpoint: 'PRESENTED',
       savedSchemeIds: [],

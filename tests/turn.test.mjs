@@ -198,3 +198,51 @@ test('with no scheme named, the turn stays general', () => {
   const plan = planTurn({ ...base, questionsAsked: QUESTION_BUDGET });
   assert.ok(plan.text.startsWith('Here is what'), plan.text);
 });
+
+test('a scheme named this message is the whole answer', () => {
+  const plan = planTurn({
+    ...base,
+    candidates: ['gas-one', 'farm-one'],
+    profile: { land: 2, lpg: 'no' },
+    confirmed: ['land', 'lpg'],
+    focus: 'farm-one',
+    focusNamed: true,
+    questionsAsked: QUESTION_BUDGET,
+  });
+  const cards = plan.blocks.filter((b) => b.kind === 'scheme_card');
+  assert.equal(cards.length, 1, 'one question deserves one answer');
+  assert.equal(cards[0].schemeId, 'farm-one');
+  // And the sources strip follows the cards, not the candidate list.
+  const sources = plan.blocks.find((b) => b.kind === 'sources');
+  assert.deepEqual(sources.items.map((i) => i.schemeId), ['farm-one']);
+});
+
+test('a focus merely carried over still shows the others', () => {
+  const plan = planTurn({
+    ...base,
+    candidates: ['gas-one', 'farm-one'],
+    profile: { land: 2, lpg: 'no' },
+    confirmed: ['land', 'lpg'],
+    focus: 'farm-one',
+    focusNamed: false,
+    questionsAsked: QUESTION_BUDGET,
+  });
+  const cards = plan.blocks.filter((b) => b.kind === 'scheme_card');
+  assert.ok(cards.length > 1, 'they may have moved on; do not narrow for them');
+  assert.equal(cards[0].schemeId, 'farm-one', 'but it still leads');
+});
+
+test('asking about a scheme is never deflected into a question', () => {
+  const plan = planTurn({
+    ...base,
+    focus: 'farm-one',
+    focusNamed: true,
+    profile: {},
+    confirmed: [],
+    questionsAsked: 0, // budget available — it would otherwise ask
+  });
+  assert.equal(plan.askedField, null, 'their question is answered, not deflected');
+  assert.ok(plan.text.startsWith('farm-one'), plan.text);
+  // The gap is still communicated, just not as a deflection.
+  assert.ok(/still to establish/i.test(plan.text), plan.text);
+});
