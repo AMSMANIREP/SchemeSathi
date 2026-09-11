@@ -5,6 +5,7 @@ import { extract } from './chat';
 import { retrieve } from '../retrieval';
 import { fields, redact, validateProfile } from '../rules';
 import { schemes } from '../schemes';
+import { applicationRepository } from '../storage';
 import type { SessionRoute } from '../session';
 import { languageStatements } from '../voice-preference';
 import type { Profile, Provenance } from '../types';
@@ -249,10 +250,7 @@ export const conversations: SessionRoute = async ({
       );
 
       const live = await schemes();
-      const saved = await db()
-        .prepare('SELECT scheme_id FROM applications WHERE owner=?')
-        .bind(s.id)
-        .all<{ scheme_id: string }>();
+      const saved = await applicationRepository().list(s.id);
 
       // Retrieve against the opening description plus this message. A bare
       // answer like "44" matches nothing on its own, and the citizen should
@@ -300,7 +298,7 @@ export const conversations: SessionRoute = async ({
         profile: merged,
         confirmed,
         changed,
-        savedSchemeIds: saved.results.map((r) => r.scheme_id),
+        savedSchemeIds: saved.map((r) => r.schemeId),
         unreadAnswer: !!askedField && answered === null,
         questionsAsked: conversation.questions_asked as number,
         language: s.language,

@@ -17,6 +17,21 @@ function client() {
         ...headers,
       },
       ...(data === undefined ? {} : { body: JSON.stringify(data) }),
+    }).catch((error) => {
+      console.error(
+        `API test could not connect to ${base} (${error.cause?.code || error.message}).\n` +
+          'The API test does not start the app. In a separate terminal, run:\n' +
+          '  pnpm dev --hostname localhost --port 3000\n' +
+          'Wait for the Local URL and leave that terminal running. In the test PowerShell terminal:\n' +
+          "  $env:TEST_BASE_URL = 'http://localhost:3000'\n" +
+          '  pnpm test:api\n' +
+          'Use the exact Local URL: localhost may bind to IPv6 while 127.0.0.1 refuses connections.\n' +
+          'For IPv4, start vinext with --hostname 127.0.0.1 (--host is not supported).\n' +
+          'If using another address, set TEST_BASE_URL to the running server URL.\n' +
+          'If vinext says a server is already running but its URL refuses connections,\n' +
+          'stop that dev server with Ctrl+C in its terminal and restart it.',
+      );
+      process.exit(1);
     });
     check(
       r.status === expected,

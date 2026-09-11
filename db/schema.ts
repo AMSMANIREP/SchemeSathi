@@ -5,6 +5,25 @@ import {
   index,
   uniqueIndex,
 } from 'drizzle-orm/sqlite-core';
+
+// Capture/backfill triggers are maintained in 0007_storage_mirror.sql.
+export const storageSyncConfig = sqliteTable('storage_sync_config', {
+  id: integer('id').primaryKey(),
+  sourceId: text('source_id').notNull(),
+  enabled: integer('enabled').notNull().default(0),
+});
+export const storageOutbox = sqliteTable(
+  'storage_outbox',
+  {
+    sequence: integer('sequence').primaryKey({ autoIncrement: true }),
+    entity: text('entity').notNull(),
+    entityId: text('entity_id').notNull(),
+    owner: text('owner').notNull(),
+    operation: text('operation').notNull(),
+    payload: text('payload').notNull(),
+  },
+  (t) => [uniqueIndex('storage_outbox_entity_idx').on(t.entity, t.entityId)],
+);
 export const sessions = sqliteTable(
   'sessions',
   {
@@ -38,6 +57,11 @@ export const voicePreferences = sqliteTable(
   },
   (t) => [index('voice_preferences_owner_idx').on(t.owner)],
 );
+export const storageLegacyImports = sqliteTable('storage_legacy_imports', {
+  owner: text('owner')
+    .primaryKey()
+    .references(() => sessions.id, { onDelete: 'cascade' }),
+});
 export const applications = sqliteTable(
   'applications',
   {

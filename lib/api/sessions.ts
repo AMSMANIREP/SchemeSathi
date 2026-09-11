@@ -1,5 +1,6 @@
 import { body, db, hash, json, limit, type Route } from '../http';
 import { isLanguage } from '../languages';
+import { storageMode } from '../storage';
 import {
   SESSION_TTL,
   sessionCookie,
@@ -43,6 +44,12 @@ export const createSession: Route = async ({ req, p, method }) => {
       Date.now() + SESSION_TTL,
     )
     .run();
+  // This brand-new UUID cannot have records from the old PostgreSQL-only flow.
+  if (storageMode() === 'dual')
+    await db()
+      .prepare('INSERT INTO storage_legacy_imports(owner) VALUES(?)')
+      .bind(id)
+      .run();
   return json(
     {
       profile: {},
