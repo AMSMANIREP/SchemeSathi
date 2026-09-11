@@ -26,3 +26,36 @@ def test_api_graph_and_access():
                 assert record.get('authoredFor') == 'demo', 'Demonstration verdicts must retain their provenance'
         payload['profile']['age'] = -1
         assert c.post('/v1/evaluate',json=payload,headers=headers).status_code == 422
+
+
+def test_scheme_recommendation_and_application_endpoints():
+    owner = '12345678-1234-4234-9234-123456789012'
+    headers = {'Authorization': 'Bearer synthetic-test-only-key'}
+    with TestClient(app) as c:
+        schemes = c.get('/v1/schemes', headers=headers)
+        assert schemes.status_code == 200
+        assert len(schemes.json()['schemes']) == 50
+        assert c.get('/v1/schemes/pm-kisan', headers=headers).json()['id'] == 'pm-kisan'
+        assert c.get('/v1/schemes/missing', headers=headers).status_code == 404
+
+        recommendations = c.get('/v1/recommendations', headers=headers)
+        assert recommendations.status_code == 200
+        assert len(recommendations.json()['results']) == 50
+
+        created = c.post('/v1/applications', headers=headers, json={'sessionId': owner, 'schemeId': 'pm-kisan'})
+        assert created.status_code == 201
+        application = created.json()['application']
+        assert application['status'] == 'Interested'
+        assert len(c.get('/v1/applications', headers=headers, params={'sessionId': owner}).json()['applications']) == 1
+
+        updated = c.patch(
+            '/v1/applications/' + application['id'],
+            headers=headers,
+            json={'sessionId': owner, 'status': 'Preparing documents'},
+        )
+        assert updated.status_code == 200
+        saved = c.get('/v1/applications', headers=headers, params={'sessionId': owner}).json()['applications'][0]
+        assert saved['reference'] == ''
+        assert saved['status'] == 'Preparing documents'
+        assert c.delete('/v1/applications/' + application['id'], headers=headers, params={'sessionId': owner}).status_code == 200
+        assert c.get('/v1/applications', headers=headers, params={'sessionId': owner}).json()['applications'] == []

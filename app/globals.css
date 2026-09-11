@@ -1,6 +1,6 @@
-@import 'tailwindcss';
-@import 'tw-animate-css';
-@import 'shadcn/tailwind.css';
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -85,9 +85,9 @@
 
   --font-sans-stack:
     var(--font-google-sans), ui-sans-serif, system-ui, -apple-system,
-    'Segoe UI', sans-serif;
+    "Segoe UI", sans-serif;
   --font-mono-stack:
-    var(--font-google-sans-code), ui-monospace, 'SF Mono', Menlo, monospace;
+    var(--font-google-sans-code), ui-monospace, "SF Mono", Menlo, monospace;
 
   --radius: 0.5rem;
 
@@ -200,7 +200,7 @@ a {
 .data {
   font-family: var(--font-mono-stack);
   font-variant-numeric: tabular-nums;
-  font-feature-settings: 'tnum' 1;
+  font-feature-settings: "tnum" 1;
 }
 h1 {
   font-size: 2.1rem;
@@ -364,7 +364,7 @@ h3 {
 .mainnav a:hover {
   color: var(--ink);
 }
-.mainnav a[aria-current='page'] {
+.mainnav a[aria-current="page"] {
   color: var(--ink);
   border-bottom-color: var(--accent-go);
 }
@@ -1509,7 +1509,7 @@ button.rowopen small {
     color: var(--slate) !important;
   }
   a[href]:after {
-    content: ' (' attr(href) ')';
+    content: " (" attr(href) ")";
     font-size: 10px;
     color: var(--steel);
   }
@@ -1523,7 +1523,6 @@ button.rowopen small {
     transition-duration: 0.01ms !important;
   }
 }
-
 
 /* ============================ voice + history ============================ */
 
@@ -1593,11 +1592,15 @@ button.rowopen small {
   gap: 26px;
   margin-bottom: 26px;
 }
+.chat-scroll-spacer {
+  min-height: 10vh;
+}
 .turn {
   display: grid;
   grid-template-columns: 62px minmax(0, 1fr);
   gap: 14px;
   align-items: start;
+  scroll-margin-top: 24px;
 }
 .turn-who {
   padding-top: 3px;
@@ -2229,8 +2232,31 @@ button.rowopen small {
 }
 
 /* Optional audio controls reuse the existing chat buttons and layout. */
-.voice-controls { margin: 1rem auto; max-width: 72rem; padding: 0 1rem; }
-.voice-buttons { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
-.voice-buttons output { display: inline-flex; gap: .4rem; align-items: center; font-size: .875rem; }
-.voice-note { font-size: .875rem; line-height: 1.5; margin: .6rem 0; }
-@media print { .voice-controls, .voice-note { display: none; } }
+.voice-controls {
+  margin: 1rem auto;
+  max-width: 72rem;
+  padding: 0 1rem;
+}
+.voice-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+.voice-buttons output {
+  display: inline-flex;
+  gap: 0.4rem;
+  align-items: center;
+  font-size: 0.875rem;
+}
+.voice-note {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin: 0.6rem 0;
+}
+@media print {
+  .voice-controls,
+  .voice-note {
+    display: none;
+  }
+}

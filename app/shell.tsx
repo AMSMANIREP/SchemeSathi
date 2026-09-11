@@ -1,6 +1,6 @@
-'use client';
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+"use client";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Compass,
   MessageSquare,
@@ -15,19 +15,19 @@ import {
   RefreshCw,
   CheckCircle2,
   X,
-} from 'lucide-react';
-import { useApp } from './providers';
-import { SchemeDialog, Pick } from './dialogs';
-import { Gate } from './gate';
-import type { Language } from '@/lib/types';
-import { languageOptions } from '@/lib/languages';
+} from "lucide-react";
+import { useApp } from "./providers";
+import { SchemeDialog, Pick } from "./dialogs";
+import { Gate } from "./gate";
+import type { Language } from "@/lib/types";
+import { languageOptions } from "@/lib/languages";
 
 const routes = [
-  { href: '/', icon: MessageSquare, key: 'navChat' as const },
-  { href: '/profile', icon: UserRound, key: 'profile' as const },
-  { href: '/explore', icon: Compass, key: 'explore' as const },
-  { href: '/applications', icon: ClipboardList, key: 'tracker' as const },
-  { href: '/settings', icon: SlidersHorizontal, key: 'privacy' as const },
+  { href: "/", icon: MessageSquare, key: "navChat" as const },
+  { href: "/profile", icon: UserRound, key: "profile" as const },
+  { href: "/explore", icon: Compass, key: "explore" as const },
+  { href: "/applications", icon: ClipboardList, key: "tracker" as const },
+  { href: "/settings", icon: SlidersHorizontal, key: "privacy" as const },
 ];
 
 export function Shell({ children }: { children: React.ReactNode }) {
@@ -37,6 +37,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
     selectLanguage,
     busy,
     visitor,
+    onboarded,
     signOut,
     applications,
     notice,
@@ -51,7 +52,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
   // The landing surface is the whole page: no nav, no chrome, nothing to
   // navigate before there is anything to navigate to. Keyed off the pathname
   // rather than sign-in state, so the server and the client agree.
-  if (pathname === '/welcome')
+  if (pathname === "/welcome")
     return (
       <main className="workspace landing-workspace" id="main">
         {children}
@@ -83,7 +84,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
             className="accountbtn"
             onClick={() => {
               signOut();
-              router.push('/welcome');
+              router.push("/welcome");
             }}
           >
             <LogOut size={14} />
@@ -100,23 +101,25 @@ export function Shell({ children }: { children: React.ReactNode }) {
       </header>
 
       <nav className="mainnav" aria-label="Sections">
-        {routes.map((r) => {
-          const Icon = r.icon;
-          const active = pathname === r.href;
-          return (
-            <Link
-              key={r.href}
-              href={r.href}
-              aria-current={active ? 'page' : undefined}
-            >
-              <Icon />
-              {t[r.key]}
-              {r.href === '/applications' && applications.length > 0 && (
-                <span className="navcount data">{applications.length}</span>
-              )}
-            </Link>
-          );
-        })}
+        {(onboarded ? routes : routes.filter((r) => r.href === "/profile")).map(
+          (r) => {
+            const Icon = r.icon;
+            const active = pathname === r.href;
+            return (
+              <Link
+                key={r.href}
+                href={r.href}
+                aria-current={active ? "page" : undefined}
+              >
+                <Icon />
+                {t[r.key]}
+                {r.href === "/applications" && applications.length > 0 && (
+                  <span className="navcount data">{applications.length}</span>
+                )}
+              </Link>
+            );
+          },
+        )}
       </nav>
 
       <main className="workspace" id="main">
@@ -124,7 +127,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           <output className="notice">
             <CheckCircle2 size={16} />
             {notice}
-            <button onClick={() => setNotice('')} aria-label={t.close}>
+            <button onClick={() => setNotice("")} aria-label={t.close}>
               <X size={15} />
             </button>
           </output>
@@ -135,7 +138,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
             <span>{error}</span>
             <button
               onClick={() => {
-                setError('');
+                setError("");
                 void load();
               }}
             >
@@ -143,7 +146,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
             </button>
           </div>
         )}
-        {language !== 'en' && (
+        {language !== "en" && (
           <div className="notice">
             <Globe size={16} />
             {t.sourceEnglish}

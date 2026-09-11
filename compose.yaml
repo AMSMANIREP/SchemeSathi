@@ -8,7 +8,7 @@ services:
     volumes:
       - sathi_pg:/var/lib/postgresql/data
     healthcheck:
-      test: [CMD-SHELL, 'pg_isready -U sathi']
+      test: [CMD-SHELL, "pg_isready -U sathi"]
       interval: 5s
       retries: 10
   migrate:
@@ -25,7 +25,7 @@ services:
     build:
       context: .
       dockerfile: backend/Dockerfile
-    ports: ['127.0.0.1:8000:8000']
+    ports: ["127.0.0.1:8000:8000"]
     environment:
       DATABASE_URL: postgresql://sathi:${POSTGRES_PASSWORD}@postgres:5432/sathi
       SERVICE_API_KEY: ${SERVICE_API_KEY:?Set SERVICE_API_KEY}
@@ -33,5 +33,26 @@ services:
     depends_on:
       migrate:
         condition: service_completed_successfully
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    ports: ["127.0.0.1:3000:3000"]
+    environment:
+      RULE_SERVICE_URL: http://rules:8000
+      RULE_SERVICE_API_KEY: ${SERVICE_API_KEY:?Set SERVICE_API_KEY}
+      SERVICE_API_KEY: ${SERVICE_API_KEY:?Set SERVICE_API_KEY}
+    volumes:
+      - sathi_web_wrangler:/app/.wrangler
+    depends_on:
+      rules:
+        condition: service_started
+  adminer:
+    image: adminer:5
+    ports: ["127.0.0.1:8080:8080"]
+    depends_on:
+      postgres:
+        condition: service_healthy
 volumes:
   sathi_pg:
+  sathi_web_wrangler:
