@@ -117,7 +117,10 @@ export const copy = {
     updated: 'Saved successfully',
     memory: 'Remember my language preference',
     memoryNote:
-      'Optional. This session expires after one hour. External memory is only used when connected and consented.',
+      'Optional. Your session is kept on this device for 30 days. External memory is only used when connected and consented.',
+    retention: 'Kept on this device for 30 days',
+    retentionNote:
+      'Your profile and saved applications stay in this browser for 30 days, and every visit extends that. Clearing your browser data, or opening Scheme Sathi on another device, starts you over — there is no way to recover it.',
     forget: 'Delete my data',
     forgetTitle: 'Delete this session and its records?',
     forgetNote:
@@ -162,6 +165,24 @@ export const copy = {
     stop: 'Stop recording',
     englishEvidence: 'Criteria are shown in the official source language.',
     draft: 'Draft criteria — not a complete eligibility decision',
+    newChat: 'New conversation',
+    conversations: 'Conversations',
+    thinking: 'Working…',
+    youLabel: 'You',
+    sathiLabel: 'Sathi',
+    chatEmpty: 'Describe your situation in your own words.',
+    askAnything: 'Reply, or tell me something else',
+    addedToProfile: 'Added to your profile',
+    reviewIt: 'Review',
+    provAnswered: 'You told us',
+    provEntered: 'You entered',
+    provInferred: 'We understood this — please check it',
+    notConfirmed: 'Not confirmed',
+    profileLede:
+      'What we know about you. It all comes from you, you can change any of it, and it is never shared.',
+    profileNothing: 'Nothing here yet. Start a conversation, or fill this in yourself.',
+    officialSources: 'Official sources',
+    fromConversation: 'From your conversation',
   },
   hi: {
     companion: 'आपका योजना साथी',
@@ -275,7 +296,10 @@ export const copy = {
     updated: 'सहेजा गया',
     memory: 'मेरी भाषा पसंद याद रखें',
     memoryNote:
-      'वैकल्पिक। सत्र एक घंटे में समाप्त होगा। बाहरी मेमोरी केवल जुड़ने और सहमति पर उपयोग होगी।',
+      'वैकल्पिक। आपका सत्र इस डिवाइस पर 30 दिन तक रखा जाता है। बाहरी मेमोरी केवल जुड़ने और सहमति पर उपयोग होगी।',
+    retention: 'इस डिवाइस पर 30 दिन तक सुरक्षित',
+    retentionNote:
+      'आपकी प्रोफ़ाइल और सहेजी गई योजनाएँ इसी ब्राउज़र में 30 दिन तक रहती हैं, और हर बार आने पर यह अवधि बढ़ जाती है। ब्राउज़र डेटा साफ़ करने पर, या किसी दूसरे डिवाइस पर खोलने पर, सब कुछ फिर से शुरू होगा — इसे वापस पाने का कोई तरीका नहीं है।',
     forget: 'मेरा डेटा मिटाएँ',
     forgetTitle: 'यह सत्र और उसके रिकॉर्ड मिटाएँ?',
     forgetNote:
@@ -316,6 +340,24 @@ export const copy = {
     stop: 'रिकॉर्डिंग रोकें',
     englishEvidence: 'मानदंड आधिकारिक स्रोत की भाषा में हैं।',
     draft: 'मसौदा मानदंड — पूर्ण पात्रता निर्णय नहीं',
+    newChat: 'नई बातचीत',
+    conversations: 'बातचीत',
+    thinking: 'काम जारी है…',
+    youLabel: 'आप',
+    sathiLabel: 'साथी',
+    chatEmpty: 'अपनी स्थिति अपने शब्दों में बताइए।',
+    askAnything: 'जवाब दीजिए, या कुछ और बताइए',
+    addedToProfile: 'आपकी प्रोफ़ाइल में जोड़ा गया',
+    reviewIt: 'जाँचें',
+    provAnswered: 'आपने बताया',
+    provEntered: 'आपने भरा',
+    provInferred: 'हमने यह समझा — कृपया जाँच लें',
+    notConfirmed: 'पुष्टि नहीं हुई',
+    profileLede:
+      'हम आपके बारे में यह जानते हैं। यह सब आपसे आया है, आप कुछ भी बदल सकते हैं, और इसे कभी साझा नहीं किया जाता।',
+    profileNothing: 'अभी कुछ नहीं है। बातचीत शुरू कीजिए, या यहाँ खुद भरिए।',
+    officialSources: 'आधिकारिक स्रोत',
+    fromConversation: 'आपकी बातचीत से',
   },
   kn: {
     companion: 'ನಿಮ್ಮ ಯೋಜನಾ ಸಂಗಾತಿ',
@@ -430,7 +472,10 @@ export const copy = {
     updated: 'ಉಳಿಸಲಾಗಿದೆ',
     memory: 'ನನ್ನ ಭಾಷಾ ಆಯ್ಕೆ ನೆನಪಿಡಿ',
     memoryNote:
-      'ಐಚ್ಛಿಕ. ಅಧಿವೇಶನ ಒಂದು ಗಂಟೆಯಲ್ಲಿ ಮುಗಿಯುತ್ತದೆ. ಬಾಹ್ಯ ಮೆಮೋರಿ ಸಂಪರ್ಕ ಮತ್ತು ಒಪ್ಪಿಗೆ ಇದ್ದಾಗ ಮಾತ್ರ ಬಳಸಲಾಗುತ್ತದೆ.',
+      'ಐಚ್ಛಿಕ. ನಿಮ್ಮ ಅಧಿವೇಶನ ಈ ಸಾಧನದಲ್ಲಿ 30 ದಿನಗಳವರೆಗೆ ಇರಿಸಲಾಗುತ್ತದೆ. ಬಾಹ್ಯ ಮೆಮೋರಿ ಸಂಪರ್ಕ ಮತ್ತು ಒಪ್ಪಿಗೆ ಇದ್ದಾಗ ಮಾತ್ರ ಬಳಸಲಾಗುತ್ತದೆ.',
+    retention: 'ಈ ಸಾಧನದಲ್ಲಿ 30 ದಿನಗಳವರೆಗೆ ಉಳಿಯುತ್ತದೆ',
+    retentionNote:
+      'ನಿಮ್ಮ ಪ್ರೊಫೈಲ್ ಮತ್ತು ಉಳಿಸಿದ ಯೋಜನೆಗಳು ಈ ಬ್ರೌಸರ್‌ನಲ್ಲಿ 30 ದಿನಗಳವರೆಗೆ ಇರುತ್ತವೆ, ಮತ್ತು ಪ್ರತಿ ಭೇಟಿಯೂ ಆ ಅವಧಿಯನ್ನು ವಿಸ್ತರಿಸುತ್ತದೆ. ಬ್ರೌಸರ್ ಡೇಟಾ ಅಳಿಸಿದರೆ, ಅಥವಾ ಬೇರೆ ಸಾಧನದಲ್ಲಿ ತೆರೆದರೆ, ಎಲ್ಲವೂ ಮೊದಲಿನಿಂದ ಆರಂಭ — ಅದನ್ನು ಮರಳಿ ಪಡೆಯುವ ಮಾರ್ಗವಿಲ್ಲ.',
     forget: 'ನನ್ನ ಮಾಹಿತಿ ಅಳಿಸಿ',
     forgetTitle: 'ಈ ಅಧಿವೇಶನ ಮತ್ತು ದಾಖಲೆಗಳನ್ನು ಅಳಿಸಬೇಕೇ?',
     forgetNote:
@@ -471,6 +516,24 @@ export const copy = {
     stop: 'ದಾಖಲಿಸುವಿಕೆ ನಿಲ್ಲಿಸಿ',
     englishEvidence: 'ಮಾನದಂಡಗಳು ಅಧಿಕೃತ ಮೂಲದ ಭಾಷೆಯಲ್ಲಿವೆ.',
     draft: 'ಕರಡು ಮಾನದಂಡಗಳು — ಸಂಪೂರ್ಣ ಅರ್ಹತೆ ನಿರ್ಧಾರವಲ್ಲ',
+    newChat: 'ಹೊಸ ಸಂಭಾಷಣೆ',
+    conversations: 'ಸಂಭಾಷಣೆಗಳು',
+    thinking: 'ಕೆಲಸ ನಡೆಯುತ್ತಿದೆ…',
+    youLabel: 'ನೀವು',
+    sathiLabel: 'ಸಾಥಿ',
+    chatEmpty: 'ನಿಮ್ಮ ಪರಿಸ್ಥಿತಿಯನ್ನು ನಿಮ್ಮ ಮಾತಿನಲ್ಲಿ ತಿಳಿಸಿ.',
+    askAnything: 'ಉತ್ತರಿಸಿ, ಅಥವಾ ಬೇರೇನಾದರೂ ತಿಳಿಸಿ',
+    addedToProfile: 'ನಿಮ್ಮ ಪ್ರೊಫೈಲ್‌ಗೆ ಸೇರಿಸಲಾಗಿದೆ',
+    reviewIt: 'ಪರಿಶೀಲಿಸಿ',
+    provAnswered: 'ನೀವು ತಿಳಿಸಿದ್ದು',
+    provEntered: 'ನೀವು ಭರ್ತಿ ಮಾಡಿದ್ದು',
+    provInferred: 'ನಾವು ಹೀಗೆ ಅರ್ಥೈಸಿದೆವು — ದಯವಿಟ್ಟು ಪರಿಶೀಲಿಸಿ',
+    notConfirmed: 'ದೃಢೀಕರಿಸಿಲ್ಲ',
+    profileLede:
+      'ನಿಮ್ಮ ಬಗ್ಗೆ ನಮಗೆ ತಿಳಿದಿರುವುದು. ಇದೆಲ್ಲವೂ ನಿಮ್ಮಿಂದಲೇ ಬಂದಿದೆ, ನೀವು ಯಾವುದನ್ನೂ ಬದಲಾಯಿಸಬಹುದು, ಮತ್ತು ಇದನ್ನು ಎಂದಿಗೂ ಹಂಚಿಕೊಳ್ಳಲಾಗುವುದಿಲ್ಲ.',
+    profileNothing: 'ಇನ್ನೂ ಏನೂ ಇಲ್ಲ. ಸಂಭಾಷಣೆ ಪ್ರಾರಂಭಿಸಿ, ಅಥವಾ ಇಲ್ಲಿ ನೀವೇ ಭರ್ತಿ ಮಾಡಿ.',
+    officialSources: 'ಅಧಿಕೃತ ಮೂಲಗಳು',
+    fromConversation: 'ನಿಮ್ಮ ಸಂಭಾಷಣೆಯಿಂದ',
   },
 };
 export const categoryNames: Record<string, [string, string]> = {

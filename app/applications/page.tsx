@@ -238,19 +238,20 @@ export default function Applications() {
                 <span className="label">{t.segDocs}</span>
                 <div style={{ marginTop: 8, marginBottom: 14 }}>
                   {editingScheme.documents.map((doc) => (
-                    <label className="checkline" key={doc}>
+                    <label className="checkline" key={doc.item}>
                       <Checkbox
-                        checked={editing.checklist.includes(doc)}
+                        checked={editing.checklist.includes(doc.item)}
                         onCheckedChange={(v) =>
                           setEditing({
                             ...editing,
                             checklist: v
-                              ? [...editing.checklist, doc]
-                              : editing.checklist.filter((x) => x !== doc),
+                              ? [...editing.checklist, doc.item]
+                              : editing.checklist.filter((x) => x !== doc.item),
                           })
                         }
                       />
-                      <span>{doc}</span>
+                      <span>{doc.item}</span>
+                      {doc.note && <small className="docnote">{doc.note}</small>}
                     </label>
                   ))}
                 </div>

@@ -43,6 +43,7 @@ export default function Settings() {
         <div>
           <h1>{t.privacy}</h1>
           <p>{t.memoryNote}</p>
+          <p className="retentionline">{t.retentionNote}</p>
         </div>
       </div>
 

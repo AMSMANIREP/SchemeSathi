@@ -11,6 +11,27 @@ export type Rule = {
 export type RuleTree =
   | { all: (Rule | RuleTree)[] }
   | { any: (Rule | RuleTree)[] };
+export type SchemeDocument = {
+  item: string;
+  note: string;
+  /** id of the rule this document establishes, when it proves one. */
+  proves?: string;
+};
+/**
+ * An authored application step. `onlyIf` reuses the eligibility RuleTree, so
+ * showing a step to the right citizen runs through the same evaluator and the
+ * same test corpus as eligibility itself — there is no second rule language.
+ */
+export type Step = {
+  title: string;
+  detail: string;
+  where: string;
+  who: string;
+  typicalWait: string;
+  /** Profile fields this step addresses, used to mark it as theirs. */
+  relatesTo: string[];
+  onlyIf?: RuleTree;
+};
 export type Scheme = {
   id: string;
   name: string;
@@ -26,8 +47,10 @@ export type Scheme = {
   version: string;
   rules: RuleTree;
   complete: boolean;
-  documents: string[];
-  steps: string[];
+  documents: SchemeDocument[];
+  steps: Step[];
+  /** What the citizen pays, if anything. Empty until authored. */
+  fees: string;
   tags: string[];
 };
 export type RuleOutcome = {
@@ -56,5 +79,54 @@ export type ApplicationRecord = {
   reference: string;
   notes: string;
   checklist: string[];
+  updatedAt: string;
+};
+export type Provenance = 'answered' | 'entered' | 'inferred';
+export type Checkpoint =
+  | 'GATHERING'
+  | 'ASKED'
+  | 'PRESENTED'
+  | 'NARROWED'
+  | 'SAVE_OFFERED'
+  | 'SAVED'
+  | 'REPORT_READY';
+/**
+ * What an assistant turn shows instead of dumping scheme data as prose.
+ * Blocks carry ids and values, never rendered sentences.
+ */
+export type Block =
+  | {
+      kind: 'scheme_card';
+      schemeId: string;
+      status: Decision['status'];
+      whyThis: string;
+      failing: RuleOutcome[];
+      missing: string[];
+      saved: boolean;
+    }
+  | { kind: 'scheme_compare'; schemeIds: string[] }
+  | { kind: 'answer_chips'; field: string; options: string[] }
+  | {
+      kind: 'profile_updated';
+      fields: { field: string; provenance: Provenance }[];
+    }
+  | { kind: 'save_prompt'; schemeId: string; reason: string }
+  | { kind: 'saved_receipt'; applicationId: string; schemeId: string }
+  | { kind: 'report_ready'; applicationId: string }
+  | { kind: 'sources'; items: { schemeId: string; url: string }[] }
+  | { kind: 'notice'; tone: 'info' | 'error'; textKey: string };
+export type MessageRecord = {
+  id: string;
+  role: 'user' | 'assistant';
+  text: string;
+  inputMode: 'text' | 'voice';
+  blocks: Block[];
+  createdAt: string;
+};
+export type ConversationRecord = {
+  id: string;
+  title: string;
+  checkpoint: Checkpoint;
+  focusSchemeId: string | null;
   updatedAt: string;
 };

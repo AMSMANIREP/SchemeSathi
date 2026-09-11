@@ -1,19 +1,16 @@
 'use client';
-import { useState, useSyncExternalStore } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import {
-  ArrowRight,
+  ArrowUp,
   Loader2,
   LockKeyhole,
-  PenLine,
+  Plus,
   X,
   Mic,
   Square,
-  Trash2,
-  PanelLeftOpen,
-  PanelLeftClose,
 } from 'lucide-react';
 import { useApp } from './providers';
+import { Blocks } from './blocks';
 
 const SEEN_KEY = 'schemesathi.introSeen';
 
@@ -72,71 +69,33 @@ function IntroPanel({ onClose }: { onClose: () => void }) {
   );
 }
 
-function HistoryRail({
-  open,
-  onToggle,
-  onPick,
-}: {
-  open: boolean;
-  onToggle: () => void;
-  onPick: (text: string) => void;
-}) {
-  const { t, history, clearHistory } = useApp();
-  return (
-    <aside className={'histrail' + (open ? ' open' : '')}>
-      <button
-        className="histtoggle"
-        onClick={onToggle}
-        aria-expanded={open}
-        aria-controls="history-column"
-        title={t.historyTitle}
-      >
-        {open ? <PanelLeftClose size={16} /> : <PanelLeftOpen size={16} />}
-        <span className="histtoggle-text">{t.historyTitle}</span>
-        {history.length > 0 && (
-          <span className="histcount data">{history.length}</span>
-        )}
-      </button>
-
-      <div className="histcol" id="history-column" hidden={!open}>
-        {history.length ? (
-          <>
-            <ul className="histlist">
-              {history.map((h) => (
-                <li key={h.at}>
-                  <button onClick={() => onPick(h.text)}>{h.text}</button>
-                </li>
-              ))}
-            </ul>
-            <div className="histcol-foot">
-              <span className="label">{t.historyScope}</span>
-              <button onClick={clearHistory}>
-                <Trash2 size={12} />
-                {t.historyClear}
-              </button>
-            </div>
-          </>
-        ) : (
-          <p className="histempty">{t.historyEmpty}</p>
-        )}
-      </div>
-    </aside>
-  );
-}
-
-export default function ChatLanding() {
-  const { t, ask, busy, loading, openProfile, record, recording } = useApp();
+export default function Chat() {
+  const {
+    t,
+    ask,
+    busy,
+    loading,
+    messages,
+    newConversation,
+    record,
+    recording,
+    caps,
+  } = useApp();
   const [message, setMessage] = useState('');
   const [dismissed, setDismissed] = useState(false);
-  const [histOpen, setHistOpen] = useState(false);
-  const router = useRouter();
+  const end = useRef<HTMLDivElement>(null);
 
   const introSeen = useSyncExternalStore(
     introStore.subscribe,
     introStore.seenOnClient,
     introStore.seenOnServer,
   );
-  const showIntro = !introSeen && !dismissed;
+  const started = messages.length > 0;
+  const showIntro = !introSeen && !dismissed && !started;
+
+  useEffect(() => {
+    if (started) end.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages.length, started]);
 
   const dismissIntro = () => {
     setDismissed(true);
@@ -147,90 +106,122 @@ export default function ChatLanding() {
     }
   };
 
-  const submit = async () => {
-    await ask(message);
+  const submit = async (text?: string) => {
+    const value = text ?? message;
+    if (!value.trim()) return;
     setMessage('');
+    await ask(value);
   };
 
   return (
-    <div className={'chatpage' + (histOpen ? ' hist-open' : '')}>
-      <HistoryRail
-        open={histOpen}
-        onToggle={() => setHistOpen((v) => !v)}
-        onPick={setMessage}
-      />
-
+    <div className="chatpage">
       <div className="chatwrap">
-        <h1>{t.chatTitle}</h1>
-      <p className="lede">{t.chatLede}</p>
+        {!started && (
+          <>
+            <h1>{t.chatTitle}</h1>
+            <p className="lede">{t.chatLede}</p>
+            {showIntro && <IntroPanel onClose={dismissIntro} />}
+          </>
+        )}
 
-      {showIntro && <IntroPanel onClose={dismissIntro} />}
-
-      <div className="composer">
-        <textarea
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder={t.prompt}
-          maxLength={1800}
-          aria-label={t.ask}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) void submit();
-          }}
-        />
-        <div className="composer-bar">
-          <button
-            className={'micbtn' + (recording ? ' recording' : '')}
-            onClick={() => void record(setMessage)}
-            disabled={busy && !recording}
-            aria-pressed={recording}
-            aria-label={recording ? t.stop : t.record}
-          >
-            {recording ? <Square size={15} /> : <Mic size={16} />}
-            {recording ? t.stop : t.record}
-          </button>
-
-          <span className="label composer-count">{message.length}/1800</span>
-          <button
-            className="btn"
-            onClick={() => void submit()}
-            disabled={busy || loading || !message.trim()}
-          >
-            {busy && !recording ? (
-              <Loader2 className="spin" size={15} />
-            ) : (
-              <ArrowRight size={15} />
+        {started && (
+          <div className="transcript" aria-live="polite">
+            {messages.map((m) => (
+              <div className={'turn turn-' + m.role} key={m.id}>
+                <span className="turn-who label">
+                  {m.role === 'user' ? t.youLabel : t.sathiLabel}
+                </span>
+                <div className="turn-body">
+                  {m.text && <p>{m.text}</p>}
+                  <Blocks blocks={m.blocks} onAnswer={(v) => void submit(v)} />
+                </div>
+              </div>
+            ))}
+            {busy && (
+              <div className="turn turn-assistant">
+                <span className="turn-who label">{t.sathiLabel}</span>
+                <div className="turn-body thinking">
+                  <Loader2 className="spin" size={14} />
+                  {t.thinking}
+                </div>
+              </div>
             )}
-            {t.send}
-          </button>
-        </div>
-      </div>
+            <div ref={end} />
+          </div>
+        )}
 
-      <div className="examples">
-        <span className="label">{t.forExample}</span>
-        <div className="examples-list">
-          {[t.ex1, t.ex2, t.ex3].map((ex) => (
-            <button key={ex} onClick={() => setMessage(ex)}>
-              {ex}
+        <div className="composer">
+          <textarea
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder={started ? t.askAnything : t.prompt}
+            maxLength={1800}
+            aria-label={t.ask}
+            rows={started ? 2 : 4}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                void submit();
+              }
+            }}
+          />
+          <div className="composer-bar">
+            {caps.voice && (
+              <button
+                className={'micbtn' + (recording ? ' recording' : '')}
+                onClick={() => void record(setMessage)}
+                disabled={busy && !recording}
+                aria-pressed={recording}
+                aria-label={recording ? t.stop : t.record}
+              >
+                {recording ? <Square size={15} /> : <Mic size={16} />}
+                {recording ? t.stop : t.record}
+              </button>
+            )}
+            {started && (
+              <button
+                className="btn btn-ghost btn-sm"
+                onClick={() => void newConversation()}
+                disabled={busy}
+              >
+                <Plus size={14} />
+                {t.newChat}
+              </button>
+            )}
+            <span className="label composer-count">{message.length}/1800</span>
+            <button
+              className="btn"
+              onClick={() => void submit()}
+              disabled={busy || loading || !message.trim()}
+              aria-label={t.send}
+            >
+              {busy && !recording ? (
+                <Loader2 className="spin" size={15} />
+              ) : (
+                <ArrowUp size={15} />
+              )}
             </button>
-          ))}
+          </div>
         </div>
-      </div>
 
-      <div className="chat-foot">
-        <button className="btn btn-ghost btn-sm" onClick={openProfile}>
-          <PenLine size={14} />
-          {t.or}
-        </button>
-        <button
-          className="btn btn-ghost btn-sm"
-          onClick={() => router.push('/explore')}
-        >
-          {t.explore}
-        </button>
-        <span className="label">
-          <LockKeyhole size={12} style={{ display: 'inline', marginRight: 5 }} />
-          {t.private} · 60 min
-        </span>
+        {!started && (
+          <div className="examples">
+            <span className="label">{t.forExample}</span>
+            <div className="examples-list">
+              {[t.ex1, t.ex2, t.ex3].map((ex) => (
+                <button key={ex} onClick={() => setMessage(ex)}>
+                  {ex}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="chat-foot">
+          <span className="label">
+            <LockKeyhole size={12} style={{ display: 'inline', marginRight: 5 }} />
+            {t.retention}
+          </span>
         </div>
       </div>
     </div>

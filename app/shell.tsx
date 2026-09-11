@@ -5,6 +5,7 @@ import {
   Compass,
   MessageSquare,
   ClipboardList,
+  UserRound,
   SlidersHorizontal,
   ShieldCheck,
   Globe,
@@ -14,11 +15,12 @@ import {
   X,
 } from 'lucide-react';
 import { useApp } from './providers';
-import { SchemeDialog, ProfileDialog, Pick } from './dialogs';
+import { SchemeDialog, Pick } from './dialogs';
 import type { Language } from '@/lib/types';
 
 const routes = [
   { href: '/', icon: MessageSquare, key: 'navChat' as const },
+  { href: '/profile', icon: UserRound, key: 'profile' as const },
   { href: '/explore', icon: Compass, key: 'explore' as const },
   { href: '/applications', icon: ClipboardList, key: 'tracker' as const },
   { href: '/settings', icon: SlidersHorizontal, key: 'privacy' as const },
@@ -132,7 +134,6 @@ export function Shell({ children }: { children: React.ReactNode }) {
       </footer>
 
       <SchemeDialog />
-      <ProfileDialog />
     </>
   );
 }

@@ -14,11 +14,14 @@ import type {
   Decision,
   Language,
   ApplicationRecord,
+  MessageRecord,
+  Provenance,
 } from '@/lib/types';
 
 export type Session = {
   profile: Profile;
   confirmed: string[];
+  provenance: Record<string, Provenance>;
   profileVersion: number;
   language: Language;
   memoryConsent: boolean;
@@ -85,22 +88,19 @@ type Ctx = {
   notice: string;
   decisions: Record<string, Decision>;
   applications: ApplicationRecord[];
-  draft: Profile;
-  confirmed: boolean;
-  chat: string;
+  provenance: Record<string, Provenance>;
+  messages: MessageRecord[];
+  conversationId: string | null;
+  checkpoint: string;
   detail: Scheme | null;
-  profileOpen: boolean;
   setError: (s: string) => void;
   setNotice: (s: string) => void;
-  setDraft: (p: Profile) => void;
-  setConfirmed: (b: boolean) => void;
   setDetail: (s: Scheme | null) => void;
-  setProfileOpen: (b: boolean) => void;
-  openProfile: () => void;
   load: () => Promise<void>;
   selectLanguage: (l: Language) => Promise<void>;
-  confirmProfile: () => Promise<void>;
   ask: (message: string) => Promise<void>;
+  saveProfile: (profile: Profile) => Promise<void>;
+  newConversation: () => Promise<void>;
   saveScheme: (s: Scheme) => Promise<void>;
   updateApplication: (a: ApplicationRecord) => Promise<void>;
   removeApplication: (id: string) => Promise<void>;
@@ -138,13 +138,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [notice, setNotice] = useState('');
   const [decisions, setDecisions] = useState<Record<string, Decision>>({});
   const [applications, setApplications] = useState<ApplicationRecord[]>([]);
-  const [draft, setDraft] = useState<Profile>({});
-  const [confirmed, setConfirmed] = useState(false);
-  const [chat, setChat] = useState('');
   const [detail, setDetail] = useState<Scheme | null>(null);
-  const [profileOpen, setProfileOpen] = useState(false);
   const [recording, setRecording] = useState(false);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [messages, setMessages] = useState<MessageRecord[]>([]);
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [checkpoint, setCheckpoint] = useState('GATHERING');
   const initialized = useRef(false);
   const recorder = useRef<MediaRecorder | null>(null);
   const stream = useRef<MediaStream | null>(null);
@@ -184,7 +183,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }
       setSession(s);
       setLanguage(s.language);
-      setDraft(s.profile);
       await refreshApps();
       if (s.profileVersion > 0) await refreshDecisions();
     } catch (e) {
@@ -232,57 +230,79 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const openProfile = () => {
-    setDraft(session?.profile || {});
-    setConfirmed(false);
-    setProfileOpen(true);
+  const ensureConversation = useCallback(async () => {
+    if (conversationId) return conversationId;
+    const c = await api<{ id: string }>('conversations', 'POST', {});
+    setConversationId(c.id);
+    return c.id;
+  }, [conversationId]);
+
+  const newConversation = async () => {
+    setMessages([]);
+    setConversationId(null);
+    setCheckpoint('GATHERING');
   };
 
-  const confirmProfile = async () => {
-    if (!confirmed || !session) return;
+  const ask = async (message: string) => {
+    const text = message.trim();
+    if (!text || busy) return;
+    const entries = [
+      { at: Date.now(), text },
+      ...history.filter((h) => h.text !== text),
+    ].slice(0, 30);
+    setHistory(entries);
+    writeHistory(entries);
+
+    // Show the citizen's own words immediately; the turn round-trips after.
+    const pending: MessageRecord = {
+      id: 'pending-' + Date.now(),
+      role: 'user',
+      text,
+      inputMode: 'text',
+      blocks: [],
+      createdAt: new Date().toISOString(),
+    };
+    setMessages((m) => [...m, pending]);
     setBusy(true);
     setError('');
     try {
+      const id = await ensureConversation();
       const r = await api<{
-        profile: Profile;
-        confirmed: string[];
-        profileVersion: number;
-      }>('profile/confirm', 'PUT', {
-        profile: draft,
-        version: session.profileVersion,
-        confirmed: true,
-      });
-      setSession({ ...session, ...r });
-      await refreshDecisions();
-      setProfileOpen(false);
-      setNotice(t.profileReady);
+        userMessage: MessageRecord;
+        message: MessageRecord;
+        checkpoint: string;
+      }>('conversations/' + id + '/messages', 'POST', { message: text });
+      setMessages((m) => [
+        ...m.filter((x) => x.id !== pending.id),
+        r.userMessage,
+        r.message,
+      ]);
+      setCheckpoint(r.checkpoint);
+      const s = await api<Session>('sessions');
+      setSession(s);
+      if (s.profileVersion > 0) await refreshDecisions();
     } catch (e) {
+      setMessages((m) => m.filter((x) => x.id !== pending.id));
       setError((e as Error).message);
     } finally {
       setBusy(false);
     }
   };
 
-  const ask = async (message: string) => {
-    if (!message.trim()) return;
-    const entries = [
-      { at: Date.now(), text: message.trim() },
-      ...history.filter((h) => h.text !== message.trim()),
-    ].slice(0, 30);
-    setHistory(entries);
-    writeHistory(entries);
+  /** The /profile route's save. Everything reviewed here counts as entered. */
+  const saveProfile = async (profile: Profile) => {
     setBusy(true);
     setError('');
     try {
-      const r = await api<{ message: string; proposedProfile: Profile }>(
-        'chat',
-        'POST',
-        { message },
+      const current = await api<Session>('sessions');
+      const r = await api<{ profileVersion: number }>(
+        'profile/confirm',
+        'PUT',
+        { profile, version: current.profileVersion, confirmed: true },
       );
-      setChat(r.message);
-      setDraft({ ...session?.profile, ...r.proposedProfile });
-      setConfirmed(false);
-      setProfileOpen(true);
+      setSession(await api<Session>('sessions'));
+      if (r.profileVersion > 0) await refreshDecisions();
+      setNotice(t.profileReady);
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -331,8 +351,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       await api('me/data', 'DELETE');
       setApplications([]);
       setDecisions({});
-      setDraft({});
-      setChat('');
+      setMessages([]);
+      setConversationId(null);
+      setCheckpoint('GATHERING');
       setSession(null);
       setHistory([]);
       writeHistory([]);
@@ -399,7 +420,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           const b = (await r.json()) as { error: string; text: string };
           if (!r.ok) throw new Error(b.error);
           onText(b.text);
-          setChat(t.transcript);
         } catch (e) {
           setError((e as Error).message);
         } finally {
@@ -441,22 +461,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         notice,
         decisions,
         applications,
-        draft,
-        confirmed,
-        chat,
         detail,
-        profileOpen,
         setError,
         setNotice,
-        setDraft,
-        setConfirmed,
         setDetail,
-        setProfileOpen,
-        openProfile,
         load,
         selectLanguage,
-        confirmProfile,
         ask,
+        saveProfile,
+        newConversation,
+        provenance: session?.provenance || {},
+        messages,
+        conversationId,
+        checkpoint,
         saveScheme,
         updateApplication,
         removeApplication,
