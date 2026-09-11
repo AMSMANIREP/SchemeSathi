@@ -57,7 +57,16 @@ export async function retrieve(
       // a worse answer in Kannada, not a broken one, so degrade rather than
       // fail the turn.
       if (dense) ranked = fuse([lexicalRanked, dense]);
-    } catch {
+    } catch (error) {
+      // Degrade, but never silently: a dense retriever that quietly stops
+      // working looks exactly like a corpus that has nothing to say, and in
+      // Hindi or Kannada the difference is every result versus none.
+      console.log(
+        JSON.stringify({
+          event: 'dense_retrieval_failed',
+          cause: error instanceof Error ? error.message : String(error),
+        }),
+      );
       ranked = lexicalRanked;
     }
   }
@@ -85,7 +94,11 @@ function group(ranked: Ranked[], live: Scheme[], maxSchemes: number) {
 
     const existing = byScheme.get(chunk.schemeId);
     if (existing) {
-      existing.score += score;
+      // A scheme ranks on its best evidence, not on how many of its chunks
+      // scraped into the top results. Summing rewards breadth over depth —
+      // and with fused ranks, where every contribution is roughly 1/60, it
+      // degenerates into counting chunks rather than measuring relevance.
+      existing.score = Math.max(existing.score, score);
       if (existing.chunks.length < 5)
         existing.chunks.push({ id: chunk.id, kind: chunk.kind, text: chunk.text });
     } else {

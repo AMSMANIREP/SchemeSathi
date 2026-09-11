@@ -49,6 +49,13 @@ export async function denseSearch(
       topK,
       includeMetadata: true,
       namespace: NAMESPACE,
+      // Tag chunks are bare keyword bags. They are a lexical affordance —
+      // strong for BM25's exact matching, actively harmful here, because a
+      // short list of keywords embeds into a generic region where every
+      // scheme looks mildly similar. Measured: with tags included, the top
+      // results for a Kannada query were six tag chunks scoring 0.45-0.50,
+      // a band too narrow to rank anything.
+      filter: { kind: { $ne: 'tags' } },
     }),
   });
 
