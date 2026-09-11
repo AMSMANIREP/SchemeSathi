@@ -156,7 +156,13 @@ export const conversations: SessionRoute = async ({
       } else {
         const found = await extract(text, s.language);
         for (const [field, value] of Object.entries(found.profile)) {
-          if (value === null || provenance[field] === 'answered') continue;
+          if (value === null) continue;
+          // Never let a model's reading overwrite something the citizen
+          // stated themselves. Downgrading an entered or answered field to
+          // "inferred" drops it out of `confirmed`, which silently changes a
+          // verdict — the citizen's own entry outranks an extraction.
+          const held = provenance[field];
+          if (held === 'answered' || held === 'entered') continue;
           // One unusable value must not fail the whole turn — the citizen
           // said something, and the agent should reply, not error.
           try {

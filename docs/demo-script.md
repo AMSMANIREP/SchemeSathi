@@ -83,6 +83,16 @@ Leave occupation, land, income, BPL, LPG and tax blank — a real person fills
 the easy demographics and skips the rest. **Point at "Bank account: no" and
 move on without explaining it.** It pays off in step 5.
 
+> **Leaving LPG blank is deliberate, and the demo changes if you fill it.**
+> Ujjwala needs only age, gender and "no LPG connection". Set LPG to `no` here
+> and all three are satisfied before she says a word, so the first turn skips
+> the question and goes straight to *Ujjwala Yojana — likely eligible*.
+>
+> That is correct behaviour — the agent does not ask a question when it can
+> already tell her something definite — and it is a perfectly good demo, just
+> a shorter one. Leaving it blank keeps the disambiguation below, which is the
+> more interesting thing to show.
+
 Click **Next**.
 
 ## 3 · The conversation  *(90 seconds)*
@@ -105,7 +115,7 @@ Press send. What comes back:
 SATHI: What kind of work do you do?
        [chips] farmer · student · self employed · salaried ·
                unorganised worker · unemployed · retired · artisan
-       · Added to your profile: occupation, gender — Not confirmed
+       · Added to your profile: Occupation — Not confirmed
 ```
 
 **This is the moment to stop and explain.** It heard both the vegetables and
@@ -119,11 +129,11 @@ Click the **artisan** chip (or type it).
 
 ```
 SATHI: Here is what your details point to so far.
-       · PM Vishwakarma        LIKELY ELIGIBLE
-       · Ujjwala Yojana        POSSIBLY ELIGIBLE
+       · PM Vishwakarma            LIKELY ELIGIBLE
+       · Ujjwala Yojana            POSSIBLY ELIGIBLE
        · National Old Age Pension  POSSIBLY ELIGIBLE
        · ADIP Assistive Devices    POSSIBLY ELIGIBLE
-       · Added to your profile: occupation — You told us
+       · Added to your profile: Occupation — You told us
 ```
 
 Two things to point at:
@@ -218,6 +228,7 @@ printing, and the chrome disappears. It is meant to be carried into an office.
 | First message is slow or fails | Cold outbound connection | Send one throwaway message before the demo |
 | No save offer appears | No single scheme in focus, or nothing has passed a rule yet | Name the scheme explicitly: "Tell me more about PM Vishwakarma" |
 | It asks about something she just said | Inferred facts are unconfirmed by design | This is the honest behaviour — explain it rather than avoiding it |
+| Turn 1 shows cards instead of asking | Something already reached *likely eligible*, so there was nothing worth asking | Check LPG is blank on the profile; see the note in step 2 |
 | Mic does nothing | `capabilities.voice` is false | Check `ELEVENLABS_API_KEY` and `ELEVENLABS_VOICE_ID` are both set, with no stray spaces |
 | Everything says "cannot determine" | Only six schemes are authored | Stay inside the six: Vishwakarma, Ujjwala, PM-KISAN, Old Age Pension, ADIP, College Scholarships |
 

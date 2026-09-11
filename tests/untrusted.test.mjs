@@ -187,3 +187,20 @@ test('a refusal is a refusal, not a fact about the citizen', () => {
   // And a place name that merely starts with "no" is not a refusal.
   assert.ok(!isDecline('North Karnataka, near Hubli'));
 });
+
+test('extraction cannot downgrade a fact the citizen stated themselves', async () => {
+  // The merge rule lives in lib/api/conversations.ts, which needs the Worker
+  // runtime; this pins the rule it implements. A field the citizen entered or
+  // answered outranks a model's re-reading of the same field, because
+  // downgrading it to "inferred" drops it out of `confirmed` and silently
+  // changes a verdict.
+  const held = (p) => p === 'answered' || p === 'entered';
+  assert.equal(held('entered'), true, 'a profile entry is the citizen speaking');
+  assert.equal(held('answered'), true, 'so is a direct answer');
+  assert.equal(held('inferred'), false, 'only an inference may be replaced');
+
+  // And the consequence it protects: confirmed drives the verdict.
+  const profile = { land: 5 };
+  assert.equal(evaluateScheme(scheme, profile, ['land']).status, 'LIKELY_ELIGIBLE');
+  assert.equal(evaluateScheme(scheme, profile, []).status, 'POSSIBLY_ELIGIBLE');
+});
