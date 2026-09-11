@@ -17,17 +17,23 @@ export async function extract(
 ): Promise<{ profile: Profile; mode: string }> {
   const config = llm();
   if (config) {
-    const r = await external(config.url, {
-      method: 'POST',
-      headers: config.headers,
-      body: JSON.stringify(extractionRequest(config.model, text, language)),
-    });
     try {
+      const r = await external(config.url, {
+        method: 'POST',
+        headers: config.headers,
+        body: JSON.stringify(extractionRequest(config.model, text, language)),
+      });
       return { profile: parseExtraction(await r.json()), mode: config.provider };
-    } catch {
-      throw new HttpError(
-        422,
-        'Please enter your details in the profile form so you can check them.',
+    } catch (error) {
+      // A slow or unavailable provider must not end the turn. The citizen
+      // still gets a reply, the deterministic extractor still reads what it
+      // can, and nothing is invented to cover the gap — which is the whole
+      // point of keeping that path alive.
+      console.log(
+        JSON.stringify({
+          event: 'extraction_degraded',
+          cause: error instanceof Error ? error.message : String(error),
+        }),
       );
     }
   }

@@ -315,8 +315,6 @@ async function runTurn(
       const query = [conversation.title as string, text]
         .filter(Boolean)
         .join(' ');
-      onStatus('searching');
-      const candidates = (await retrieve(query, live)).map((c) => c.schemeId);
 
       const previous = await db()
         .prepare(
@@ -340,6 +338,59 @@ async function runTurn(
           });
       const focus = detected.schemeId;
 
+
+      // The planner decides first, then the model speaks — never the reverse.
+      //
+      // A question is left to the planner: it asks about exactly one field and
+      // ships the chips that answer it, whereas a model asked to phrase the
+      // same thing rambles across three and contradicts the chips beneath it.
+      // The model is worth having when there is something to explain, so it is
+      // called only then, and told which programmes are on screen so its words
+      // and the cards cannot disagree.
+      // The model decides whether there is enough to go on before anything
+      // touches the index. A vague opening — "money is tight" — should start a
+      // conversation, not a search: naming a programme off one sentence is a
+      // guess wearing the clothes of an answer. So the agent runs first, and
+      // the schemes it actually looked up become the candidates. With no model
+      // configured the deterministic path retrieves for itself, as before.
+      let spoken: Awaited<ReturnType<typeof runAgent>> = null;
+      try {
+        const recent = await db()
+          .prepare(
+            'SELECT role,text FROM messages WHERE conversation_id=? ORDER BY created_at DESC, rowid DESC LIMIT 7',
+          )
+          .bind(conversation.id)
+          .all<{ role: string; text: string }>();
+        onStatus('thinking');
+        spoken = await runAgent({
+          schemes: live,
+          profile: merged,
+          confirmed,
+          language: s.language,
+          history: recent.results
+            .reverse()
+            .slice(0, -1)
+            .map((m) => ({ role: m.role as 'user' | 'assistant', text: m.text })),
+          message: text,
+        });
+      } catch (error) {
+        console.log(
+          JSON.stringify({
+            traceId: trace,
+            event: 'agent_failed',
+            cause: error instanceof Error ? error.message : String(error),
+          }),
+        );
+      }
+
+      let candidates: string[];
+      if (spoken) {
+        candidates = spoken.seen;
+      } else {
+        onStatus('searching');
+        candidates = (await retrieve(query, live)).map((c) => c.schemeId);
+      }
+
       const plan = planTurn({
         schemes: live,
         candidates,
@@ -360,87 +411,40 @@ async function runTurn(
         language: s.language,
       });
 
-      // The planner decides first, then the model speaks — never the reverse.
-      //
-      // A question is left to the planner: it asks about exactly one field and
-      // ships the chips that answer it, whereas a model asked to phrase the
-      // same thing rambles across three and contradicts the chips beneath it.
-      // The model is worth having when there is something to explain, so it is
-      // called only then, and told which programmes are on screen so its words
-      // and the cards cannot disagree.
+      const modelAsked = spoken?.asking ?? null;
+
+      // Validation happens here rather than at generation, because it needs
+      // the verdicts the planner just computed. Prose that overreaches is
+      // replaced by the deterministic sentence, and prose that asks about a
+      // different field than the chips beneath it is set aside entirely.
       let assistantText = plan.text;
-      let modelAsked: { field: string; options: string[] } | null = null;
-      {
-        const cards = plan.blocks.filter((b) => b.kind === 'scheme_card') as {
-          schemeId: string;
-          status: string;
-          missing: string[];
-        }[];
-        const onScreen = cards.map((c) => c.schemeId);
-        try {
-          const recent = await db()
-            .prepare(
-              'SELECT role,text FROM messages WHERE conversation_id=? ORDER BY created_at DESC, rowid DESC LIMIT 7',
-            )
-            .bind(conversation.id)
-            .all<{ role: string; text: string }>();
-          onStatus('thinking');
-          const spoken = await runAgent({
-            schemes: live,
-            profile: merged,
-            confirmed,
-            language: s.language,
-            onScreen: cards.map((c) => ({
-              schemeId: c.schemeId,
-              status: c.status,
-              missing: c.missing,
-            })),
-            history: recent.results
-              .reverse()
-              .slice(0, -1)
-              .map((m) => ({ role: m.role as 'user' | 'assistant', text: m.text })),
-            message: text,
-          });
-          modelAsked = spoken?.asking ?? null;
-          if (spoken?.text) {
-            const verdict = validateProse(spoken.text, {
-              onScreen,
-              seen: spoken.seen,
-              schemes: live,
-              decisions: plan.decisions,
-            });
-            // The model's words are used only when they cannot contradict the
-            // blocks beneath them. If the planner is asking and the model did
-            // not call ask_about, its prose asks about whatever it chose while
-            // the chips answer a different field — so the planner speaks.
-            const wouldContradict = !spoken.asking && plan.checkpoint === 'ASKED';
-            if (!verdict.ok)
-              console.log(
-                JSON.stringify({
-                  traceId: trace,
-                  event: 'prose_rejected',
-                  reason: verdict.reason,
-                }),
-              );
-            else if (wouldContradict)
-              console.log(
-                JSON.stringify({
-                  traceId: trace,
-                  event: 'prose_unused',
-                  reason: 'the planner is asking and the model did not',
-                }),
-              );
-            else assistantText = spoken.text;
-          }
-        } catch (error) {
+      if (spoken?.text) {
+        const verdict = validateProse(spoken.text, {
+          onScreen: plan.blocks
+            .filter((b) => b.kind === 'scheme_card')
+            .map((b) => (b as { schemeId: string }).schemeId),
+          seen: spoken.seen,
+          schemes: live,
+          decisions: plan.decisions,
+        });
+        const wouldContradict = !modelAsked && plan.checkpoint === 'ASKED';
+        if (!verdict.ok)
           console.log(
             JSON.stringify({
               traceId: trace,
-              event: 'agent_failed',
-              cause: error instanceof Error ? error.message : String(error),
+              event: 'prose_rejected',
+              reason: verdict.reason,
             }),
           );
-        }
+        else if (wouldContradict)
+          console.log(
+            JSON.stringify({
+              traceId: trace,
+              event: 'prose_unused',
+              reason: 'the planner is asking and the model did not',
+            }),
+          );
+        else assistantText = spoken.text;
       }
 
       // A question the model asked replaces the planner's: the wording is its

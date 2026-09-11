@@ -140,7 +140,7 @@ export async function limit(key: string, max = 20) {
  * with a streamed body is sent once, because its body cannot be replayed.
  */
 const COLD_ATTEMPT_MS = 6000;
-const FULL_ATTEMPT_MS = 20000;
+const FULL_ATTEMPT_MS = 45000;
 
 export async function external(url: string, init: RequestInit) {
   const replayable =

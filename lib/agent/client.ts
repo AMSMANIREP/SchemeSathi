@@ -18,7 +18,7 @@ import { conf, HttpError } from '../http';
  * still our request.
  */
 const COLD_ATTEMPT_MS = 6000;
-const FULL_ATTEMPT_MS = 25000;
+const FULL_ATTEMPT_MS = 45000;
 
 const hardenedFetch: typeof fetch = async (input, init = {}) => {
   const attempt = (timeoutMs: number) =>
