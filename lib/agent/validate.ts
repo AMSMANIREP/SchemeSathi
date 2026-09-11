@@ -61,7 +61,9 @@ export function validateProse(
   // An undetermined scheme must not be described in the language of
   // entitlement. "You may be eligible for X" when the engine said it cannot
   // tell is precisely the confident wrong answer the product exists to avoid.
-  for (const id of context.onScreen) {
+  // Checked for every scheme the reply names, not only the carded ones: a
+  // scheme discussed without a card is no less misleading.
+  for (const id of new Set([...context.onScreen, ...(context.seen ?? [])])) {
     if (context.decisions.get(id)?.status !== 'UNABLE_TO_DETERMINE') continue;
     const scheme = context.schemes.find((s) => s.id === id);
     if (!scheme) continue;

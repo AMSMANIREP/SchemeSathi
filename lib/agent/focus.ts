@@ -134,6 +134,22 @@ export function shouldOfferSave(i: SaveSignalInput): boolean {
 }
 
 /**
+ * Recognises a request to see the full list.
+ *
+ * Narrowing is only kind if the citizen can opt out of it. Someone who wants
+ * to browse should get everything, including the programmes nothing can be
+ * said about yet.
+ */
+export function wantsEverything(text: string) {
+  const t = text.trim().toLowerCase();
+  return (
+    /\b(everything|all (the )?(schemes|programmes|options)|show me all|what else|anything else|other (schemes|options))\b/.test(t) ||
+    /(सब|सारी|और क्या|बाकी)/.test(t) ||
+    /(ಎಲ್ಲಾ|ಎಲ್ಲ|ಬೇರೆ ಏನು)/.test(t)
+  );
+}
+
+/**
  * Recognises a refusal, so "no thanks" is not parsed as a profile answer.
  *
  * The Latin forms need a word boundary — otherwise "north Karnataka" reads as

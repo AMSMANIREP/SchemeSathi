@@ -1,7 +1,7 @@
 import { body, db, HttpError, json, limit } from '../http';
 import type { SessionCtx } from '../session';
 import { planTurn } from '../agent/turn';
-import { detectFocus, isDecline } from '../agent/focus.ts';
+import { detectFocus, isDecline, wantsEverything } from '../agent/focus.ts';
 import { runAgent } from '../agent/loop';
 import { validateProse } from '../agent/validate.ts';
 import { extract } from './chat';
@@ -345,6 +345,7 @@ async function runTurn(
         candidates,
         focus,
         focusNamed: detected.named,
+        showEverything: wantsEverything(text),
         declinedSchemeId: declining
           ? (conversation.focus_scheme_id as string) || null
           : (conversation.declined_scheme_id as string) || null,
@@ -408,8 +409,12 @@ async function runTurn(
               schemes: live,
               decisions: plan.decisions,
             });
-            if (verdict.ok) assistantText = spoken.text;
-            else
+            // The model's words are used only when they cannot contradict the
+            // blocks beneath them. If the planner is asking and the model did
+            // not call ask_about, its prose asks about whatever it chose while
+            // the chips answer a different field — so the planner speaks.
+            const wouldContradict = !spoken.asking && plan.checkpoint === 'ASKED';
+            if (!verdict.ok)
               console.log(
                 JSON.stringify({
                   traceId: trace,
@@ -417,6 +422,15 @@ async function runTurn(
                   reason: verdict.reason,
                 }),
               );
+            else if (wouldContradict)
+              console.log(
+                JSON.stringify({
+                  traceId: trace,
+                  event: 'prose_unused',
+                  reason: 'the planner is asking and the model did not',
+                }),
+              );
+            else assistantText = spoken.text;
           }
         } catch (error) {
           console.log(

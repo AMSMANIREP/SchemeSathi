@@ -246,3 +246,60 @@ test('asking about a scheme is never deflected into a question', () => {
   // The gap is still communicated, just not as a deflection.
   assert.ok(/still to establish/i.test(plan.text), plan.text);
 });
+
+test('a scheme nothing can be said about is not offered as an option', () => {
+  // Undetermined means the rules could not decide. Showing it as a card reads
+  // as a suggestion, which is the confident-looking answer the product avoids.
+  const undecided = scheme('unknown-one', { all: [rule('bpl', 'eq', 'yes')] }, {
+    reviewStatus: 'DRAFT',
+    complete: false,
+  });
+  const plan = planTurn({
+    ...base,
+    schemes: [farming, undecided],
+    candidates: ['farm-one', 'unknown-one'],
+    profile: { land: 2 },
+    confirmed: ['land'],
+    questionsAsked: QUESTION_BUDGET,
+  });
+  const ids = plan.blocks.filter((b) => b.kind === 'scheme_card').map((b) => b.schemeId);
+  assert.deepEqual(ids, ['farm-one']);
+});
+
+test('asking for everything shows the undetermined ones too', () => {
+  const undecided = scheme('unknown-one', { all: [rule('bpl', 'eq', 'yes')] }, {
+    reviewStatus: 'DRAFT',
+    complete: false,
+  });
+  const plan = planTurn({
+    ...base,
+    schemes: [farming, undecided],
+    candidates: ['farm-one', 'unknown-one'],
+    profile: { land: 2 },
+    confirmed: ['land'],
+    showEverything: true,
+    questionsAsked: QUESTION_BUDGET,
+  });
+  const ids = plan.blocks.filter((b) => b.kind === 'scheme_card').map((b) => b.schemeId);
+  assert.ok(ids.includes('unknown-one'), 'narrowing must be opt-out-able');
+});
+
+test('a scheme asked about by name is shown whatever its verdict', () => {
+  // Refusing to answer is worse than answering "we cannot tell".
+  const undecided = scheme('unknown-one', { all: [rule('bpl', 'eq', 'yes')] }, {
+    reviewStatus: 'DRAFT',
+    complete: false,
+  });
+  const plan = planTurn({
+    ...base,
+    schemes: [farming, undecided],
+    candidates: ['farm-one'],
+    focus: 'unknown-one',
+    focusNamed: true,
+    profile: { land: 2 },
+    confirmed: ['land'],
+    questionsAsked: QUESTION_BUDGET,
+  });
+  const ids = plan.blocks.filter((b) => b.kind === 'scheme_card').map((b) => b.schemeId);
+  assert.deepEqual(ids, ['unknown-one']);
+});

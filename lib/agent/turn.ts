@@ -15,6 +15,8 @@ import type {
 /** Interrogation is not conversation. Two questions, then show something. */
 export const QUESTION_BUDGET = 2;
 const MAX_CARDS = 4;
+/** Fewer when nobody asked for a list: an answer, not a search result. */
+const PROACTIVE_CARDS = 3;
 
 export type TurnInput = {
   schemes: Scheme[];
@@ -29,6 +31,8 @@ export type TurnInput = {
   focus?: string | null;
   /** True when this message named that scheme, rather than inheriting it. */
   focusNamed?: boolean;
+  /** The citizen asked to see the full list, so show it unfiltered. */
+  showEverything?: boolean;
   declinedSchemeId?: string | null;
   declinedAtTurn?: number;
   turn?: number;
@@ -114,6 +118,7 @@ export function planTurn(input: TurnInput): TurnPlan {
     savedSchemeIds,
     focus,
     focusNamed,
+    showEverything,
     unreadAnswer,
     questionsAsked,
     language,
@@ -180,11 +185,20 @@ export function planTurn(input: TurnInput): TurnPlan {
   // only carried over from an earlier turn leads but does not narrow, because
   // they may have moved on.
   const asked = focus && schemes.some((s) => s.id === focus) ? focus : null;
+  // A card for a scheme the rules cannot decide tells the citizen nothing and
+  // reads as an option. Proactively, only show what something can be said
+  // about; a scheme they asked about by name is shown whatever the verdict,
+  // because refusing to answer is worse than answering "we cannot tell".
+  const decided = ranked.filter(
+    (id) => decisions.get(id)?.status !== 'UNABLE_TO_DETERMINE',
+  );
+  const offered = showEverything ? ranked : decided;
+
   const shown = asked
     ? focusNamed
       ? [asked]
-      : [asked, ...ranked.filter((id) => id !== asked)].slice(0, MAX_CARDS)
-    : ranked.slice(0, MAX_CARDS);
+      : [asked, ...offered.filter((id) => id !== asked)].slice(0, MAX_CARDS)
+    : offered.slice(0, showEverything ? MAX_CARDS : PROACTIVE_CARDS);
 
   for (const id of shown) {
     const scheme = schemes.find((s) => s.id === id)!;
