@@ -128,7 +128,36 @@ export async function limit(key: string, max = 20) {
     throw new HttpError(429, 'Please wait a minute before trying again.');
 }
 
+/**
+ * Calls a third-party service.
+ *
+ * The first outbound request to a host after an idle period hangs in this
+ * runtime until the abort fires, while every call after it returns in under a
+ * second — a cold connection, not a slow provider. Left alone that means the
+ * first thing a citizen does always fails. So a request whose body can safely
+ * be sent twice gets one short attempt and then a full-length retry; anything
+ * with a streamed body is sent once, because its body cannot be replayed.
+ */
+const COLD_ATTEMPT_MS = 6000;
+const FULL_ATTEMPT_MS = 20000;
+
 export async function external(url: string, init: RequestInit) {
+  const replayable =
+    typeof init.body === 'string' || init.body === undefined || init.body === null;
+
+  if (replayable) {
+    try {
+      return await attempt(url, init, COLD_ATTEMPT_MS);
+    } catch (error) {
+      // A real rejection from the service is final; only a stalled connection
+      // is worth trying again.
+      if (error instanceof HttpError) throw error;
+    }
+  }
+  return attempt(url, init, replayable ? FULL_ATTEMPT_MS : FULL_ATTEMPT_MS);
+}
+
+async function attempt(url: string, init: RequestInit, timeoutMs: number) {
   const r = await fetch(url, {
     ...init,
     // Workers does not implement redirect: 'error' — it throws on the option
@@ -136,7 +165,7 @@ export async function external(url: string, init: RequestInit) {
     // redirect is surfaced as a 3xx rather than silently followed to another
     // host, and the !r.ok check below rejects it.
     redirect: 'manual',
-    signal: AbortSignal.timeout(20000),
+    signal: AbortSignal.timeout(timeoutMs),
   });
   if (r.status >= 300 && r.status < 400)
     throw new HttpError(
