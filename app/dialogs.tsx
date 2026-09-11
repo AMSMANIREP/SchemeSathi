@@ -24,7 +24,13 @@ import {
 import { categoryText, statusNames } from '@/lib/i18n';
 import { useApp } from './providers';
 
-export function StatusTag({ status, label }: { status: string; label: string }) {
+export function StatusTag({
+  status,
+  label,
+}: {
+  status: string;
+  label: string;
+}) {
   return <span className={'status status-' + status}>{label}</span>;
 }
 
@@ -34,14 +40,17 @@ export function Pick({
   onChange,
   options,
   label,
+  disabled = false,
 }: {
   value: string;
   onChange: (s: string) => void;
   options: { value: string; label: string }[];
   label: string;
+  disabled?: boolean;
 }) {
   return (
     <Select
+      disabled={disabled}
       value={value || '__unknown'}
       onValueChange={(v) => onChange(v === '__unknown' ? '' : String(v || ''))}
     >

@@ -1,4 +1,4 @@
-export type Language = 'en' | 'hi' | 'kn';
+export type Language = 'en' | 'hi' | 'kn' | 'ta' | 'ml';
 export type Profile = Record<string, string | number | boolean | null>;
 export type Rule = {
   id: string;
@@ -122,6 +122,7 @@ export type Block =
   | { kind: 'notice'; tone: 'info' | 'error'; textKey: string };
 export type MessageRecord = {
   id: string;
+  language?: Language;
   role: 'user' | 'assistant';
   text: string;
   inputMode: 'text' | 'voice';

@@ -18,7 +18,10 @@ export const health: Route = async ({ p, trace }) => {
       hosting: e.HOSTING_PROVIDER || 'Sites',
       storage: 'D1',
       ai: !!llm(),
-      voice: !!(e.ELEVENLABS_API_KEY && e.ELEVENLABS_VOICE_ID),
+      voice: !!e.ELEVENLABS_API_KEY,
+      speechToText: !!e.ELEVENLABS_API_KEY,
+      textToSpeech: !!e.ELEVENLABS_API_KEY,
+      voiceLanguages: ['en', 'hi', 'kn', 'ta', 'ml'],
       // Lexical retrieval is a build artifact, so it is always present.
       // The dense layer is what a binding turns on.
       retrieval: true,

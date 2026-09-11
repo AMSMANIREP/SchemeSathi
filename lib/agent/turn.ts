@@ -1,6 +1,7 @@
 import { evaluateScheme } from '../rules.ts';
 import { hasQuestion, leverage, questionFor } from '../questions.ts';
 import { shouldOfferSave } from './focus.ts';
+import { languageIndex } from '../languages.ts';
 import type {
   Block,
   Checkpoint,
@@ -52,29 +53,36 @@ const RANK: Record<Decision['status'], number> = {
   LIKELY_NOT_ELIGIBLE: 3,
 };
 
-const li = (language: Language) =>
-  language === 'en' ? 0 : language === 'hi' ? 1 : 2;
+const li = languageIndex;
 
 const said = {
   presenting: [
     'Here is what your details point to so far.',
     'आपके विवरण के आधार पर अभी यह दिख रहा है।',
     'ನಿಮ್ಮ ವಿವರಗಳ ಆಧಾರದ ಮೇಲೆ ಇಲ್ಲಿಯವರೆಗೆ ಇದು ಕಾಣಿಸುತ್ತಿದೆ.',
+    'உங்கள் விவரங்களின் அடிப்படையில் இதுவரை கிடைத்த முடிவுகள் இவை.',
+    'നിങ്ങളുടെ വിവരങ്ങളുടെ അടിസ്ഥാനത്തിൽ ഇതുവരെ ലഭിച്ച ഫലങ്ങൾ ഇവയാണ്.',
   ],
   offerSave: [
     'Would you like to keep this one in My applications, so you have the next steps to hand?',
     'क्या आप इसे “मेरे आवेदन” में रखना चाहेंगे, ताकि अगले कदम आपके पास रहें?',
     'ಮುಂದಿನ ಹೆಜ್ಜೆಗಳು ನಿಮ್ಮ ಬಳಿ ಇರುವಂತೆ ಇದನ್ನು “ನನ್ನ ಅರ್ಜಿಗಳು” ನಲ್ಲಿ ಇರಿಸಬೇಕೆ?',
+    'அடுத்த படிகளைப் பார்க்க இதை என் விண்ணப்பங்களில் சேமிக்க விரும்புகிறீர்களா?',
+    'അടുത്ത ഘട്ടങ്ങൾ കാണാൻ ഇത് എന്റെ അപേക്ഷകളിൽ സൂക്ഷിക്കണോ?',
   ],
   didNotCatch: [
     'Sorry — I did not catch that.',
     'माफ़ कीजिए — मैं यह समझ नहीं पाया।',
     'ಕ್ಷಮಿಸಿ — ಅದು ನನಗೆ ಅರ್ಥವಾಗಲಿಲ್ಲ.',
+    'மன்னிக்கவும், அது எனக்குப் புரியவில்லை.',
+    'ക്ഷമിക്കണം, അത് മനസ്സിലായില്ല.',
   ],
   nothing: [
     'I could not match that to a programme yet. Tell me a little more about your situation — your work, your family, your land, your age.',
     'अभी इसे किसी योजना से नहीं जोड़ा जा सका। अपनी स्थिति के बारे में थोड़ा और बताइए — काम, परिवार, ज़मीन, उम्र।',
     'ಇದನ್ನು ಇನ್ನೂ ಯಾವುದೇ ಯೋಜನೆಗೆ ಹೊಂದಿಸಲಾಗಿಲ್ಲ. ನಿಮ್ಮ ಪರಿಸ್ಥಿತಿಯ ಬಗ್ಗೆ ಸ್ವಲ್ಪ ಹೆಚ್ಚು ತಿಳಿಸಿ — ಕೆಲಸ, ಕುಟುಂಬ, ಭೂಮಿ, ವಯಸ್ಸು.',
+    'இன்னும் பொருத்தமான திட்டத்தைக் கண்டறிய முடியவில்லை. உங்கள் வேலை, குடும்பம், நிலம் அல்லது வயது பற்றிச் சிறிது கூறுங்கள்.',
+    'ഇതുവരെ അനുയോജ്യമായ പദ്ധതി കണ്ടെത്താനായില്ല. ജോലി, കുടുംബം, ഭൂമി, പ്രായം എന്നിവയെക്കുറിച്ച് അല്പം കൂടി പറയൂ.',
   ],
 };
 
@@ -120,7 +128,9 @@ export function planTurn(input: TurnInput): TurnPlan {
     // first would ask a farmer their age simply because 'age' sorts earlier.
     const relevant = schemes.filter((s) => candidates.includes(s.id));
     const next =
-      leverage(relevant, profile, confirmed).find((x) => hasQuestion(x.field)) ||
+      leverage(relevant, profile, confirmed).find((x) =>
+        hasQuestion(x.field),
+      ) ||
       leverage(schemes, profile, confirmed).find((x) => hasQuestion(x.field));
     if (next) {
       const q = questionFor(next.field, language);
@@ -198,8 +208,7 @@ export function planTurn(input: TurnInput): TurnPlan {
         kind: 'save_prompt',
         schemeId: focus,
         // From the rule engine, never written for the occasion.
-        reason:
-          decision.reasons.find((r) => r.result === 'PASS')?.label ?? '',
+        reason: decision.reasons.find((r) => r.result === 'PASS')?.label ?? '',
       });
       checkpoint = 'SAVE_OFFERED';
       offeredSchemeId = focus;

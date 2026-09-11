@@ -36,6 +36,13 @@
       "when": 1789118274825,
       "tag": "0004_brown_gladiator",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1789130303407,
+      "tag": "0005_polite_lorna_dane",
+      "breakpoints": true
     }
   ]
 }

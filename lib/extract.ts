@@ -42,13 +42,16 @@ export function patternExtract(text: string): Profile {
   const p: Profile = {};
   const normalized = text
     .replace(/[०-९]/g, (c) => String(c.charCodeAt(0) - 2406))
-    .replace(/[೦-೯]/g, (c) => String(c.charCodeAt(0) - 3302));
+    .replace(/[೦-೯]/g, (c) => String(c.charCodeAt(0) - 3302))
+    .replace(/[௦-௯]/g, (c) => String(c.charCodeAt(0) - 3046))
+    .replace(/[൦-൯]/g, (c) => String(c.charCodeAt(0) - 3430));
   const age = normalized.match(
-    /\b(\d{1,3})\s*(?:years? old|year-old|ವರ್ಷ|साल|वर्ष)/i,
+    /\b(\d{1,3})\s*(?:years? old|year-old|ವರ್ಷ|साल|वर्ष|வயது|വയസ്സ്|വയസ്സ)/i,
   );
   if (age && +age[1] <= 120) p.age = +age[1];
-  if (/\bfarmer\b|किसान|ರೈತ/i.test(text)) p.occupation = 'farmer';
-  if (/\bstudent\b|विद्यार्थी|छात्र|ವಿದ್ಯಾರ್ಥಿ/i.test(text)) p.occupation = 'student';
+  if (/\bfarmer\b|किसान|ರೈತ|விவசாயி|കർഷക/i.test(text)) p.occupation = 'farmer';
+  if (/\bstudent\b|विद्यार्थी|छात्र|ವಿದ್ಯಾರ್ಥಿ|மாணவ|വിദ്യാർത്ഥി/i.test(text))
+    p.occupation = 'student';
   if (/\bartisan\b|कारीगर|ಕುಶಲಕರ್ಮಿ/i.test(text)) p.occupation = 'artisan';
   if (/Karnataka|कर्नाटक|ಕರ್ನಾಟಕ/i.test(text)) p.state = 'Karnataka';
   return p;

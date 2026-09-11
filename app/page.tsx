@@ -8,9 +8,13 @@ import {
   X,
   Mic,
   Square,
+  Volume2,
 } from 'lucide-react';
 import { useApp } from './providers';
 import { Blocks } from './blocks';
+import { VoiceControls } from './voice-controls';
+import { voiceCopy } from '@/lib/languages';
+import type { Language } from '@/lib/types';
 
 const SEEN_KEY = 'schemesathi.introSeen';
 
@@ -52,7 +56,9 @@ function IntroPanel({ onClose }: { onClose: () => void }) {
       <div className="intro-steps">
         {steps.map((s, i) => (
           <div className="intro-step" key={s.title}>
-            <span className="intro-n data">{String(i + 1).padStart(2, '0')}</span>
+            <span className="intro-n data">
+              {String(i + 1).padStart(2, '0')}
+            </span>
             <b>{s.title}</b>
             <p>{s.body}</p>
           </div>
@@ -80,8 +86,12 @@ export default function Chat() {
     record,
     recording,
     caps,
+    language,
+    speakReply,
   } = useApp();
   const [message, setMessage] = useState('');
+  const [voiceLanguage, setVoiceLanguage] = useState<Language | undefined>();
+  const [inputMode, setInputMode] = useState<'text' | 'voice'>('text');
   const [dismissed, setDismissed] = useState(false);
   const end = useRef<HTMLDivElement>(null);
 
@@ -108,9 +118,15 @@ export default function Chat() {
 
   const submit = async (text?: string) => {
     const value = text ?? message;
-    if (!value.trim()) return;
+    if (!value.trim() || busy || loading || recording) return;
     setMessage('');
-    await ask(value);
+    await ask(
+      value,
+      text === undefined ? inputMode : 'text',
+      text === undefined ? voiceLanguage : undefined,
+    );
+    setInputMode('text');
+    setVoiceLanguage(undefined);
   };
 
   return (
@@ -134,6 +150,17 @@ export default function Chat() {
                 <div className="turn-body">
                   {m.text && <p>{m.text}</p>}
                   <Blocks blocks={m.blocks} onAnswer={(v) => void submit(v)} />
+                  {caps.voice &&
+                    m.role === 'assistant' &&
+                    m.language === language && (
+                      <button
+                        className="btn btn-ghost btn-sm"
+                        disabled={busy || recording}
+                        onClick={() => speakReply(m)}
+                      >
+                        <Volume2 size={14} /> {voiceCopy[language].replay}
+                      </button>
+                    )}
                 </div>
               </div>
             ))}
@@ -159,7 +186,11 @@ export default function Chat() {
             aria-label={t.ask}
             rows={started ? 2 : 4}
             onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
+              if (
+                e.key === 'Enter' &&
+                !e.shiftKey &&
+                !e.nativeEvent.isComposing
+              ) {
                 e.preventDefault();
                 void submit();
               }
@@ -169,7 +200,13 @@ export default function Chat() {
             {caps.voice && (
               <button
                 className={'micbtn' + (recording ? ' recording' : '')}
-                onClick={() => void record(setMessage)}
+                onClick={() =>
+                  void record((text, detected) => {
+                    setMessage(text);
+                    setVoiceLanguage(detected);
+                    setInputMode('voice');
+                  })
+                }
                 disabled={busy && !recording}
                 aria-pressed={recording}
                 aria-label={recording ? t.stop : t.record}
@@ -192,7 +229,7 @@ export default function Chat() {
             <button
               className="btn"
               onClick={() => void submit()}
-              disabled={busy || loading || !message.trim()}
+              disabled={busy || loading || recording || !message.trim()}
               aria-label={t.send}
             >
               {busy && !recording ? (
@@ -203,6 +240,8 @@ export default function Chat() {
             </button>
           </div>
         </div>
+
+        <VoiceControls />
 
         {!started && (
           <div className="examples">
@@ -219,7 +258,10 @@ export default function Chat() {
 
         <div className="chat-foot">
           <span className="label">
-            <LockKeyhole size={12} style={{ display: 'inline', marginRight: 5 }} />
+            <LockKeyhole
+              size={12}
+              style={{ display: 'inline', marginRight: 5 }}
+            />
             {t.retention}
           </span>
         </div>

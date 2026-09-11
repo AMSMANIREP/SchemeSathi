@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { copy, statusNames, categoryNames } from '../lib/i18n.ts';
 
-const LANGS = ['en', 'hi', 'kn'];
+const LANGS = ['en', 'hi', 'kn', 'ta', 'ml'];
 
 /**
  * A missing key does not throw — it renders `undefined` or the raw key name
@@ -12,12 +12,16 @@ const LANGS = ['en', 'hi', 'kn'];
 
 test('every language carries exactly the same keys', () => {
   const en = Object.keys(copy.en).sort();
-  for (const lang of ['hi', 'kn']) {
+  for (const lang of LANGS.slice(1)) {
     const other = Object.keys(copy[lang]).sort();
     const missing = en.filter((k) => !other.includes(k));
     const extra = other.filter((k) => !en.includes(k));
     assert.deepEqual(missing, [], `${lang} is missing: ${missing.join(', ')}`);
-    assert.deepEqual(extra, [], `${lang} has keys English does not: ${extra.join(', ')}`);
+    assert.deepEqual(
+      extra,
+      [],
+      `${lang} has keys English does not: ${extra.join(', ')}`,
+    );
   }
 });
 
@@ -34,7 +38,7 @@ test('translations are not English left in place', () => {
   // Proper nouns and codes legitimately repeat; prose must not.
   const allowed = new Set(['lang']);
   const untranslated = [];
-  for (const lang of ['hi', 'kn'])
+  for (const lang of LANGS.slice(1))
     for (const [k, v] of Object.entries(copy[lang]))
       if (
         !allowed.has(k) &&
@@ -43,7 +47,11 @@ test('translations are not English left in place', () => {
         String(v).split(/\s+/).length > 2
       )
         untranslated.push(`${lang}.${k}`);
-  assert.deepEqual(untranslated, [], 'untranslated: ' + untranslated.join(', '));
+  assert.deepEqual(
+    untranslated,
+    [],
+    'untranslated: ' + untranslated.join(', '),
+  );
 });
 
 test('no string still contains a placeholder or TODO', () => {
@@ -55,7 +63,7 @@ test('no string still contains a placeholder or TODO', () => {
       );
 });
 
-test('every verdict has a label in all three languages', () => {
+test('every verdict has a label in all five languages', () => {
   const statuses = [
     'LIKELY_ELIGIBLE',
     'POSSIBLY_ELIGIBLE',
@@ -64,7 +72,11 @@ test('every verdict has a label in all three languages', () => {
   ];
   for (const s of statuses) {
     assert.ok(statusNames[s], `no label for ${s}`);
-    assert.equal(statusNames[s].length, 3, `${s} is missing a language`);
+    assert.equal(
+      statusNames[s].length,
+      LANGS.length,
+      `${s} is missing a language`,
+    );
     for (const v of statusNames[s]) assert.ok(v.trim().length > 0, s);
   }
 });

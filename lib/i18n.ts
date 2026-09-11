@@ -1,5 +1,12 @@
 import type { Language } from './types';
-export const copy = {
+import {
+  tamil,
+  malayalam,
+  regionalCategories,
+  regionalStatuses,
+} from './regional-copy.ts';
+import { regionalChat } from './regional-chat.ts';
+const baseCopy = {
   en: {
     companion: 'Your benefits companion',
     explore: 'Explore schemes',
@@ -50,7 +57,8 @@ export const copy = {
     segVersion: 'Version',
     segReview: 'Review',
     historyTitle: 'What you have asked',
-    historyEmpty: 'Nothing yet. What you type here will be listed for this session.',
+    historyEmpty:
+      'Nothing yet. What you type here will be listed for this session.',
     historyScope: 'This session only',
     historyClear: 'Clear',
     askIntro:
@@ -180,7 +188,8 @@ export const copy = {
     notConfirmed: 'Not confirmed',
     profileLede:
       'What we know about you. It all comes from you, you can change any of it, and it is never shared.',
-    profileNothing: 'Nothing here yet. Start a conversation, or fill this in yourself.',
+    profileNothing:
+      'Nothing here yet. Start a conversation, or fill this in yourself.',
     officialSources: 'Official sources',
     fromConversation: 'From your conversation',
     whyYou: 'Why this applies to you',
@@ -428,7 +437,8 @@ export const copy = {
     password: 'पासवर्ड',
     signOut: 'लॉग आउट',
     signInName: 'हम आपको किस नाम से बुलाएँ?',
-    signInNote: 'कोई पासवर्ड नहीं। कोई फ़ोन नंबर नहीं। कुछ भी इस ब्राउज़र से बाहर नहीं जाता।',
+    signInNote:
+      'कोई पासवर्ड नहीं। कोई फ़ोन नंबर नहीं। कुछ भी इस ब्राउज़र से बाहर नहीं जाता।',
     greeting: 'स्वागत है',
     profileFirst: 'पहले, अपने बारे में थोड़ा बताइए',
     profileFirstNote:
@@ -481,8 +491,7 @@ export const copy = {
     ex3: 'ನಾನು ಮನೆಯಿಂದಲೇ ಸಣ್ಣ ಹೊಲಿಗೆ ಅಂಗಡಿ ನಡೆಸುತ್ತೇನೆ ಮತ್ತು ಎರಡನೇ ಯಂತ್ರ ಖರೀದಿಸಲು ಬಯಸುತ್ತೇನೆ.',
     introTitle: 'ನೀವು ನಿಮ್ಮ ಜೀವನ ಹೇಳಿ. ನಿಮಗೆ ಸಲ್ಲಬೇಕಾದದ್ದನ್ನು ನಾವು ಹುಡುಕುತ್ತೇವೆ.',
     introS1t: 'ನಿಮ್ಮ ಪರಿಸ್ಥಿತಿಯನ್ನು ನಿಮ್ಮದೇ ಮಾತುಗಳಲ್ಲಿ ಹೇಳಿ',
-    introS1b:
-      'ಯೋಜನೆಯ ಹೆಸರುಗಳಿಲ್ಲ, ಅರ್ಜಿಗಳಿಲ್ಲ, ಸರ್ಕಾರಿ ಪದಗಳಿಲ್ಲ. ನೆರೆಯವರಿಗೆ ಹೇಳುವಂತೆಯೇ ಬರೆಯಿರಿ.',
+    introS1b: 'ಯೋಜನೆಯ ಹೆಸರುಗಳಿಲ್ಲ, ಅರ್ಜಿಗಳಿಲ್ಲ, ಸರ್ಕಾರಿ ಪದಗಳಿಲ್ಲ. ನೆರೆಯವರಿಗೆ ಹೇಳುವಂತೆಯೇ ಬರೆಯಿರಿ.',
     introS2t: 'ನಾವು ಅರ್ಥಮಾಡಿಕೊಂಡದ್ದನ್ನು ನೀವು ದೃಢಪಡಿಸುತ್ತೀರಿ',
     introS2b:
       'ನೀವು ವಿವರಗಳನ್ನು ಪರಿಶೀಲಿಸಿ ಸರಿ ಎಂದು ಹೇಳುವವರೆಗೆ ಯಾವ ನಿರ್ಧಾರವೂ ಆಗುವುದಿಲ್ಲ. ಯಾವುದೇ ವಿವರವನ್ನು ನೀವು ಬದಲಾಯಿಸಬಹುದು.',
@@ -674,7 +683,16 @@ export const copy = {
     statusUnknown: 'ನಿರ್ಧರಿಸಲಾಗದು',
   },
 };
-export const categoryNames: Record<string, [string, string]> = {
+const localized = (regional: Record<string, string>) =>
+  Object.fromEntries(
+    Object.keys(baseCopy.en).map((k) => [k, regional[k]]),
+  ) as typeof baseCopy.en;
+export const copy = {
+  ...baseCopy,
+  ta: localized({ ...tamil, ...regionalChat.ta }),
+  ml: localized({ ...malayalam, ...regionalChat.ml }),
+};
+export const categoryNames: Record<string, string[]> = {
   'All schemes': ['सभी योजनाएँ', 'ಎಲ್ಲಾ ಯೋಜನೆಗಳು'],
   Agriculture: ['कृषि', 'ಕೃಷಿ'],
   Health: ['स्वास्थ्य', 'ಆರೋಗ್ಯ'],
@@ -688,11 +706,15 @@ export const categoryNames: Record<string, [string, string]> = {
   'Food & essentials': ['खाद्य और आवश्यकताएँ', 'ಆಹಾರ ಮತ್ತು ಅಗತ್ಯಗಳು'],
 };
 export function categoryText(category: string, language: Language) {
+  if (language === 'ta' || language === 'ml')
+    return (
+      regionalCategories[category]?.[language === 'ta' ? 0 : 1] || category
+    );
   return language === 'en'
     ? category
     : categoryNames[category]?.[language === 'hi' ? 0 : 1] || category;
 }
-export const statusNames: Record<string, [string, string, string]> = {
+export const statusNames: Record<string, string[]> = {
   LIKELY_ELIGIBLE: ['Likely eligible', 'संभवतः पात्र', 'ಅರ್ಹತೆ ಇರುವ ಸಾಧ್ಯತೆ'],
   POSSIBLY_ELIGIBLE: ['Possibly eligible', 'पात्रता की संभावना', 'ಅರ್ಹತೆ ಇರಬಹುದು'],
   LIKELY_NOT_ELIGIBLE: [
@@ -706,3 +728,5 @@ export const statusNames: Record<string, [string, string, string]> = {
     'ನಿರ್ಧರಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ',
   ],
 };
+for (const [status, names] of Object.entries(regionalStatuses))
+  statusNames[status].push(...names);

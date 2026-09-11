@@ -7,6 +7,12 @@ import { fields, redact, validateProfile } from '../rules';
 import { schemes } from '../schemes';
 import type { SessionRoute } from '../session';
 import type { Profile, Provenance } from '../types';
+import {
+  isLanguage,
+  languageCommand,
+  sessionLanguage,
+  voiceCopy,
+} from '../languages';
 
 type Row = Record<string, unknown>;
 
@@ -24,6 +30,7 @@ const message = (m: Row) => ({
   role: m.role as 'user' | 'assistant',
   text: m.text as string,
   inputMode: m.input_mode as 'text' | 'voice',
+  language: m.language as string | undefined,
   blocks: JSON.parse(m.blocks as string),
   createdAt: m.created_at as string,
 });
@@ -109,6 +116,74 @@ export const conversations: SessionRoute = async ({
       const inputMode = b.inputMode === 'voice' ? 'voice' : 'text';
       const text = redact(b.message.trim());
       const now = new Date().toISOString();
+      const selected = !!s.language_selected || s.language !== 'en';
+      const initial =
+        !selected && inputMode === 'voice' && isLanguage(b.language)
+          ? b.language
+          : s.language;
+      s.language = sessionLanguage(text, initial, selected);
+      await db().batch([
+        db()
+          .prepare(
+            'UPDATE sessions SET language=?,language_selected=1 WHERE id=?',
+          )
+          .bind(s.language, s.id),
+        db()
+          .prepare('UPDATE conversations SET language=? WHERE id=?')
+          .bind(s.language, conversation.id),
+      ]);
+
+      // A language instruction is not a profile answer and must not consume
+      // the question budget or turn "Tamil" into an occupation/location.
+      if (languageCommand(text)) {
+        const userMessage = {
+          id: crypto.randomUUID(),
+          role: 'user' as const,
+          text,
+          inputMode,
+          language: s.language,
+          blocks: [],
+          createdAt: now,
+        };
+        const assistant = {
+          id: crypto.randomUUID(),
+          role: 'assistant' as const,
+          text: voiceCopy[s.language].selected,
+          inputMode: 'text' as const,
+          language: s.language,
+          blocks: [],
+          createdAt: now,
+        };
+        await db().batch(
+          [userMessage, assistant].map((m) =>
+            db()
+              .prepare(
+                'INSERT INTO messages(id,conversation_id,role,text,input_mode,language,blocks,created_at) VALUES(?,?,?,?,?,?,?,?)',
+              )
+              .bind(
+                m.id,
+                conversation.id,
+                m.role,
+                m.text,
+                m.inputMode,
+                s.language,
+                '[]',
+                now,
+              ),
+          ),
+        );
+        return json(
+          {
+            userMessage,
+            message: assistant,
+            checkpoint: conversation.checkpoint,
+            profileVersion: s.version,
+            language: s.language,
+            traceId: trace,
+          },
+          201,
+        );
+      }
 
       const userMessage = {
         id: crypto.randomUUID(),
@@ -116,12 +191,13 @@ export const conversations: SessionRoute = async ({
         role: 'user' as const,
         text,
         inputMode,
+        language: s.language,
         blocks: [],
         createdAt: now,
       };
       await db()
         .prepare(
-          'INSERT INTO messages(id,conversation_id,role,text,input_mode,blocks,created_at) VALUES(?,?,?,?,?,?,?)',
+          'INSERT INTO messages(id,conversation_id,role,text,input_mode,language,blocks,created_at) VALUES(?,?,?,?,?,?,?,?)',
         )
         .bind(
           userMessage.id,
@@ -129,6 +205,7 @@ export const conversations: SessionRoute = async ({
           'user',
           text,
           inputMode,
+          s.language,
           '[]',
           now,
         )
@@ -170,7 +247,8 @@ export const conversations: SessionRoute = async ({
       }
 
       const confirmed = Object.keys(merged).filter(
-        (k) => merged[k] !== null && provenance[k] && provenance[k] !== 'inferred',
+        (k) =>
+          merged[k] !== null && provenance[k] && provenance[k] !== 'inferred',
       );
 
       const live = await schemes();
@@ -194,7 +272,10 @@ export const conversations: SessionRoute = async ({
         .bind(conversation.id)
         .first<{ blocks: string }>();
       const lastPresented = (
-        JSON.parse(previous?.blocks || '[]') as { kind: string; schemeId?: string }[]
+        JSON.parse(previous?.blocks || '[]') as {
+          kind: string;
+          schemeId?: string;
+        }[]
       )
         .filter((b) => b.kind === 'scheme_card' && b.schemeId)
         .map((b) => b.schemeId as string);
@@ -215,7 +296,9 @@ export const conversations: SessionRoute = async ({
         declinedSchemeId: declining
           ? (conversation.focus_scheme_id as string) || null
           : (conversation.declined_scheme_id as string) || null,
-        declinedAtTurn: declining ? turn : (conversation.declined_at_turn as number),
+        declinedAtTurn: declining
+          ? turn
+          : (conversation.declined_at_turn as number),
         turn,
         profile: merged,
         confirmed,
@@ -232,6 +315,7 @@ export const conversations: SessionRoute = async ({
         role: 'assistant' as const,
         text: plan.text,
         inputMode: 'text' as const,
+        language: s.language,
         blocks: plan.blocks,
         createdAt: new Date().toISOString(),
       };
@@ -239,7 +323,7 @@ export const conversations: SessionRoute = async ({
       await db().batch([
         db()
           .prepare(
-            'INSERT INTO messages(id,conversation_id,role,text,input_mode,blocks,created_at) VALUES(?,?,?,?,?,?,?)',
+            'INSERT INTO messages(id,conversation_id,role,text,input_mode,language,blocks,created_at) VALUES(?,?,?,?,?,?,?,?)',
           )
           .bind(
             assistant.id,
@@ -247,12 +331,13 @@ export const conversations: SessionRoute = async ({
             'assistant',
             plan.text,
             'text',
+            s.language,
             JSON.stringify(plan.blocks),
             assistant.createdAt,
           ),
         db()
           .prepare(
-            'UPDATE conversations SET checkpoint=?,questions_asked=?,asked_field=?,focus_scheme_id=?,turns=?,declined_scheme_id=?,declined_at_turn=?,title=CASE WHEN title=\'\' THEN ? ELSE title END,updated_at=? WHERE id=?',
+            "UPDATE conversations SET checkpoint=?,questions_asked=?,asked_field=?,focus_scheme_id=?,turns=?,declined_scheme_id=?,declined_at_turn=?,title=CASE WHEN title='' THEN ? ELSE title END,updated_at=? WHERE id=?",
           )
           .bind(
             plan.checkpoint,
@@ -287,6 +372,7 @@ export const conversations: SessionRoute = async ({
           checkpoint: plan.checkpoint,
           profileVersion: s.version + 1,
           traceId: trace,
+          language: s.language,
         },
         201,
       );
@@ -319,6 +405,8 @@ function coerce(field: string, text: string): string | number | null {
     const digits = value
       .replace(/[०-९]/g, (c) => String(c.charCodeAt(0) - 2406))
       .replace(/[೦-೯]/g, (c) => String(c.charCodeAt(0) - 3302))
+      .replace(/[௦-௯]/g, (c) => String(c.charCodeAt(0) - 3046))
+      .replace(/[൦-൯]/g, (c) => String(c.charCodeAt(0) - 3430))
       .match(/\d+(?:\.\d+)?/);
     if (!digits) return null;
     return ok(field, Number(digits[0]));
@@ -326,11 +414,19 @@ function coerce(field: string, text: string): string | number | null {
 
   const exact = (spec.values || []).find((v) => v === value);
   if (exact) return exact;
-  if (/^(yes|y|haan|हाँ|हां|ಹೌದು)$/i.test(value) && spec.values?.includes('yes'))
+  if (
+    /^(yes|y|haan|हाँ|हां|ಹೌದು|ஆம்|ஆமாம்|അതെ)$/i.test(value) &&
+    spec.values?.includes('yes')
+  )
     return 'yes';
-  if (/^(no|n|nahi|नहीं|ಇಲ್ಲ)$/i.test(value) && spec.values?.includes('no'))
+  if (
+    /^(no|n|nahi|नहीं|ಇಲ್ಲ|இல்லை|ഇല്ല)$/i.test(value) &&
+    spec.values?.includes('no')
+  )
     return 'no';
-  return (spec.values || []).find((v) => value.includes(v.replace('_', ' '))) ?? null;
+  return (
+    (spec.values || []).find((v) => value.includes(v.replace('_', ' '))) ?? null
+  );
 }
 
 /** Lets the profile validator be the single judge of what a field accepts. */

@@ -20,6 +20,7 @@ import { useApp } from './providers';
 import { SchemeDialog, Pick } from './dialogs';
 import { Gate } from './gate';
 import type { Language } from '@/lib/types';
+import { languageOptions } from '@/lib/languages';
 
 const routes = [
   { href: '/', icon: MessageSquare, key: 'navChat' as const },
@@ -34,6 +35,8 @@ export function Shell({ children }: { children: React.ReactNode }) {
     t,
     language,
     selectLanguage,
+    busy,
+    recording,
     visitor,
     signOut,
     applications,
@@ -89,13 +92,10 @@ export function Shell({ children }: { children: React.ReactNode }) {
           </button>
           <Pick
             value={language}
-            label="Language / भाषा / ಭಾಷೆ"
+            label="Language / भाषा / ಭಾಷೆ / தமிழ் / മലയാളം"
+            disabled={busy || recording}
             onChange={(v) => void selectLanguage(v as Language)}
-            options={[
-              { value: 'en', label: 'English' },
-              { value: 'hi', label: 'हिन्दी' },
-              { value: 'kn', label: 'ಕನ್ನಡ' },
-            ]}
+            options={languageOptions}
           />
         </div>
       </header>
