@@ -2317,3 +2317,45 @@ button.rowopen small {
 .blk-profile button:hover {
   color: var(--ink);
 }
+
+/* Account controls replace the privacy pill once the citizen is inside. */
+.accountbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  padding: 6px 10px;
+  color: var(--steel);
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.16s var(--ease-out);
+}
+.accountbtn:hover {
+  border-color: var(--rule);
+  background: var(--surface);
+  color: var(--ink);
+}
+.accountbtn svg {
+  flex: none;
+}
+
+.btn-lg {
+  font-size: 12px;
+  padding: 14px 22px;
+  letter-spacing: 0.12em;
+}
+.loginform {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 4px;
+}
+.loginform .btn {
+  justify-content: center;
+  margin-top: 2px;
+}
+.loginform .landing-note {
+  margin-top: 0;
+}

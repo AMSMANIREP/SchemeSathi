@@ -1,7 +1,8 @@
 'use client';
 import { useState } from 'react';
-import { ArrowRight, Compass, ShieldCheck } from 'lucide-react';
+import { ArrowRight, Compass, LogIn, ShieldCheck } from 'lucide-react';
 import { useApp } from './providers';
+import { LoginDialog } from './login';
 
 /**
  * The landing surface. Persuade mode, inside the established world: ink on
@@ -15,7 +16,7 @@ import { useApp } from './providers';
  */
 export function Landing({ onEnter }: { onEnter: (name: string) => void }) {
   const { t, schemes } = useApp();
-  const [name, setName] = useState('');
+  const [loginOpen, setLoginOpen] = useState(false);
 
   const verdicts = [
     { cls: 'status-LIKELY_ELIGIBLE', label: t.statusGo },
@@ -26,33 +27,23 @@ export function Landing({ onEnter }: { onEnter: (name: string) => void }) {
 
   return (
     <div className="landing">
+      <LoginDialog
+        open={loginOpen}
+        onOpenChange={setLoginOpen}
+        onSignIn={onEnter}
+      />
       <section className="landing-hero">
         <div className="landing-copy">
           <h1>{t.landingTitle}</h1>
           <p className="landing-lede">{t.landingLede}</p>
 
-          <form
-            className="landing-enter"
-            onSubmit={(e) => {
-              e.preventDefault();
-              onEnter(name.trim());
-            }}
-          >
-            <label className="field">
-              <span>{t.signInName}</span>
-              <input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                maxLength={40}
-                autoComplete="name"
-                placeholder="—"
-              />
-            </label>
-            <button className="btn" type="submit">
-              {t.signIn}
+          <div className="landing-enter">
+            <button className="btn btn-lg" onClick={() => setLoginOpen(true)}>
+              <LogIn size={16} />
+              {t.login}
               <ArrowRight size={15} />
             </button>
-          </form>
+          </div>
           <p className="landing-note">
             <ShieldCheck size={13} />
             {t.signInNote}

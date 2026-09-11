@@ -198,7 +198,14 @@ export const copy = {
       'This scheme record changed after your report was made. The report below is the one you may already have printed — update it when you are ready.',
     demoData:
       'Demonstration data. These programme details were drafted for this build and have not been independently verified against official sources. Check the official source before acting.',
-    signIn: 'Continue',
+    signIn: 'Sign in',
+    login: 'Log in',
+    loginTitle: 'Log in to Scheme Sathi',
+    loginNote:
+      'This is a demonstration sign-in. Nothing is checked, nothing is sent, and no password is stored — type anything to continue.',
+    email: 'Email',
+    password: 'Password',
+    signOut: 'Log out',
     signInName: 'What should we call you?',
     signInNote: 'No password. No phone number. Nothing leaves this browser.',
     greeting: 'Welcome',
@@ -412,7 +419,14 @@ export const copy = {
       'आपकी रिपोर्ट बनने के बाद इस योजना का विवरण बदला है। नीचे वही रिपोर्ट है जो आपने शायद प्रिंट की थी — तैयार हों तो इसे अपडेट करें।',
     demoData:
       'प्रदर्शन डेटा। ये विवरण इस बिल्ड के लिए तैयार किए गए हैं और आधिकारिक स्रोतों से स्वतंत्र रूप से सत्यापित नहीं हैं। कार्रवाई से पहले आधिकारिक स्रोत देखें।',
-    signIn: 'आगे बढ़ें',
+    signIn: 'साइन इन करें',
+    login: 'लॉग इन',
+    loginTitle: 'योजना साथी में लॉग इन करें',
+    loginNote:
+      'यह प्रदर्शन के लिए बनाया गया साइन-इन है। कुछ भी जाँचा नहीं जाता, कुछ भी भेजा नहीं जाता, और कोई पासवर्ड सहेजा नहीं जाता — आगे बढ़ने के लिए कुछ भी लिखिए।',
+    email: 'ईमेल',
+    password: 'पासवर्ड',
+    signOut: 'लॉग आउट',
     signInName: 'हम आपको किस नाम से बुलाएँ?',
     signInNote: 'कोई पासवर्ड नहीं। कोई फ़ोन नंबर नहीं। कुछ भी इस ब्राउज़र से बाहर नहीं जाता।',
     greeting: 'स्वागत है',
@@ -627,7 +641,14 @@ export const copy = {
       'ನಿಮ್ಮ ವರದಿ ತಯಾರಾದ ನಂತರ ಈ ಯೋಜನೆಯ ವಿವರ ಬದಲಾಗಿದೆ. ಕೆಳಗಿನದು ನೀವು ಈಗಾಗಲೇ ಮುದ್ರಿಸಿರಬಹುದಾದ ವರದಿ — ಸಿದ್ಧವಾದಾಗ ನವೀಕರಿಸಿ.',
     demoData:
       'ಪ್ರದರ್ಶನ ಮಾಹಿತಿ. ಈ ವಿವರಗಳನ್ನು ಈ ಬಿಲ್ಡ್‌ಗಾಗಿ ಸಿದ್ಧಪಡಿಸಲಾಗಿದೆ ಮತ್ತು ಅಧಿಕೃತ ಮೂಲಗಳಿಂದ ಸ್ವತಂತ್ರವಾಗಿ ಪರಿಶೀಲಿಸಲಾಗಿಲ್ಲ. ಕ್ರಮ ಕೈಗೊಳ್ಳುವ ಮೊದಲು ಅಧಿಕೃತ ಮೂಲವನ್ನು ನೋಡಿ.',
-    signIn: 'ಮುಂದುವರಿಯಿರಿ',
+    signIn: 'ಸೈನ್ ಇನ್ ಮಾಡಿ',
+    login: 'ಲಾಗ್ ಇನ್',
+    loginTitle: 'ಯೋಜನಾ ಸಾಥಿಗೆ ಲಾಗ್ ಇನ್ ಮಾಡಿ',
+    loginNote:
+      'ಇದು ಪ್ರದರ್ಶನಕ್ಕಾಗಿ ಮಾಡಿದ ಸೈನ್-ಇನ್. ಏನನ್ನೂ ಪರಿಶೀಲಿಸುವುದಿಲ್ಲ, ಏನನ್ನೂ ಕಳುಹಿಸುವುದಿಲ್ಲ, ಮತ್ತು ಯಾವುದೇ ಪಾಸ್‌ವರ್ಡ್ ಉಳಿಸುವುದಿಲ್ಲ — ಮುಂದುವರಿಯಲು ಏನಾದರೂ ಟೈಪ್ ಮಾಡಿ.',
+    email: 'ಇಮೇಲ್',
+    password: 'ಪಾಸ್‌ವರ್ಡ್',
+    signOut: 'ಲಾಗ್ ಔಟ್',
     signInName: 'ನಿಮ್ಮನ್ನು ಯಾವ ಹೆಸರಿನಿಂದ ಕರೆಯಬೇಕು?',
     signInNote: 'ಪಾಸ್‌ವರ್ಡ್ ಇಲ್ಲ. ಫೋನ್ ಸಂಖ್ಯೆ ಇಲ್ಲ. ಯಾವುದೂ ಈ ಬ್ರೌಸರ್‌ನಿಂದ ಹೊರಗೆ ಹೋಗುವುದಿಲ್ಲ.',
     greeting: 'ಸ್ವಾಗತ',
