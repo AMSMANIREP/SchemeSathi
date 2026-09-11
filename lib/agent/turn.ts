@@ -1,6 +1,7 @@
 import { evaluateScheme } from '../rules.ts';
 import { hasQuestion, leverage, questionFor } from '../questions.ts';
 import { shouldOfferSave } from './focus.ts';
+import { copy, statusNames } from '../i18n.ts';
 import type {
   Block,
   Checkpoint,
@@ -44,6 +45,22 @@ export type TurnPlan = {
   /** Set when this turn offered to save, so the server can record the offer. */
   offeredSchemeId: string | null;
 };
+
+/**
+ * A sentence about one scheme, assembled from the decision rather than
+ * written. It names the verdict in the citizen's language and the facts still
+ * missing, so asking about a programme returns something about that programme
+ * instead of a generic re-listing.
+ */
+function aboutScheme(scheme: Scheme, decision: Decision, language: Language) {
+  const t = copy[language];
+  const verdict = statusNames[decision.status][li(language)];
+  const missing = decision.missingFields.map((f) =>
+    String(t[f as keyof typeof t] ?? f),
+  );
+  const head = `${scheme.shortName} — ${verdict.toLowerCase()}. ${scheme.summary}`;
+  return missing.length ? `${head} ${t.stillUnknown}: ${missing.join(', ')}.` : head;
+}
 
 const RANK: Record<Decision['status'], number> = {
   LIKELY_ELIGIBLE: 0,
@@ -141,13 +158,18 @@ export function planTurn(input: TurnInput): TurnPlan {
     }
   }
 
-  const shown = [...candidates]
-    .sort(
-      (a, b) =>
-        RANK[decisions.get(a)!.status] - RANK[decisions.get(b)!.status] ||
-        candidates.indexOf(a) - candidates.indexOf(b),
-    )
-    .slice(0, MAX_CARDS);
+  const ranked = [...candidates].sort(
+    (a, b) =>
+      RANK[decisions.get(a)!.status] - RANK[decisions.get(b)!.status] ||
+      candidates.indexOf(a) - candidates.indexOf(b),
+  );
+
+  // When the citizen named a scheme, that scheme leads and is always present.
+  // Ranking it away answers a question they did not ask.
+  const asked = focus && schemes.some((s) => s.id === focus) ? focus : null;
+  const shown = (
+    asked ? [asked, ...ranked.filter((id) => id !== asked)] : ranked
+  ).slice(0, MAX_CARDS);
 
   for (const id of shown) {
     const scheme = schemes.find((s) => s.id === id)!;
@@ -206,14 +228,14 @@ export function planTurn(input: TurnInput): TurnPlan {
     }
   }
 
+  const opening = asked
+    ? aboutScheme(schemes.find((s) => s.id === asked)!, decisions.get(asked)!, language)
+    : shown.length
+      ? said.presenting[n]
+      : said.nothing[n];
+
   return {
-    text: shown.length
-      ? offeredSchemeId
-        ? said.presenting[n] + ' ' + said.offerSave[n]
-        : said.presenting[n]
-      : offeredSchemeId
-        ? said.offerSave[n]
-        : said.nothing[n],
+    text: offeredSchemeId ? opening + ' ' + said.offerSave[n] : opening,
     blocks,
     checkpoint,
     questionsAsked,

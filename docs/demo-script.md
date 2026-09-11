@@ -150,11 +150,18 @@ Type:
 > `Tell me more about PM Vishwakarma`
 
 ```
-SATHI: Here is what your details point to so far. Would you like to keep this
-       one in My applications, so you have the next steps to hand?
+SATHI: PM Vishwakarma — likely eligible. Skills and enterprise support for
+       eligible traditional artisans. Would you like to keep this one in My
+       applications, so you have the next steps to hand?
+       · PM Vishwakarma  (leads the cards)
        · [an unissued pass]  PM Vishwakarma
          "You work in one of the recognised traditional trades"
 ```
+
+Naming a scheme changes the answer: it leads the cards and the reply is about
+that scheme — its verdict, what it offers, and anything still unestablished.
+Every part of that sentence comes from the rule engine and the catalogue, so
+it is the same sentence every time and in every language.
 
 **The offer only appears now.** Say why: it needs a single scheme in focus, a
 verdict of likely or possibly eligible, and at least one rule already passing.

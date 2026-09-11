@@ -153,3 +153,48 @@ test('an unreadable answer is acknowledged, not silently repeated', () => {
   assert.ok(retry.text.startsWith('Sorry'), retry.text);
   assert.ok(retry.text.includes(plain.text), 'the question itself is still there');
 });
+
+test('naming a scheme leads with it, however retrieval ranked it', () => {
+  // cooking sorts ahead on verdict; the citizen asked about farming.
+  const plan = planTurn({
+    ...base,
+    candidates: ['gas-one', 'farm-one'],
+    profile: { land: 2, lpg: 'no' },
+    confirmed: ['land', 'lpg'],
+    focus: 'farm-one',
+    questionsAsked: QUESTION_BUDGET,
+  });
+  const cards = plan.blocks.filter((b) => b.kind === 'scheme_card');
+  assert.equal(cards[0].schemeId, 'farm-one', 'the scheme they asked about leads');
+});
+
+test('a focused turn answers about that scheme, not in general', () => {
+  const plan = planTurn({
+    ...base,
+    focus: 'farm-one',
+    profile: { land: 2 },
+    confirmed: ['land'],
+    questionsAsked: QUESTION_BUDGET,
+  });
+  assert.ok(plan.text.startsWith('farm-one'), plan.text);
+  assert.ok(/likely eligible/i.test(plan.text), plan.text);
+  assert.ok(plan.text.includes('A summary for farm-one'), plan.text);
+});
+
+test('a focused turn names what is still missing', () => {
+  const plan = planTurn({
+    ...base,
+    focus: 'farm-one',
+    profile: {},
+    confirmed: [],
+    questionsAsked: QUESTION_BUDGET,
+  });
+  // 'land' is unknown, so the sentence must say so rather than imply a verdict.
+  assert.ok(/still to establish/i.test(plan.text), plan.text);
+  assert.ok(/landholding/i.test(plan.text), plan.text);
+});
+
+test('with no scheme named, the turn stays general', () => {
+  const plan = planTurn({ ...base, questionsAsked: QUESTION_BUDGET });
+  assert.ok(plan.text.startsWith('Here is what'), plan.text);
+});
