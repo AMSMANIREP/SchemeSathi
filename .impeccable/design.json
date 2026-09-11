@@ -1,0 +1,573 @@
+{
+ "schemaVersion": 2,
+ "generatedAt": "2026-09-10T00:00:00.000Z",
+ "title": "Design System: Scheme Sathi",
+ "extensions": {
+  "colorMeta": {
+   "ink": {
+    "role": "primary",
+    "displayName": "Ink",
+    "canonical": "#0b0d10",
+    "tonalRamp": [
+     "#000000",
+     "#05070a",
+     "#0b0d10",
+     "#1c2127",
+     "#3a4149",
+     "#5c6269",
+     "#9aa0a6",
+     "#e6e8eb"
+    ]
+   },
+   "alert": {
+    "role": "primary",
+    "displayName": "Alert Yellow",
+    "canonical": "#ffd400",
+    "tonalRamp": [
+     "#2b2400",
+     "#4a3c00",
+     "#6d5900",
+     "#9c7f00",
+     "#cca600",
+     "#ffd400",
+     "#ffe966",
+     "#fff6bf"
+    ]
+   },
+   "alert-ink": {
+    "role": "primary",
+    "displayName": "Alert Ink",
+    "canonical": "#4a3c00",
+    "tonalRamp": [
+     "#191400",
+     "#2b2400",
+     "#4a3c00",
+     "#6d5900",
+     "#9c7f00",
+     "#cca600",
+     "#ffd400",
+     "#fff6bf"
+    ]
+   },
+   "slate": {
+    "role": "neutral",
+    "displayName": "Slate",
+    "canonical": "#1c2127",
+    "tonalRamp": [
+     "#05070a",
+     "#0b0d10",
+     "#1c2127",
+     "#3a4149",
+     "#5c6269",
+     "#9aa0a6",
+     "#dcdfe3",
+     "#f2f2f0"
+    ]
+   },
+   "steel": {
+    "role": "neutral",
+    "displayName": "Steel (darkened for contrast)",
+    "canonical": "#5c6269",
+    "tonalRamp": [
+     "#0b0d10",
+     "#1c2127",
+     "#3a4149",
+     "#5c6269",
+     "#7c828a",
+     "#9aa0a6",
+     "#c6cace",
+     "#e6e8eb"
+    ]
+   },
+   "mist": {
+    "role": "neutral",
+    "displayName": "Mist",
+    "canonical": "#9aa0a6",
+    "tonalRamp": [
+     "#1c2127",
+     "#3a4149",
+     "#5c6269",
+     "#7c828a",
+     "#9aa0a6",
+     "#c6cace",
+     "#e6e8eb",
+     "#f6f7f8"
+    ]
+   },
+   "panel": {
+    "role": "neutral",
+    "displayName": "Panel Fill",
+    "canonical": "#e6e8eb",
+    "tonalRamp": [
+     "#1c2127",
+     "#3a4149",
+     "#5c6269",
+     "#9aa0a6",
+     "#c6cace",
+     "#dcdfe3",
+     "#e6e8eb",
+     "#f6f7f8"
+    ]
+   },
+   "rule": {
+    "role": "neutral",
+    "displayName": "Hairline Rule",
+    "canonical": "#dcdfe3",
+    "tonalRamp": [
+     "#1c2127",
+     "#3a4149",
+     "#5c6269",
+     "#9aa0a6",
+     "#c6cace",
+     "#dcdfe3",
+     "#eceef0",
+     "#f8f9fa"
+    ]
+   },
+   "surface": {
+    "role": "neutral",
+    "displayName": "Document White",
+    "canonical": "#ffffff",
+    "tonalRamp": [
+     "#1c2127",
+     "#3a4149",
+     "#5c6269",
+     "#9aa0a6",
+     "#dcdfe3",
+     "#f2f2f0",
+     "#fafafa",
+     "#ffffff"
+    ]
+   },
+   "paper": {
+    "role": "neutral",
+    "displayName": "Paper Ground",
+    "canonical": "#f2f2f0",
+    "tonalRamp": [
+     "#1e1e1c",
+     "#3a3a37",
+     "#5c5c58",
+     "#8b8b86",
+     "#b5b5b0",
+     "#dcdcd8",
+     "#f2f2f0",
+     "#fbfbfa"
+    ]
+   },
+   "go": {
+    "role": "secondary",
+    "displayName": "Go Green",
+    "canonical": "#10614a",
+    "tonalRamp": [
+     "#04231a",
+     "#0a3b2d",
+     "#10614a",
+     "#1a8767",
+     "#31ab88",
+     "#71c9ae",
+     "#b3e0d1",
+     "#e3f0ea"
+    ]
+   },
+   "go-field": {
+    "role": "secondary",
+    "displayName": "Go Field",
+    "canonical": "#e3f0ea",
+    "tonalRamp": [
+     "#0a3b2d",
+     "#10614a",
+     "#1a8767",
+     "#31ab88",
+     "#71c9ae",
+     "#b3e0d1",
+     "#e3f0ea",
+     "#f4faf7"
+    ]
+   },
+   "hold": {
+    "role": "secondary",
+    "displayName": "Hold Amber",
+    "canonical": "#7a5510",
+    "tonalRamp": [
+     "#2b1d04",
+     "#4d360a",
+     "#7a5510",
+     "#a8761b",
+     "#cf9a35",
+     "#e2bd77",
+     "#efdcb2",
+     "#f8eed6"
+    ]
+   },
+   "hold-field": {
+    "role": "secondary",
+    "displayName": "Hold Field",
+    "canonical": "#f8eed6",
+    "tonalRamp": [
+     "#4d360a",
+     "#7a5510",
+     "#a8761b",
+     "#cf9a35",
+     "#e2bd77",
+     "#efdcb2",
+     "#f8eed6",
+     "#fdf8ee"
+    ]
+   },
+   "stop": {
+    "role": "secondary",
+    "displayName": "Stop Red",
+    "canonical": "#8f2b21",
+    "tonalRamp": [
+     "#2e0d09",
+     "#5a1a14",
+     "#8f2b21",
+     "#b8412f",
+     "#d2705f",
+     "#e39c8f",
+     "#efc6bd",
+     "#f6e4e1"
+    ]
+   },
+   "stop-field": {
+    "role": "secondary",
+    "displayName": "Stop Field",
+    "canonical": "#f6e4e1",
+    "tonalRamp": [
+     "#5a1a14",
+     "#8f2b21",
+     "#b8412f",
+     "#d2705f",
+     "#e39c8f",
+     "#efc6bd",
+     "#f6e4e1",
+     "#fcf3f1"
+    ]
+   },
+   "unknown": {
+    "role": "secondary",
+    "displayName": "Unknown Grey",
+    "canonical": "#5b6169",
+    "tonalRamp": [
+     "#0b0d10",
+     "#1c2127",
+     "#3a4149",
+     "#5b6169",
+     "#7c828a",
+     "#9aa0a6",
+     "#c6cace",
+     "#e8e9ea"
+    ]
+   },
+   "unknown-field": {
+    "role": "secondary",
+    "displayName": "Unknown Field",
+    "canonical": "#e8e9ea",
+    "tonalRamp": [
+     "#1c2127",
+     "#3a4149",
+     "#5b6169",
+     "#7c828a",
+     "#9aa0a6",
+     "#c6cace",
+     "#e8e9ea",
+     "#f7f8f8"
+    ]
+   },
+   "changed-field": {
+    "role": "tertiary",
+    "displayName": "Changed Row Wash",
+    "canonical": "#fffdf2",
+    "tonalRamp": [
+     "#4a3c00",
+     "#6d5900",
+     "#9c7f00",
+     "#cca600",
+     "#ffd400",
+     "#ffe97f",
+     "#fff6bf",
+     "#fffdf2"
+    ]
+   },
+   "accent-go": {
+    "displayName": "Accent Green",
+    "purpose": "Affirmative accent: progress fill, active nav underline, voice button, source-link underline, privacy shield. A mark, never a field.",
+    "tonalRamp": [
+     "#04231a",
+     "#0a3b2d",
+     "#10614a",
+     "#1a8767",
+     "#31ab88",
+     "#71c9ae",
+     "#d7ece3",
+     "#f4faf7"
+    ]
+   },
+   "accent-go-soft": {
+    "displayName": "Accent Green Soft",
+    "purpose": "The hover ground beneath the voice button; the only tinted use of the green accent.",
+    "tonalRamp": [
+     "#0a3b2d",
+     "#10614a",
+     "#1a8767",
+     "#31ab88",
+     "#71c9ae",
+     "#b3e0d1",
+     "#d7ece3",
+     "#f4faf7"
+    ]
+   }
+  },
+  "typographyMeta": {
+   "display": {
+    "displayName": "Display",
+    "purpose": "The chat landing's single question. One per site."
+   },
+   "headline": {
+    "displayName": "Headline",
+    "purpose": "Route titles on explore, applications and settings."
+   },
+   "title": {
+    "displayName": "Title",
+    "purpose": "Panel and section headings."
+   },
+   "subtitle": {
+    "displayName": "Subtitle",
+    "purpose": "Dialog sub-sections and board row programme names."
+   },
+   "lede": {
+    "displayName": "Lede",
+    "purpose": "The one steel paragraph under the landing question, capped at 60ch."
+   },
+   "body": {
+    "displayName": "Body",
+    "purpose": "All running prose. Capped at 68ch via .measure."
+   },
+   "body-small": {
+    "displayName": "Body Small",
+    "purpose": "List rows, rule rows, dialog document and step lists."
+   },
+   "caption": {
+    "displayName": "Caption",
+    "purpose": "The smallest sans step - board benefit cells, ministry sublines, panel footnotes, the board's shared-verdict sentence, the print notice."
+   },
+   "label": {
+    "displayName": "Label",
+    "purpose": "Mono uppercase caption above every figure, list and field."
+   },
+   "control-label": {
+    "displayName": "Control Label",
+    "purpose": "Buttons and navigation items."
+   },
+   "board-title": {
+    "displayName": "Board Title",
+    "purpose": "The ink board bar only; the widest tracking in the system."
+   },
+   "data": {
+    "displayName": "Data",
+    "purpose": "Pass-cell figures, page-head counts, footer stamp, nav counts. Tabular numerals."
+   }
+  },
+  "shadows": {
+   "shadow-sm": {
+    "value": "0 1px 2px rgb(11 13 16 / 0.04), 0 2px 6px -1px rgb(11 13 16 / 0.05)",
+    "purpose": "Resting state of a document surface: panel, board, pass, intro panel, composer."
+   },
+   "shadow-md": {
+    "value": "0 2px 4px rgb(11 13 16 / 0.04), 0 10px 22px -8px rgb(11 13 16 / 0.13)",
+    "purpose": "Lifted state: hovered pass, focused composer, history popover. Paired with at most a 2px move."
+   },
+   "focus-wash": {
+    "value": "0 0 0 3px rgb(11 13 16 / 0.07)",
+    "purpose": "State response on the search box, alongside border-color: ink. Not elevation."
+   }
+  },
+  "motion": {
+   "ease-out": {
+    "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+    "purpose": "The single easing curve; everything decelerates into place."
+   },
+   "deal": {
+    "value": "0.5s ease-out, 26ms stagger, first 16 rows",
+    "purpose": "The authored moment: the board deals its rows once on arrival."
+   },
+   "rise": {
+    "value": "0.24s-0.34s ease-out from translateY(6-8px)",
+    "purpose": "Intro panel and history popover entering."
+   },
+   "mark": {
+    "value": "background-size 0.26s ease-out",
+    "purpose": "The yellow stroke drawing in under a scheme name on hover."
+   },
+   "lift": {
+    "value": "transform 0.12s-0.22s ease-out, max 2px",
+    "purpose": "Buttons, example chips and pass cards responding to the pointer."
+   },
+   "breathe": {
+    "value": "1.6s ease-in-out infinite",
+    "purpose": "The recording state of the voice button; the only looping animation, and only while recording."
+   },
+   "reduced-motion": {
+    "value": "all durations collapse to 0.01ms",
+    "purpose": "prefers-reduced-motion is honoured globally."
+   }
+  },
+  "breakpoints": []
+ },
+ "components": [
+  {
+   "name": "Primary Button",
+   "kind": "button",
+   "refersTo": "button-primary",
+   "description": "Ink-filled mono uppercase action that flips to alert yellow on hover. The one emphatic control in the system.",
+   "html": "<button class=\"ds-btn\"><svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 12h14\"/><path d=\"m12 5 7 7-7 7\"/></svg>Send</button>",
+   "css": ".ds-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--ink, #0b0d10); background: var(--ink, #0b0d10); color: #fff; padding: 10px 17px; border-radius: 7px; font-family: var(--font-mono-stack, ui-monospace, Menlo, monospace); font-size: 11px; font-weight: 500; letter-spacing: 0.13em; text-transform: uppercase; cursor: pointer; transition: background .14s ease, color .14s ease, border-color .14s ease; } .ds-btn:hover { background: var(--alert, #ffd400); border-color: var(--alert, #ffd400); color: var(--ink, #0b0d10); } .ds-btn:focus-visible { outline: 2px solid var(--ink, #0b0d10); outline-offset: 2px; } .ds-btn:disabled { opacity: .4; cursor: not-allowed; }"
+  },
+  {
+   "name": "Ghost Button",
+   "kind": "button",
+   "refersTo": "button-ghost",
+   "description": "Secondary action: hairline stroke on transparent, filling panel grey on hover. Used for print, edit and clear.",
+   "html": "<button class=\"ds-btn-ghost\">Print this report</button>",
+   "css": ".ds-btn-ghost { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--rule, #dcdfe3); background: transparent; color: var(--ink, #0b0d10); padding: 10px 17px; border-radius: 7px; font-family: var(--font-mono-stack, ui-monospace, Menlo, monospace); font-size: 11px; font-weight: 500; letter-spacing: 0.13em; text-transform: uppercase; cursor: pointer; transition: background .14s ease, color .14s ease, border-color .14s ease; } .ds-btn-ghost:hover { background: var(--panel, #e6e8eb); border-color: var(--steel, #5c6269); } .ds-btn-ghost:focus-visible { outline: 2px solid var(--ink, #0b0d10); outline-offset: 2px; }"
+  },
+  {
+   "name": "Save Icon Button",
+   "kind": "button",
+   "refersTo": "icon-button",
+   "description": "34px square toggle in a board row. Its ON state is the system's saved marker: ink fill with an alert-yellow glyph.",
+   "html": "<button class=\"ds-iconbtn\" aria-label=\"Save\"><svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z\"/></svg></button> <button class=\"ds-iconbtn ds-on\" aria-label=\"Saved\"><svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"currentColor\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z\"/></svg></button>",
+   "css": ".ds-iconbtn { display: inline-grid; place-items: center; width: 34px; height: 34px; border: 1px solid var(--rule, #dcdfe3); background: var(--surface, #fff); border-radius: 7px; color: var(--steel, #5c6269); cursor: pointer; transition: all .14s ease; } .ds-iconbtn:hover { color: var(--ink, #0b0d10); border-color: var(--steel, #5c6269); } .ds-iconbtn:focus-visible { outline: 2px solid var(--ink, #0b0d10); outline-offset: 2px; } .ds-iconbtn.ds-on { background: var(--ink, #0b0d10); border-color: var(--ink, #0b0d10); color: var(--alert, #ffd400); }"
+  },
+  {
+   "name": "Filter Chip",
+   "kind": "chip",
+   "refersTo": "filter-chip",
+   "description": "Category filter above the board. Hairline at rest, solid ink when active; no intermediate selected style.",
+   "html": "<div class=\"ds-filters\"><button class=\"ds-chip ds-active\">All schemes</button><button class=\"ds-chip\">Agriculture</button><button class=\"ds-chip\">Health</button></div>",
+   "css": ".ds-filters { display: flex; gap: 7px; flex-wrap: wrap; } .ds-chip { font-family: var(--font-mono-stack, ui-monospace, Menlo, monospace); font-size: 10px; letter-spacing: 0.11em; text-transform: uppercase; padding: 7px 11px; border: 1px solid var(--rule, #dcdfe3); background: var(--surface, #fff); border-radius: 5px; color: var(--steel, #5c6269); cursor: pointer; transition: all .14s ease; } .ds-chip:hover { color: var(--ink, #0b0d10); border-color: var(--steel, #5c6269); } .ds-chip:focus-visible { outline: 2px solid var(--ink, #0b0d10); outline-offset: 2px; } .ds-chip.ds-active { background: var(--ink, #0b0d10); border-color: var(--ink, #0b0d10); color: #fff; }"
+  },
+  {
+   "name": "Status Pill",
+   "kind": "chip",
+   "refersTo": "status-go",
+   "description": "The four verdicts. Status colour lives here and on the 3px row edge, nowhere else. UNKNOWN carries the same size and weight as the others.",
+   "html": "<div class=\"ds-pills\"><span class=\"ds-status ds-go\">Likely eligible</span><span class=\"ds-status ds-hold\">Possibly eligible</span><span class=\"ds-status ds-stop\">Likely not eligible</span><span class=\"ds-status ds-unknown\">Unable to determine</span></div>",
+   "css": ".ds-pills { display: flex; gap: 8px; flex-wrap: wrap; } .ds-status { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono-stack, ui-monospace, Menlo, monospace); font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 8px; border-radius: 4px; white-space: nowrap; } .ds-go { background: var(--go-field, #e3f0ea); color: var(--go, #10614a); } .ds-hold { background: var(--hold-field, #f8eed6); color: var(--hold, #7a5510); } .ds-stop { background: var(--stop-field, #f6e4e1); color: var(--stop, #8f2b21); } .ds-unknown { background: var(--unknown-field, #e8e9ea); color: var(--unknown, #5b6169); }"
+  },
+  {
+   "name": "Text Field",
+   "kind": "input",
+   "refersTo": "text-field",
+   "description": "White on a hairline with a 10px mono uppercase caption above. Placeholder is mono because it is machine text.",
+   "html": "<label class=\"ds-field\"><span>Annual household income</span><input class=\"ds-input\" placeholder=\"e.g. 180000\" /></label>",
+   "css": ".ds-field { display: flex; flex-direction: column; gap: 6px; } .ds-field > span { font-family: var(--font-mono-stack, ui-monospace, Menlo, monospace); font-size: 10px; letter-spacing: 0.13em; text-transform: uppercase; color: var(--steel, #5c6269); } .ds-input { width: 100%; background: var(--surface, #fff); border: 1px solid var(--rule, #dcdfe3); border-radius: 8px; padding: 12px 14px; font-size: 14px; color: var(--ink, #0b0d10); caret-color: var(--ink, #0b0d10); } .ds-input::placeholder { color: var(--steel, #5c6269); font-family: var(--font-mono-stack, ui-monospace, Menlo, monospace); font-size: 12.5px; letter-spacing: 0.03em; } .ds-input:focus { outline: none; border-color: var(--ink, #0b0d10); box-shadow: 0 0 0 3px rgb(11 13 16 / 0.07); }"
+  },
+  {
+   "name": "Route Navigation",
+   "kind": "nav",
+   "refersTo": null,
+   "description": "Four mono uppercase routes on white. Current page goes ink with a 2px ink underline sitting on the nav's own hairline.",
+   "html": "<nav class=\"ds-nav\" aria-label=\"Sections\"><a href=\"#\">My situation</a><a href=\"#\" aria-current=\"page\">Explore schemes</a><a href=\"#\">My applications<span class=\"ds-navcount\">3</span></a><a href=\"#\">Privacy &amp; settings</a></nav>",
+   "css": ".ds-nav { display: flex; gap: 2px; padding: 0 28px; background: var(--surface, #fff); border-bottom: 1px solid var(--rule, #dcdfe3); } .ds-nav a { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; padding: 13px 16px 12px; font-family: var(--font-mono-stack, ui-monospace, Menlo, monospace); font-size: 11px; font-weight: 500; letter-spacing: 0.13em; text-transform: uppercase; color: var(--steel, #5c6269); text-decoration: none; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color .14s ease; } .ds-nav a:hover { color: var(--ink, #0b0d10); } .ds-nav a:focus-visible { outline: 2px solid var(--ink, #0b0d10); outline-offset: 2px; } .ds-nav a[aria-current=\"page\"] { color: var(--ink, #0b0d10); border-bottom-color: var(--ink, #0b0d10); } .ds-navcount { font-size: 10px; background: var(--panel, #e6e8eb); color: var(--ink, #0b0d10); padding: 1px 6px; border-radius: 99px; letter-spacing: 0.04em; }"
+  },
+  {
+   "name": "The Board",
+   "kind": "custom",
+   "refersTo": "board-bar",
+   "description": "Signature component. Gate display: ink bar, shared verdict stated once on a paper strip, mono column heads, hairline rows. A changed row takes a 3px alert edge and a warm wash and holds it until seen.",
+   "html": "<div class=\"ds-board\"><div class=\"ds-board-bar\"><span class=\"ds-board-title\">Eligibility board</span><span class=\"ds-board-asof\">50 scheme references</span></div><div class=\"ds-board-condition\"><span class=\"ds-status ds-unknown\">Unable to determine</span><span>These are programme references. Complete eligibility rules need independent review.</span></div><div class=\"ds-board-head\"><span>Programme</span><span>Category</span><span>What you get</span></div><div class=\"ds-board-row ds-changed\"><button class=\"ds-rowopen\">PM-KISAN<small>Ministry of Agriculture and Farmers Welfare</small></button><span class=\"ds-rowcat\">Agriculture</span><span class=\"ds-rowbenefit\">Annual income support of Rs 6,000 for eligible farmer families.</span></div><div class=\"ds-board-row\"><button class=\"ds-rowopen\">Kisan Credit Card<small>Ministry of Agriculture and Farmers Welfare</small></button><span class=\"ds-rowcat\">Agriculture</span><span class=\"ds-rowbenefit\">Institutional agricultural credit through participating banks.</span></div></div>",
+   "css": ".ds-board { background: var(--surface, #fff); border: 1px solid var(--rule, #dcdfe3); border-radius: 10px; overflow: hidden; } .ds-board-bar { background: var(--ink, #0b0d10); color: #fff; display: flex; align-items: baseline; gap: 16px; padding: 12px 18px; } .ds-board-title { font-family: var(--font-mono-stack, ui-monospace, Menlo, monospace); font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; } .ds-board-asof { margin-left: auto; font-family: var(--font-mono-stack, ui-monospace, Menlo, monospace); font-size: 11px; letter-spacing: 0.13em; text-transform: uppercase; color: var(--mist, #9aa0a6); } .ds-board-condition { display: flex; align-items: center; gap: 12px; padding: 11px 18px; background: var(--paper, #f2f2f0); border-bottom: 1px solid var(--rule, #dcdfe3); font-size: 12.5px; color: var(--steel, #5c6269); } .ds-board-head, .ds-board-row { display: grid; grid-template-columns: minmax(190px, 1.15fr) 140px minmax(200px, 1.5fr); gap: 16px; align-items: center; padding: 0 18px; } .ds-board-head { height: 34px; border-bottom: 1px solid var(--rule, #dcdfe3); } .ds-board-head span { font-family: var(--font-mono-stack, ui-monospace, Menlo, monospace); font-size: 9.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--steel, #5c6269); } .ds-board-row { min-height: 58px; border-bottom: 1px solid var(--rule, #dcdfe3); border-left: 3px solid transparent; padding-left: 15px; transition: background .14s ease; } .ds-board-row:last-child { border-bottom: none; } .ds-board-row:hover { background: var(--paper, #f2f2f0); } .ds-board-row.ds-changed { border-left-color: var(--alert, #ffd400); background: #fffdf2; } .ds-rowopen { text-align: left; background: none; border: 0; padding: 0; font: inherit; font-weight: 600; letter-spacing: -0.008em; color: var(--ink, #0b0d10); cursor: pointer; } .ds-rowopen:hover { text-decoration: underline; } .ds-rowopen small { display: block; font-weight: 400; font-size: 11.5px; color: var(--steel, #5c6269); letter-spacing: 0; } .ds-rowcat { font-family: var(--font-mono-stack, ui-monospace, Menlo, monospace); font-size: 10px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--ink, #0b0d10); border: 1px solid var(--rule, #dcdfe3); border-radius: 4px; padding: 4px 7px; justify-self: start; } .ds-rowbenefit { font-size: 12.5px; color: var(--steel, #5c6269); } .ds-status { display: inline-flex; align-items: center; font-family: var(--font-mono-stack, ui-monospace, Menlo, monospace); font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 8px; border-radius: 4px; white-space: nowrap; } .ds-unknown { background: var(--unknown-field, #e8e9ea); color: var(--unknown, #5b6169); }"
+  },
+  {
+   "name": "The Pass",
+   "kind": "card",
+   "refersTo": "pass-head",
+   "description": "Signature component. Segmented travel document: ink head, dashed labelled cells with tabular figures, perforated tear line, paper stub. Prints with the head inverted to ink-on-white.",
+   "html": "<div class=\"ds-pass\"><div class=\"ds-pass-head\"><span class=\"ds-label ds-onink\">Preparation pass</span><span class=\"ds-status ds-go\">Likely eligible</span></div><div class=\"ds-pass-seg\"><div><span class=\"ds-label\">Documents</span><b>7</b></div><div><span class=\"ds-label\">Steps</span><b>4</b></div><div><span class=\"ds-label\">Version</span><b>1.2</b></div><div><span class=\"ds-label\">Review</span><b>VERIFIED</b></div></div><div class=\"ds-perforate\"></div><div class=\"ds-pass-stub\"><span class=\"ds-label\">Reference</span><b class=\"ds-data\">•••• 4821</b></div></div>",
+   "css": ".ds-pass { background: var(--surface, #fff); border: 1px solid var(--rule, #dcdfe3); border-radius: 10px; overflow: hidden; } .ds-pass-head { background: var(--ink, #0b0d10); color: #fff; padding: 12px 18px; display: flex; align-items: center; gap: 12px; } .ds-pass-head .ds-onink { color: var(--mist, #9aa0a6); margin-right: auto; } .ds-label { font-family: var(--font-mono-stack, ui-monospace, Menlo, monospace); font-size: 10px; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; color: var(--steel, #5c6269); } .ds-pass-seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; border-top: 1px dashed var(--rule, #dcdfe3); } .ds-pass-seg > div { padding: 12px 14px; border-right: 1px dashed var(--rule, #dcdfe3); min-width: 0; } .ds-pass-seg > div:last-child { border-right: none; } .ds-pass-seg .ds-label { display: block; line-height: 1.35; } .ds-pass-seg b { display: block; font-family: var(--font-mono-stack, ui-monospace, Menlo, monospace); font-size: 15px; font-weight: 600; margin-top: 5px; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .ds-perforate { height: 1px; background-image: linear-gradient(90deg, var(--rule, #dcdfe3) 0 6px, transparent 6px 12px); } .ds-pass-stub { padding: 16px 18px; background: var(--paper, #f2f2f0); } .ds-pass-stub .ds-data { display: block; margin-top: 5px; font-family: var(--font-mono-stack, ui-monospace, Menlo, monospace); font-variant-numeric: tabular-nums; } .ds-status { display: inline-flex; font-family: var(--font-mono-stack, ui-monospace, Menlo, monospace); font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 8px; border-radius: 4px; } .ds-go { background: var(--go-field, #e3f0ea); color: var(--go, #10614a); }"
+  },
+  {
+   "name": "Notice",
+   "kind": "custom",
+   "refersTo": null,
+   "description": "A solid signal block carrying the icon at full notice height, not a hairline rule down the side of a callout. Error variant swaps the block to stop red.",
+   "html": "<div class=\"ds-notice\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"m9 12 2 2 4-4\"/></svg><span>Scheme saved to your applications.</span><button>Dismiss</button></div>",
+   "css": ".ds-notice { display: flex; align-items: center; gap: 14px; padding-right: 15px; border: 1px solid var(--rule, #dcdfe3); background: var(--surface, #fff); border-radius: 8px; font-size: 13px; overflow: hidden; } .ds-notice > svg { flex: none; box-sizing: content-box; width: 16px; height: 16px; padding: 13px 14px; background: var(--alert, #ffd400); color: var(--alert-ink, #4a3c00); align-self: stretch; } .ds-notice button { margin-left: auto; background: none; border: 0; cursor: pointer; color: var(--steel, #5c6269); font: inherit; font-size: 12px; padding: 6px 0 6px 12px; } .ds-notice button:hover { color: var(--ink, #0b0d10); } .ds-notice button:focus-visible { outline: 2px solid var(--ink, #0b0d10); outline-offset: 2px; }"
+  }
+ ],
+ "narrative": {
+  "northStar": "The Gate Board and the Pass",
+  "overview": "Scheme Sathi is built from two physical objects a traveller already trusts. The board is the departures display: every scheme is a row, the columns are fixed, the verdict that all rows share is stated once at the head instead of repeated fifty times, and a change holds a mark on the row until it has been seen. The pass is the segmented travel document: an ink header, a body, dashed cells that each carry one labelled figure, a perforated edge, and a stub. It is meant to leave the screen — a citizen prints it and carries it into an office.\n\nThe register is ink on paper and deliberately unglamorous. The ground is a warm-grey paper, every readable surface is white with a single hairline border, and the reading field is achromatic top to bottom. Colour is not atmosphere here; it is signal. One alert yellow is held back for change and attention, and the four status colours are confined to pills, small marks and a 3px row edge. Nothing in the system dramatises. The seriousness is in the alignment, the tabular figures, and the fact that every figure carries a mono uppercase label above it.\n\nThe world deliberately refuses the govtech default it was designed against: the white page of rounded cards with a blue call-to-action and a friendly illustration. That arrangement makes every scheme look equally plausible. It also refuses any resemblance to an official government portal — this is a private advocate standing beside the citizen, and the visual register says so by being a travel document rather than a seal.",
+  "keyCharacteristics": [
+   "Ink-on-paper, light theme, achromatic reading field",
+   "Two structural objects — the board (rows) and the pass (segmented cells)",
+   "Hairline borders and flat surfaces; no drop shadows anywhere",
+   "Mono uppercase labels above every figure; tabular numerals for all data",
+   "One alert yellow, reserved; four status colours confined to pills and edges",
+   "Print treated as a shipping surface, not a fallback",
+   "Desktop-only geometry: a single 1180px workspace, no breakpoints"
+  ],
+  "rules": [
+   {
+    "name": "The Achromatic Field Rule",
+    "body": "Status colour never enters the reading field. It rides pills, 20px rule marks and a 3px row edge — nothing else. Headings, body copy, links and panel grounds stay ink, steel or white. A results page must never become a traffic light.",
+    "section": "colors"
+   },
+   {
+    "name": "The Reserved Yellow Rule",
+    "body": "Alert yellow means this changed or look here now. If a proposed yellow is neither, it is wrong. The only standing exception in the build is the 26px brand mark, which carries an alert glyph on ink; do not extend that exception to any other surface.",
+    "section": "colors"
+   },
+   {
+    "name": "The Honest Grey Rule",
+    "body": "UNKNOWN is styled at the same size, weight and letter-spacing as every other verdict. It is never faded, never italicised, never smaller.",
+    "section": "colors"
+   },
+   {
+    "name": "The Labelled Figure Rule",
+    "body": "No number ships bare. Every figure sits under a mono uppercase label naming what it counts, and every figure uses tabular numerals so columns of them align down the page.",
+    "section": "typography"
+   },
+   {
+    "name": "The Two-Voice Rule",
+    "body": "Google Sans addresses the citizen; Google Sans Code reports the machine's facts. A sentence written to a person is never set in mono, and a status, count, reference, column heading or control label is never set in the sans.",
+    "section": "typography"
+   },
+   {
+    "name": "The One Column Rule",
+    "body": "There is one workspace column at one width. Depth comes from stacking bands and rows inside it, never from a sidebar or a second rail.",
+    "section": "layout"
+   },
+   {
+    "name": "The Flat Paper Rule",
+    "body": "No drop shadows, no offset shadows, no glows. If a surface needs to separate from another, give it a hairline or set it on paper. Depth in this world is printable.",
+    "section": "elevation"
+   },
+   {
+    "name": "The Hairline-First Rule",
+    "body": "Structure is drawn with 1px rule, not with fills, spacing alone, or shadow. A dashed hairline is reserved for document cells; a solid one for everything else.",
+    "section": "shapes"
+   }
+  ],
+  "dos": [
+   "Do put a mono uppercase label above every figure, and set every figure in tabular numerals.",
+   "Do keep status colour on pills, 20px rule marks and the 3px row edge only; the reading field stays ink, steel and white.",
+   "Do state a shared verdict once at the head of the board and drop the repeated column, rather than printing the same pill fifty times.",
+   "Do use the darker steel (#5c6269) for labels and secondary text; it is the accessible value this build ships, and it supersedes the reference world's STEEL.",
+   "Do draw structure with 1px rule hairlines, and reserve dashed hairlines and the perforation gradient for document cells and tear lines.",
+   "Do treat print as a real output: mark screen-only chrome .no-print, invert ink headers, and set break-inside: avoid on any new card.",
+   "Do keep every user-facing string in lib/i18n.ts; the interface ships in English, Hindi and Kannada.",
+   "Do style UNKNOWN at full weight and full size, exactly like the other three verdicts."
+  ],
+  "donts": [
+   "Don't add drop shadows, offset shadows, or glows. The only shadow in this system is the 3px ink focus wash.",
+   "Don't spend alert yellow on decoration, panel tints, headings or brand flourish. It marks change and attention.",
+   "Don't introduce a third typeface, or set a sentence addressed to a person in the mono face.",
+   "Don't add viewport breakpoints, mobile navigation, or stacked-column fallbacks; desktop-only is a recorded product decision for this phase.",
+   "Don't let a surface read as an official government portal — no seals, emblems, tricolour, or ministry-style chrome. This is a private advocate.",
+   "Don't stack a second sidebar or rail beside the 1180px workspace.",
+   "Don't use the rounded-card-plus-blue-button govtech default composition; the board and the pass are the two structural objects."
+  ]
+ }
+}

@@ -92,7 +92,7 @@ await a('applications/' + apps[0].id, 'PATCH', {
   status: 'Submitted',
   reference: '123456789012',
   notes: 'Contact abc@example.com',
-  checklist: [all[0].documents[0]],
+  checklist: [all[0].documents[0].item],
 });
 const record = (await a('applications')).applications[0];
 check(

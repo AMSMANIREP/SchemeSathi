@@ -43,3 +43,12 @@ next-env.d.ts
 *.pyc
 *.tsbuildinfo
 /work/
+
+# impeccable: platform binaries are re-downloaded on first run
+**/skills/impeccable/scripts/bin/
+
+# impeccable: regenerable build evidence and per-session scratch.
+# The design system itself (config.json, design.json, surfaces/) is tracked.
+/.impeccable/review/
+/.impeccable/questions/
+/.impeccable/hook.cache.json

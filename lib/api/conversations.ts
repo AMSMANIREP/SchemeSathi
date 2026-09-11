@@ -1,0 +1,303 @@
+import { body, db, HttpError, json, limit } from '../http';
+import { planTurn } from '../agent/turn';
+import { extract } from './chat';
+import { retrieve } from '../retrieval';
+import { fields, redact, validateProfile } from '../rules';
+import { schemes } from '../schemes';
+import type { SessionRoute } from '../session';
+import type { Profile, Provenance } from '../types';
+
+type Row = Record<string, unknown>;
+
+const shape = (c: Row) => ({
+  id: c.id as string,
+  title: c.title as string,
+  checkpoint: c.checkpoint as string,
+  focusSchemeId: (c.focus_scheme_id as string) || null,
+  questionsAsked: c.questions_asked as number,
+  updatedAt: c.updated_at as string,
+});
+
+const message = (m: Row) => ({
+  id: m.id as string,
+  role: m.role as 'user' | 'assistant',
+  text: m.text as string,
+  inputMode: m.input_mode as 'text' | 'voice',
+  blocks: JSON.parse(m.blocks as string),
+  createdAt: m.created_at as string,
+});
+
+async function owned(id: string, owner: string) {
+  const c = await db()
+    .prepare('SELECT * FROM conversations WHERE id=? AND owner=?')
+    .bind(id, owner)
+    .first<Row>();
+  if (!c) throw new HttpError(404, 'Conversation not found.');
+  return c;
+}
+
+export const conversations: SessionRoute = async ({
+  req,
+  p,
+  path,
+  method,
+  s,
+  trace,
+}) => {
+  if (p === 'conversations' && method === 'POST') {
+    await limit('conv:' + s.id, 10);
+    const now = new Date().toISOString();
+    const id = crypto.randomUUID();
+    await db()
+      .prepare(
+        'INSERT INTO conversations(id,owner,language,created_at,updated_at) VALUES(?,?,?,?,?)',
+      )
+      .bind(id, s.id, s.language, now, now)
+      .run();
+    return json(
+      {
+        id,
+        title: '',
+        checkpoint: 'GATHERING',
+        focusSchemeId: null,
+        questionsAsked: 0,
+        updatedAt: now,
+      },
+      201,
+    );
+  }
+
+  if (p === 'conversations' && method === 'GET') {
+    const r = await db()
+      .prepare(
+        'SELECT * FROM conversations WHERE owner=? ORDER BY updated_at DESC LIMIT 30',
+      )
+      .bind(s.id)
+      .all<Row>();
+    return json({ conversations: r.results.map(shape) });
+  }
+
+  if (p.startsWith('conversations/') && path[2] === 'messages') {
+    const conversation = await owned(path[1], s.id);
+
+    if (method === 'GET') {
+      const r = await db()
+        .prepare(
+          'SELECT * FROM messages WHERE conversation_id=? ORDER BY created_at ASC, rowid ASC',
+        )
+        .bind(conversation.id)
+        .all<Row>();
+      return json({
+        conversation: shape(conversation),
+        messages: r.results.map(message),
+      });
+    }
+
+    if (method === 'POST') {
+      await limit('turn:' + s.id, 30);
+      const b = await body(req);
+      if (
+        typeof b.message !== 'string' ||
+        b.message.length > 1800 ||
+        !b.message.trim()
+      )
+        throw new HttpError(
+          400,
+          'Please enter a message of up to 1,800 characters.',
+        );
+      const inputMode = b.inputMode === 'voice' ? 'voice' : 'text';
+      const text = redact(b.message.trim());
+      const now = new Date().toISOString();
+
+      const userMessage = {
+        id: crypto.randomUUID(),
+        conversationId: conversation.id,
+        role: 'user' as const,
+        text,
+        inputMode,
+        blocks: [],
+        createdAt: now,
+      };
+      await db()
+        .prepare(
+          'INSERT INTO messages(id,conversation_id,role,text,input_mode,blocks,created_at) VALUES(?,?,?,?,?,?,?)',
+        )
+        .bind(
+          userMessage.id,
+          conversation.id,
+          'user',
+          text,
+          inputMode,
+          '[]',
+          now,
+        )
+        .run();
+
+      // A reply to a question we just asked is a direct answer, so it is
+      // confirmed. Anything else is inference, and stays unconfirmed.
+      const askedField = (conversation.asked_field as string) || '';
+      const profile = JSON.parse(s.profile) as Profile;
+      const provenance = JSON.parse(s.provenance) as Record<string, Provenance>;
+      const changed: { field: string; provenance: Provenance }[] = [];
+      let merged: Profile = { ...profile };
+
+      const answered = askedField ? coerce(askedField, text) : null;
+      if (answered !== null) {
+        merged = validateProfile({ ...merged, [askedField]: answered });
+        provenance[askedField] = 'answered';
+        changed.push({ field: askedField, provenance: 'answered' });
+      } else {
+        const found = await extract(text, s.language);
+        for (const [field, value] of Object.entries(found.profile)) {
+          if (value === null || provenance[field] === 'answered') continue;
+          // One unusable value must not fail the whole turn — the citizen
+          // said something, and the agent should reply, not error.
+          try {
+            merged = validateProfile({ ...merged, [field]: value });
+            provenance[field] = 'inferred';
+            changed.push({ field, provenance: 'inferred' });
+          } catch {
+            continue;
+          }
+        }
+      }
+
+      const confirmed = Object.keys(merged).filter(
+        (k) => merged[k] !== null && provenance[k] && provenance[k] !== 'inferred',
+      );
+
+      const live = await schemes();
+      const saved = await db()
+        .prepare('SELECT scheme_id FROM applications WHERE owner=?')
+        .bind(s.id)
+        .all<{ scheme_id: string }>();
+
+      // Retrieve against the opening description plus this message. A bare
+      // answer like "44" matches nothing on its own, and the citizen should
+      // not lose the thread of what they came in saying.
+      const query = [conversation.title as string, text]
+        .filter(Boolean)
+        .join(' ');
+      const candidates = retrieve(query, live).map((c) => c.schemeId);
+      const plan = planTurn({
+        schemes: live,
+        candidates,
+        profile: merged,
+        confirmed,
+        changed,
+        savedSchemeIds: saved.results.map((r) => r.scheme_id),
+        unreadAnswer: !!askedField && answered === null,
+        questionsAsked: conversation.questions_asked as number,
+        language: s.language,
+      });
+
+      const assistant = {
+        id: crypto.randomUUID(),
+        conversationId: conversation.id,
+        role: 'assistant' as const,
+        text: plan.text,
+        inputMode: 'text' as const,
+        blocks: plan.blocks,
+        createdAt: new Date().toISOString(),
+      };
+
+      await db().batch([
+        db()
+          .prepare(
+            'INSERT INTO messages(id,conversation_id,role,text,input_mode,blocks,created_at) VALUES(?,?,?,?,?,?,?)',
+          )
+          .bind(
+            assistant.id,
+            conversation.id,
+            'assistant',
+            plan.text,
+            'text',
+            JSON.stringify(plan.blocks),
+            assistant.createdAt,
+          ),
+        db()
+          .prepare(
+            'UPDATE conversations SET checkpoint=?,questions_asked=?,asked_field=?,title=CASE WHEN title=\'\' THEN ? ELSE title END,updated_at=? WHERE id=?',
+          )
+          .bind(
+            plan.checkpoint,
+            plan.questionsAsked,
+            plan.askedField || '',
+            text.slice(0, 60),
+            assistant.createdAt,
+            conversation.id,
+          ),
+        db()
+          .prepare(
+            'UPDATE sessions SET profile=?,confirmed=?,provenance=?,version=version+1 WHERE id=?',
+          )
+          .bind(
+            JSON.stringify(merged),
+            JSON.stringify(confirmed),
+            JSON.stringify(provenance),
+            s.id,
+          ),
+      ]);
+
+      return json(
+        {
+          userMessage,
+          message: assistant,
+          checkpoint: plan.checkpoint,
+          profileVersion: s.version + 1,
+          traceId: trace,
+        },
+        201,
+      );
+    }
+  }
+
+  if (p.startsWith('conversations/') && !path[2] && method === 'DELETE') {
+    await owned(path[1], s.id);
+    await db()
+      .prepare('DELETE FROM conversations WHERE id=? AND owner=?')
+      .bind(path[1], s.id)
+      .run();
+    return json({ deleted: true });
+  }
+
+  return null;
+};
+
+/**
+ * Reads a direct answer to the field we asked about. Returns null when the
+ * reply is not a usable value, so the turn falls back to extraction and the
+ * agent can ask again rather than recording a guess as a statement.
+ */
+function coerce(field: string, text: string): string | number | null {
+  const spec = fields.find((f) => f.key === field);
+  if (!spec) return null;
+  const value = text.trim().toLowerCase();
+
+  if (spec.type === 'number') {
+    const digits = value
+      .replace(/[०-९]/g, (c) => String(c.charCodeAt(0) - 2406))
+      .replace(/[೦-೯]/g, (c) => String(c.charCodeAt(0) - 3302))
+      .match(/\d+(?:\.\d+)?/);
+    if (!digits) return null;
+    return ok(field, Number(digits[0]));
+  }
+
+  const exact = (spec.values || []).find((v) => v === value);
+  if (exact) return exact;
+  if (/^(yes|y|haan|हाँ|हां|ಹೌದು)$/i.test(value) && spec.values?.includes('yes'))
+    return 'yes';
+  if (/^(no|n|nahi|नहीं|ಇಲ್ಲ)$/i.test(value) && spec.values?.includes('no'))
+    return 'no';
+  return (spec.values || []).find((v) => value.includes(v.replace('_', ' '))) ?? null;
+}
+
+/** Lets the profile validator be the single judge of what a field accepts. */
+function ok(field: string, value: string | number) {
+  try {
+    validateProfile({ [field]: value });
+    return value;
+  } catch {
+    return null;
+  }
+}

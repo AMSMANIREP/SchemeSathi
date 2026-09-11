@@ -1,0 +1,1 @@
+ALTER TABLE `sessions` ADD `provenance` text DEFAULT '{}' NOT NULL;

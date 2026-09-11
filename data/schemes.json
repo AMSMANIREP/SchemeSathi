@@ -42,19 +42,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "agriculture",
       "pm-kisan"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "pmfby",
@@ -74,19 +109,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "agriculture",
       "pm fasal bima"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "pm-kmy",
@@ -106,19 +176,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "agriculture",
       "pm kisan maandhan"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "kcc",
@@ -138,19 +243,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "agriculture",
       "kisan credit card"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "pm-kusum",
@@ -170,19 +310,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "agriculture",
       "pm-kusum"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "smam",
@@ -202,19 +377,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "agriculture",
       "farm mechanization"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "soil-health",
@@ -234,19 +444,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "agriculture",
       "soil health card"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "aif",
@@ -266,19 +511,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "agriculture",
       "agriculture infrastructure"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "pmksy",
@@ -298,19 +578,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "agriculture",
       "pm krishi sinchayee"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "pmjay",
@@ -330,19 +645,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "health",
       "ayushman bharat pm-jay"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "pmuy",
@@ -387,21 +737,62 @@
     },
     "complete": false,
     "documents": [
-      "KYC application form",
-      "Identity and applicable address evidence",
-      "Family-composition evidence or prescribed migrant declaration",
-      "Bank details and deprivation declaration (provide only to the official distributor)"
+      {
+        "item": "KYC application form",
+        "note": ""
+      },
+      {
+        "item": "Identity and applicable address evidence",
+        "note": ""
+      },
+      {
+        "item": "Family-composition evidence or prescribed migrant declaration",
+        "note": ""
+      },
+      {
+        "item": "Bank details and deprivation declaration (provide only to the official distributor)",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "women & family",
       "ujjwala yojana"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "pmmvy",
@@ -421,19 +812,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "women & family",
       "matru vandana yojana"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "sukanya",
@@ -453,19 +879,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "women & family",
       "sukanya samriddhi"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "pmjjby",
@@ -485,19 +946,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "finance & pension",
       "jeevan jyoti bima"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "pmsby",
@@ -517,19 +1013,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "finance & pension",
       "suraksha bima"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "apy",
@@ -549,19 +1080,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "finance & pension",
       "atal pension yojana"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "pmjdy",
@@ -581,19 +1147,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "finance & pension",
       "jan dhan yojana"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "scss",
@@ -613,19 +1214,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "finance & pension",
       "senior citizens savings"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "pmayg",
@@ -645,19 +1281,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "housing & utilities",
       "pm awaas gramin"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "pmayu",
@@ -677,19 +1348,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "housing & utilities",
       "pm awas urban 2.0"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "sbmg",
@@ -709,19 +1415,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "housing & utilities",
       "swachh bharat gramin"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "jjm",
@@ -741,19 +1482,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "housing & utilities",
       "jal jeevan mission"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "mgnrega",
@@ -773,19 +1549,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "jobs & skills",
       "mgnrega"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "nrlm",
@@ -805,19 +1616,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "jobs & skills",
       "day-nrlm"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "ddugky",
@@ -837,19 +1683,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "jobs & skills",
       "ddu-gky"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "pmkvy",
@@ -869,19 +1750,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "jobs & skills",
       "pm kaushal vikas"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "naps",
@@ -901,19 +1817,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "jobs & skills",
       "apprenticeship promotion"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "nats",
@@ -933,19 +1884,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "jobs & skills",
       "apprenticeship training"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "vishwakarma",
@@ -965,19 +1951,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "business",
       "pm vishwakarma"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "pmegp",
@@ -997,19 +2018,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "business",
       "pmegp"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "mudra",
@@ -1029,19 +2085,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "business",
       "mudra yojana"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "standup",
@@ -1061,19 +2152,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "business",
       "stand up india"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "svanidhi",
@@ -1093,19 +2219,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "business",
       "pm svanidhi"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "pmfme",
@@ -1125,19 +2286,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "business",
       "pmfme"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "ignoaps",
@@ -1157,19 +2353,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "finance & pension",
       "national old age pension"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "ignwps",
@@ -1189,19 +2420,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "women & family",
       "national widow pension"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "igndps",
@@ -1221,19 +2487,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "disability support",
       "national disability pension"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "nfbs",
@@ -1253,19 +2554,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "women & family",
       "national family benefit"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "annapurna",
@@ -1285,19 +2621,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "food & essentials",
       "annapurna"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "csss",
@@ -1317,19 +2688,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "education",
       "college scholarships"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "yasasvi",
@@ -1349,19 +2755,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "education",
       "pm yasasvi"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "sc-postmatric",
@@ -1381,19 +2822,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "education",
       "sc post matric scholarship"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "st-postmatric",
@@ -1413,19 +2889,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "education",
       "st post matric scholarship"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "sc-topclass",
@@ -1445,19 +2956,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "education",
       "sc top class education"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "st-topclass",
@@ -1477,19 +3023,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "education",
       "st higher education"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "adip",
@@ -1509,19 +3090,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "disability support",
       "adip assistive devices"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "vayoshri",
@@ -1541,19 +3157,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "disability support",
       "rashtriya vayoshri"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "pmsym",
@@ -1573,19 +3224,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "finance & pension",
       "shram yogi maandhan"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "suryaghar",
@@ -1605,19 +3291,54 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "housing & utilities",
       "pm surya ghar"
-    ]
+    ],
+    "fees": ""
   },
   {
     "id": "nos",
@@ -1637,18 +3358,53 @@
     },
     "complete": false,
     "documents": [
-      "Check the current document list on the official source.",
-      "Prepare only the records requested by the responsible authority."
+      {
+        "item": "Check the current document list on the official source.",
+        "note": ""
+      },
+      {
+        "item": "Prepare only the records requested by the responsible authority.",
+        "note": ""
+      }
     ],
     "steps": [
-      "Open the official programme or ministry reference.",
-      "Confirm the current application window and all eligibility conditions.",
-      "Follow the official portal or local office instructions.",
-      "Record your own progress here after taking action."
+      {
+        "title": "Open the official programme or ministry reference.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Confirm the current application window and all eligibility conditions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Follow the official portal or local office instructions.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      },
+      {
+        "title": "Record your own progress here after taking action.",
+        "detail": "",
+        "where": "",
+        "who": "",
+        "typicalWait": "",
+        "relatesTo": []
+      }
     ],
     "tags": [
       "education",
       "national overseas scholarship"
-    ]
+    ],
+    "fees": ""
   }
 ]
