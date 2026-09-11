@@ -3,6 +3,10 @@ import { env } from "cloudflare:workers";
 export type Settings = {
   HOSTING_PROVIDER?: string;
   DB: D1Database;
+  DATA_STORAGE_MODE?: 'd1' | 'dual';
+  POSTGRES_SERVICE_URL?: string;
+  POSTGRES_SERVICE_API_KEY?: string;
+  STORAGE_SYNC_KEY?: string;
   RULE_SERVICE_URL?: string;
   RULE_SERVICE_API_KEY?: string;
   SERVICE_API_KEY?: string;

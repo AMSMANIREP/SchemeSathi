@@ -1,3 +1,5 @@
+-- Docker bootstrap only: equivalent to the normal 0001 through 0006 chain.
+-- Keep outside drizzle/ so deployment migrations do not apply these twice.
 ALTER TABLE `sessions` ADD COLUMN `provenance` text DEFAULT '{}' NOT NULL;
 ALTER TABLE `sessions` ADD COLUMN `language_selected` integer DEFAULT 0 NOT NULL;
 ALTER TABLE `sessions` ADD COLUMN `voice_profile` text;

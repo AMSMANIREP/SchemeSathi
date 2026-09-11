@@ -39,6 +39,10 @@ services:
       dockerfile: Dockerfile.web
     ports: ["127.0.0.1:3000:3000"]
     environment:
+      DATA_STORAGE_MODE: dual
+      POSTGRES_SERVICE_URL: http://rules:8000
+      POSTGRES_SERVICE_API_KEY: ${SERVICE_API_KEY:?Set SERVICE_API_KEY}
+      STORAGE_SYNC_KEY: ${SERVICE_API_KEY:?Set SERVICE_API_KEY}
       RULE_SERVICE_URL: http://rules:8000
       RULE_SERVICE_API_KEY: ${SERVICE_API_KEY:?Set SERVICE_API_KEY}
       SERVICE_API_KEY: ${SERVICE_API_KEY:?Set SERVICE_API_KEY}
@@ -46,6 +50,16 @@ services:
       - sathi_web_wrangler:/app/.wrangler
     depends_on:
       rules:
+        condition: service_started
+  storage-sync:
+    image: schemesathi-web
+    command: [node, scripts/storage-sync-loop.mjs]
+    restart: unless-stopped
+    environment:
+      STORAGE_SYNC_URL: http://web:3000
+      STORAGE_SYNC_KEY: ${SERVICE_API_KEY:?Set SERVICE_API_KEY}
+    depends_on:
+      web:
         condition: service_started
   adminer:
     image: adminer:5

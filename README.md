@@ -163,6 +163,12 @@ On macOS/Linux, the interpreter is `backend/.venv/bin/python` instead of
 
 For PostgreSQL, set `DATABASE_URL` and `STORAGE_MODE=postgres`, run `python migrate.py` using a migration role, then start the service. Alternatively set `POSTGRES_PASSWORD` and `SERVICE_API_KEY` and run `docker compose up --build` from the project root. Use URL-safe passwords in the supplied Compose connection string or supply an encoded DATABASE_URL.
 
+Docker Compose now keeps D1 as the web API's primary database and mirrors saved
+applications and user profiles into PostgreSQL, including updates and deletes.
+The `storage-sync` service retries queued changes after outages. See
+[PostgreSQL persistence and migration](docs/postgres-storage.md) for configuration,
+failure behavior, verification, and the remaining steps for a PostgreSQL-only app.
+
 Stop the standalone Uvicorn service before starting Docker Compose: both use
 `127.0.0.1:8000`. Only one can listen on that address at a time. With Compose
 running, `/health/ready` should report `storage: postgres`.

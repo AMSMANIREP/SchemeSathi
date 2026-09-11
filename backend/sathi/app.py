@@ -11,6 +11,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 from .graph import build_graph
 from .providers import Evidence, discover_sources
 from .rules import evaluate_scheme
+from .storage import PostgresStorage, StorageBatch
 
 CATALOGUE = Path(__file__).resolve().parents[2] / 'data' / 'schemes.json'
 
@@ -42,6 +43,25 @@ def authorize(credentials: HTTPAuthorizationCredentials | None = Security(bearer
     key = os.getenv('SERVICE_API_KEY', '')
     if not key or not credentials or credentials.scheme.lower() != 'bearer' or not hmac.compare_digest(credentials.credentials, key):
         raise HTTPException(401, 'Service authentication required')
+
+
+@app.post('/v1/storage/sync', dependencies=[Depends(authorize)])
+async def sync_storage(request: StorageBatch):
+    if not app.state.pool:
+        raise HTTPException(503, 'PostgreSQL storage is not configured')
+    acknowledged = await PostgresStorage(app.state.pool).apply(request)
+    return {'acknowledged': acknowledged}
+
+
+@app.get('/v1/profiles/{owner}', dependencies=[Depends(authorize)])
+async def get_profile(owner: str):
+    validate_owner(owner)
+    if not app.state.pool:
+        raise HTTPException(503, 'PostgreSQL storage is not configured')
+    value = await PostgresStorage(app.state.pool).profile(owner)
+    if not value:
+        raise HTTPException(404, 'Profile not found')
+    return value
 
 
 class Evaluate(BaseModel):

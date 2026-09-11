@@ -11,4 +11,4 @@ COPY . .
 
 ENV RULE_SERVICE_URL=http://rules:8000
 
-CMD ["sh", "-c", "pnpm build && if [ ! -f .wrangler/.schema-ready ]; then pnpm exec wrangler d1 execute site-creator-d1 --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0000_old_power_pack.sql && pnpm exec wrangler d1 execute site-creator-d1 --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0001_session_and_conversation_fields.sql && touch .wrangler/.schema-ready; fi && pnpm dev --hostname 0.0.0.0 --port 3000"]
+CMD ["node", "scripts/start-web.mjs"]
