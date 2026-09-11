@@ -1,6 +1,8 @@
 import { body, db, HttpError, json, limit } from '../http';
 import { planTurn } from '../agent/turn';
 import { detectFocus, isDecline } from '../agent/focus.ts';
+import { runAgent } from '../agent/loop';
+import { validateProse } from '../agent/validate.ts';
 import { extract } from './chat';
 import { retrieve } from '../retrieval';
 import { fields, redact, validateProfile } from '../rules';
@@ -234,11 +236,70 @@ export const conversations: SessionRoute = async ({
         language: s.language,
       });
 
+      // The planner decides first, then the model speaks — never the reverse.
+      //
+      // A question is left to the planner: it asks about exactly one field and
+      // ships the chips that answer it, whereas a model asked to phrase the
+      // same thing rambles across three and contradicts the chips beneath it.
+      // The model is worth having when there is something to explain, so it is
+      // called only then, and told which programmes are on screen so its words
+      // and the cards cannot disagree.
+      let assistantText = plan.text;
+      if (plan.checkpoint !== 'ASKED') {
+        const onScreen = plan.blocks
+          .filter((b) => b.kind === 'scheme_card')
+          .map((b) => (b as { schemeId: string }).schemeId);
+        try {
+          const recent = await db()
+            .prepare(
+              'SELECT role,text FROM messages WHERE conversation_id=? ORDER BY created_at DESC, rowid DESC LIMIT 7',
+            )
+            .bind(conversation.id)
+            .all<{ role: string; text: string }>();
+          const spoken = await runAgent({
+            schemes: live,
+            profile: merged,
+            confirmed,
+            language: s.language,
+            onScreen,
+            history: recent.results
+              .reverse()
+              .slice(0, -1)
+              .map((m) => ({ role: m.role as 'user' | 'assistant', text: m.text })),
+            message: text,
+          });
+          if (spoken?.text) {
+            const verdict = validateProse(spoken.text, {
+              onScreen,
+              schemes: live,
+              decisions: plan.decisions,
+            });
+            if (verdict.ok) assistantText = spoken.text;
+            else
+              console.log(
+                JSON.stringify({
+                  traceId: trace,
+                  event: 'prose_rejected',
+                  reason: verdict.reason,
+                }),
+              );
+          }
+        } catch (error) {
+          console.log(
+            JSON.stringify({
+              traceId: trace,
+              event: 'agent_failed',
+              cause: error instanceof Error ? error.message : String(error),
+            }),
+          );
+        }
+      }
+
       const assistant = {
         id: crypto.randomUUID(),
         conversationId: conversation.id,
         role: 'assistant' as const,
-        text: plan.text,
+        text: assistantText,
         inputMode: 'text' as const,
         blocks: plan.blocks,
         createdAt: new Date().toISOString(),
@@ -253,7 +314,7 @@ export const conversations: SessionRoute = async ({
             assistant.id,
             conversation.id,
             'assistant',
-            plan.text,
+            assistantText,
             'text',
             JSON.stringify(plan.blocks),
             assistant.createdAt,

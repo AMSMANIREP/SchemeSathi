@@ -46,6 +46,8 @@ export type TurnPlan = {
   askedField: string | null;
   /** Set when this turn offered to save, so the server can record the offer. */
   offeredSchemeId: string | null;
+  /** Verdicts this turn computed, so generated prose can be checked on them. */
+  decisions: Map<string, Decision>;
 };
 
 /**
@@ -161,6 +163,7 @@ export function planTurn(input: TurnInput): TurnPlan {
         questionsAsked: questionsAsked + 1,
         askedField: next.field,
         offeredSchemeId: null,
+        decisions,
       };
     }
   }
@@ -253,5 +256,6 @@ export function planTurn(input: TurnInput): TurnPlan {
     questionsAsked,
     askedField: null,
     offeredSchemeId,
+    decisions,
   };
 }
