@@ -149,7 +149,9 @@ export default function Chat() {
                       ? t.stageSearching
                       : stage === 'thinking'
                         ? t.stageThinking
-                        : t.thinking}
+                        : stage === 'checking'
+                          ? t.stageChecking
+                          : t.thinking}
                 </div>
               </div>
             )}

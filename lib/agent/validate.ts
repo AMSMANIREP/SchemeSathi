@@ -77,3 +77,14 @@ export function validateProse(
 
   return { ok: true };
 }
+
+/** Scheme ids a reply actually names, so only those sources are sent. */
+export function schemesMentioned(text: string, schemes: Scheme[]) {
+  const lower = text.toLowerCase();
+  return schemes
+    .filter((s) => {
+      const name = s.shortName.toLowerCase();
+      return name.length > 5 && lower.includes(name);
+    })
+    .map((s) => s.id);
+}

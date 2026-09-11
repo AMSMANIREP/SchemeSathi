@@ -3,7 +3,8 @@ import type { SessionCtx } from '../session';
 import { planTurn, nextQuestion } from '../agent/turn';
 import { detectFocus, isDecline, isUnsure, wantsEverything } from '../agent/focus.ts';
 import { runAgent } from '../agent/loop';
-import { validateProse } from '../agent/validate.ts';
+import { validateProse, schemesMentioned } from '../agent/validate.ts';
+import { judgeProse } from '../agent/judge';
 import { extract } from './chat';
 import { retrieve } from '../retrieval';
 import { fields, redact, validateProfile } from '../rules';
@@ -473,7 +474,38 @@ async function runTurn(
               reason: 'the planner is asking and the model did not',
             }),
           );
-        else assistantText = spoken.text;
+        else {
+          // The regex checks passed. Now read it beside the catalogue text,
+          // which is the only way to catch elaboration that sounds right.
+          let judged: Awaited<ReturnType<typeof judgeProse>> = { ok: true };
+          try {
+            onStatus('checking');
+            judged = await judgeProse(
+              spoken.text,
+              live,
+              schemesMentioned(spoken.text, live),
+            );
+          } catch (error) {
+            // A judge that cannot answer must not cost the citizen their
+            // reply; the checkable claims were already ruled out.
+            console.log(
+              JSON.stringify({
+                traceId: trace,
+                event: 'judge_unavailable',
+                cause: error instanceof Error ? error.message : String(error),
+              }),
+            );
+          }
+          if (judged.ok) assistantText = spoken.text;
+          else
+            console.log(
+              JSON.stringify({
+                traceId: trace,
+                event: 'prose_rejected',
+                reason: judged.reason,
+              }),
+            );
+        }
       }
 
       // A question the model asked replaces the planner's: the wording is its
