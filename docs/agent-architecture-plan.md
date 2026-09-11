@@ -661,6 +661,12 @@ Found while hardening: `shouldOfferSave` would offer any verified scheme to a ci
 
 Remaining: the Vectorize dense-retrieval binding (needs Cloudflare configuration), and a human print check at A4 in Chrome and Firefox — the rules are verified structurally but nothing here substitutes for looking at a printed sheet.
 
+**Provider neutrality (11 September 2026).** The chat provider is now a setting, not an architectural choice. `lib/llm.ts` resolves `LLM_BASE_URL` / `LLM_API_KEY` / `LLM_MODEL` for any OpenAI-compatible endpoint, falling back to the `AZURE_OPENAI_*` names so existing deployments keep working. The model extracts fields, calls tools and writes two validated prose slots; the deterministic engine owns every verdict, so a provider swap costs a base URL and a model name and cannot move a verdict.
+
+`pnpm eval:extraction` scores profile extraction per language against `tests/extraction-cases.json`, using the configured provider or the deterministic fallback when none is set. It exists to answer "can this provider read Kannada?" with numbers before a provider is chosen. It counts **invented** facts separately from missed ones, because a fact nobody stated becomes a wrong verdict while a missing one becomes an honest question.
+
+Baseline today, no provider configured: English 0/8, Hindi 5/7, Kannada 5/6, **0 invented**.
+
 Roughly **10.5 working days** end to end; Phases 0–2 alone (~2.5 days) already deliver a real chat transcript with cards.
 
 ---

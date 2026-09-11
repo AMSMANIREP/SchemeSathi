@@ -22,7 +22,8 @@
     "migrate:catalogue": "node scripts/migrate-catalogue.mjs",
     "author:demo": "node scripts/author-demo-schemes.mjs",
     "validate": "node scripts/validate-release.mjs",
-    "deploy:demo": "node scripts/validate-release.mjs --allow-demo && pnpm build && pnpm run db:migrate:cloudflare && wrangler deploy --config wrangler.cloudflare.jsonc"
+    "deploy:demo": "node scripts/validate-release.mjs --allow-demo && pnpm build && pnpm run db:migrate:cloudflare && wrangler deploy --config wrangler.cloudflare.jsonc",
+    "eval:extraction": "node --experimental-strip-types scripts/eval-extraction.mjs"
   },
   "dependencies": {
     "react": "19.2.6",
