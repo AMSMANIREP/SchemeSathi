@@ -580,7 +580,7 @@ Existing endpoints keep their contracts. `POST /chat` stays for one release as a
 
 **`lib/server.ts` splits during this work.** At 660 lines with one linear `if` chain it is already at the edge of comfortable, and this plan roughly doubles it. Split into `lib/api/{sessions,schemes,profile,recommendations,conversations,applications,reports,voice,privacy}.ts` behind a small route table, with `lib/http.ts` holding `json()`, `body()`, `HttpError`, `limit()` and `origin()`. Same behaviour, mechanical change, done first so later phases land in small files.
 
-Rate limits, using the existing `request_limits` table: 30 messages per conversation per hour, 12 report generations per session per hour, retrieval 60/hour.
+Rate limits use the existing `request_limits` table, whose window is **one minute**, not one hour — an earlier draft of this document said per-hour and was wrong about the mechanism. Current ceilings per minute: 30 conversation turns, 20 searches, 12 report generations, 10 new conversations, 8 transcriptions, 8 playbacks, 5 feedback submissions, and 30 session creations per IP.
 
 ---
 
@@ -646,8 +646,20 @@ Two invariants now hold this honest, both tested: a record may only leave `DRAFT
 **Phase 6 — Voice (~1 day)**
 Mic moves into the chat composer with the draft-and-confirm flow; `messages.inputMode`; `lib/voice/speak.ts` with one `speak()` per block kind; `/voice/speak` replacing `/voice/synthesize`; playback controls on assistant turns and report steps. Ships last because §7.3 needs blocks and report steps to exist first.
 
-**Phase 7 — Hardening (~1 day)**
-Vectorize binding behind the flag. Rate limits. Prompt-injection tests (a scheme record is trusted data; a citizen message is not). Print QA in Chrome and Firefox at A4. Kannada and Hindi passes over every new string. `scripts/validate-release.mjs` extended to assert the index artifacts are fresh against `data/schemes.json`.
+**Phase 7 — Hardening (~1 day) — ✅ mostly done**
+
+Shipped:
+
+- **Release gate rewritten.** `scripts/validate-release.mjs` now refuses three things: a VERIFIED record without review evidence, demo-authored records unless `--allow-demo` is passed, and a retrieval index built from a different catalogue than the one shipping. `pnpm deploy:cloudflare` stays strict; `pnpm deploy:demo` is a separate, explicitly named action. A demo build can no longer ship as production by habit.
+- **A VERIFIED step must carry an office, a person and a wait.** A printed report must not send someone to a blank address.
+- **i18n parity is tested** (`tests/i18n.test.mjs`): identical keys across all three languages, no empty strings, no prose left in English, no placeholders, and a label for every field the rules use. A missing key renders `undefined` to a Hindi speaker while English looks perfect; nothing else was catching that.
+- **Untrusted-input boundary is tested** (`tests/untrusted.test.mjs`): an injected instruction cannot become a profile field, an unconfirmed value never reaches a verdict, blocks and source URLs come only from the planner and the catalogue, report steps are never invented, and identifiers are redacted before storage.
+- **Print hardened.** Browsers drop background fills when printing, so a ticked document box printed identically to an unticked one; both it and the demo marker now use borders, which always print.
+- **Rate-limit documentation corrected** — the window is one minute, not one hour. See §11.
+
+Found while hardening: `shouldOfferSave` would offer any verified scheme to a citizen who had told us nothing, because an empty profile makes every verified record `POSSIBLY_ELIGIBLE`. That is the catalogue's default state, not a narrowing. An offer now also requires at least one rule to have actually passed.
+
+Remaining: the Vectorize dense-retrieval binding (needs Cloudflare configuration), and a human print check at A4 in Chrome and Firefox — the rules are verified structurally but nothing here substitutes for looking at a printed sheet.
 
 Roughly **10.5 working days** end to end; Phases 0–2 alone (~2.5 days) already deliver a real chat transcript with cards.
 

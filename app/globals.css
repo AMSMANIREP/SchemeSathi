@@ -2271,6 +2271,22 @@ button.rowopen small {
   .demomark {
     break-inside: avoid;
   }
+  /* Browsers drop background fills when printing, so a ticked document would
+     print identical to an unticked one. Borders always print: fill the box
+     with its own border instead. */
+  .docbox {
+    border: 1px solid #000;
+  }
+  .docbox.held {
+    background: none;
+    border: 6px solid #000;
+  }
+  /* The demo marker must survive onto paper — it is the sheet's own caveat. */
+  .demomark {
+    border: 1px solid #000;
+    border-left: 4px solid #000;
+    background: none;
+  }
 }
 
 /* The save offer: an unissued pass, not a hidden one. */

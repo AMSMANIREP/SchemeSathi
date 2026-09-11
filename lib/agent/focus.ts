@@ -64,6 +64,15 @@ export function shouldOfferSave(i: SaveSignalInput): boolean {
     i.decision.status !== 'POSSIBLY_ELIGIBLE'
   )
     return false;
+  // And only once something is actually established about this citizen.
+  // With an empty profile every verified scheme is POSSIBLY_ELIGIBLE — that
+  // is the default state of the catalogue, not a narrowing, and offering on
+  // it would mean offering everything to someone who has told us nothing.
+  if (
+    i.decision.status === 'POSSIBLY_ELIGIBLE' &&
+    !i.decision.reasons.some((r) => r.result === 'PASS')
+  )
+    return false;
   if (i.savedSchemeIds.includes(i.focus)) return false;
   // Declining is an answer. Respect it for a few turns rather than asking again.
   if (

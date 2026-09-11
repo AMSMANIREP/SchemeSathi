@@ -127,3 +127,25 @@ test('refusals are recognised in all three languages', () => {
   for (const s of ['north karnataka', 'nothing else', '0.8'])
     assert.ok(!isDecline(s), s);
 });
+
+test('a merely possible verdict with nothing established is not offered', () => {
+  // Empty profile: every rule UNKNOWN, so the verdict is POSSIBLY_ELIGIBLE
+  // for the whole catalogue. That is the default state, not a narrowing.
+  const nothingKnown = {
+    ...decision('POSSIBLY_ELIGIBLE'),
+    reasons: [
+      { id: 'r1', field: 'land', label: 'You farm land', result: 'UNKNOWN', source: 'x' },
+    ],
+  };
+  assert.equal(shouldOfferSave({ ...base, decision: nothingKnown }), false);
+
+  // One established fact is enough to make it a real narrowing.
+  const somethingKnown = {
+    ...nothingKnown,
+    reasons: [
+      { id: 'r1', field: 'land', label: 'You farm land', result: 'PASS', source: 'x' },
+      { id: 'r2', field: 'bank', label: 'You have an account', result: 'UNKNOWN', source: 'x' },
+    ],
+  };
+  assert.equal(shouldOfferSave({ ...base, decision: somethingKnown }), true);
+});
