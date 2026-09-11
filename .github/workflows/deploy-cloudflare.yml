@@ -1,0 +1,53 @@
+name: Deploy Scheme Sathi to Cloudflare
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: Branch to deploy to india.scheme-sathi.workers.dev
+        required: true
+        default: feature/layer2_implementation
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cloudflare-india-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: cloudflare-production
+      url: https://india.scheme-sathi.workers.dev
+    steps:
+      - name: Check out selected branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: pnpm/action-setup@v4
+        with:
+          version: '11'
+      - run: pnpm install --frozen-lockfile
+      - name: Preserve current public draft policy
+        run: node scripts/prepare-cloudflare.mjs
+      - name: Validate, test, and build
+        run: node scripts/validate-release.mjs --allow-demo && pnpm typecheck && pnpm test && pnpm run build
+      - name: Apply migrations and deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo "Add the CLOUDFLARE_API_TOKEN Actions secret."; exit 1; }
+          test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo "Add the CLOUDFLARE_ACCOUNT_ID Actions secret."; exit 1; }
+          pnpm run db:migrate:cloudflare
+          pnpm exec wrangler deploy --config wrangler.cloudflare.jsonc
+      - name: Check public health
+        run: |
+          node --input-type=module -e 'const r=await fetch("https://india.scheme-sathi.workers.dev/health/ready");const b=await r.json();if(!r.ok||b.status!=="ok"||b.database!=="connected")throw Error("Deployment health check failed");console.log("Site and database are healthy.");'
