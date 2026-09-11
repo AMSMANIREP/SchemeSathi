@@ -23,6 +23,8 @@ export function validateProse(
   text: string,
   context: {
     onScreen: string[];
+    /** Schemes the tools actually returned this turn. */
+    seen?: string[];
     schemes: Scheme[];
     decisions: Map<string, Decision>;
   },
@@ -39,8 +41,14 @@ export function validateProse(
   // Naming a programme that is not on screen invites someone to act on a
   // scheme they cannot see, whose verdict they have not been shown.
   const lower = text.toLowerCase();
+  // When cards are shown, talk about those. When none are — a turn that asks
+  // a question — naming the programme being investigated is helpful, so long
+  // as a tool actually returned it.
+  const allowed = context.onScreen.length
+    ? context.onScreen
+    : (context.seen ?? []);
   const offScreen = context.schemes.find((s) => {
-    if (context.onScreen.includes(s.id)) return false;
+    if (allowed.includes(s.id)) return false;
     const name = s.shortName.toLowerCase();
     return name.length > 6 && lower.includes(name);
   });

@@ -245,10 +245,14 @@ export const conversations: SessionRoute = async ({
       // called only then, and told which programmes are on screen so its words
       // and the cards cannot disagree.
       let assistantText = plan.text;
-      if (plan.checkpoint !== 'ASKED') {
-        const onScreen = plan.blocks
-          .filter((b) => b.kind === 'scheme_card')
-          .map((b) => (b as { schemeId: string }).schemeId);
+      let modelAsked: { field: string; options: string[] } | null = null;
+      {
+        const cards = plan.blocks.filter((b) => b.kind === 'scheme_card') as {
+          schemeId: string;
+          status: string;
+          missing: string[];
+        }[];
+        const onScreen = cards.map((c) => c.schemeId);
         try {
           const recent = await db()
             .prepare(
@@ -261,16 +265,22 @@ export const conversations: SessionRoute = async ({
             profile: merged,
             confirmed,
             language: s.language,
-            onScreen,
+            onScreen: cards.map((c) => ({
+              schemeId: c.schemeId,
+              status: c.status,
+              missing: c.missing,
+            })),
             history: recent.results
               .reverse()
               .slice(0, -1)
               .map((m) => ({ role: m.role as 'user' | 'assistant', text: m.text })),
             message: text,
           });
+          modelAsked = spoken?.asking ?? null;
           if (spoken?.text) {
             const verdict = validateProse(spoken.text, {
               onScreen,
+              seen: spoken.seen,
               schemes: live,
               decisions: plan.decisions,
             });
@@ -295,13 +305,35 @@ export const conversations: SessionRoute = async ({
         }
       }
 
+      // A question the model asked replaces the planner's: the wording is its
+      // own, the chips and the field are ours, and the answer is coerced
+      // against that field exactly as before. The planner's own question is
+      // the fallback for when no model is configured.
+      const blocks = modelAsked
+        ? [
+            ...plan.blocks.filter(
+              (b) => b.kind === 'profile_updated' || b.kind === 'notice',
+            ),
+            ...(modelAsked.options.length
+              ? [
+                  {
+                    kind: 'answer_chips' as const,
+                    field: modelAsked.field,
+                    options: modelAsked.options,
+                  },
+                ]
+              : []),
+          ]
+        : plan.blocks;
+      const askedFieldOut = modelAsked ? modelAsked.field : plan.askedField;
+
       const assistant = {
         id: crypto.randomUUID(),
         conversationId: conversation.id,
         role: 'assistant' as const,
         text: assistantText,
         inputMode: 'text' as const,
-        blocks: plan.blocks,
+        blocks,
         createdAt: new Date().toISOString(),
       };
 
@@ -316,7 +348,7 @@ export const conversations: SessionRoute = async ({
             'assistant',
             assistantText,
             'text',
-            JSON.stringify(plan.blocks),
+            JSON.stringify(blocks),
             assistant.createdAt,
           ),
         db()
@@ -326,7 +358,7 @@ export const conversations: SessionRoute = async ({
           .bind(
             plan.checkpoint,
             plan.questionsAsked,
-            plan.askedField || '',
+            askedFieldOut || '',
             plan.offeredSchemeId ?? focus,
             turn,
             declining

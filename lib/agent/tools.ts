@@ -20,6 +20,8 @@ export type ToolContext = {
   confirmed: string[];
   /** Filled in as the model searches, so the caller can see what it saw. */
   seen: Set<string>;
+  /** Set when the model chooses to ask about a field this turn. */
+  asking: { field: string; options: string[] } | null;
 };
 
 export function buildTools(ctx: ToolContext) {
@@ -85,5 +87,32 @@ export function buildTools(ctx: ToolContext) {
     },
   );
 
-  return [searchSchemes, checkEligibility, whatIsKnown];
+  const askAbout = tool(
+    async ({ field }: { field: string }) => {
+      const spec = fields.find((f) => f.key === field);
+      if (!spec)
+        return `There is no field called "${field}". Choose one of: ${fields.map((f) => f.key).join(', ')}.`;
+      if (ctx.confirmed.includes(field))
+        return `${field} is already established as ${ctx.profile[field]}. Ask about something else, or stop asking.`;
+      // The model phrases the question; the answerable values are ours. A
+      // field it cannot name cannot be asked about, and the chips a citizen
+      // taps come from the same list the validator accepts.
+      ctx.asking = { field, options: spec.type === 'select' ? spec.values ?? [] : [] };
+      return spec.type === 'select'
+        ? `Ask about ${field}. Buttons will be shown for: ${(spec.values ?? []).join(', ')}. Ask in one short sentence.`
+        : `Ask about ${field}. It is a number. Ask in one short sentence, and say the unit if there is one.`;
+    },
+    {
+      name: 'ask_about',
+      description:
+        'Choose one unestablished detail to ask the citizen about, when knowing it would settle a verdict. Ask only what changes an answer, and never more than one thing at a time.',
+      schema: z.object({
+        field: z
+          .string()
+          .describe('One of the profile field keys from what_is_known'),
+      }),
+    },
+  );
+
+  return [searchSchemes, checkEligibility, whatIsKnown, askAbout];
 }
