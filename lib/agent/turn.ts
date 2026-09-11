@@ -12,6 +12,27 @@ import type {
   Scheme,
 } from '../types';
 
+/**
+ * The single most useful thing still unknown, phrased.
+ *
+ * Exposed so a turn that would otherwise end in a statement can close with a
+ * question instead. A reply that names what someone said and stops is not a
+ * conversation; it leaves them to work out what to type next.
+ */
+export function nextQuestion(
+  schemes: Scheme[],
+  profile: Profile,
+  confirmed: string[],
+  candidates: string[],
+  language: Language,
+) {
+  const relevant = schemes.filter((s) => candidates.includes(s.id));
+  const pick =
+    leverage(relevant, profile, confirmed).find((x) => hasQuestion(x.field)) ||
+    leverage(schemes, profile, confirmed).find((x) => hasQuestion(x.field));
+  return pick ? questionFor(pick.field, language) : null;
+}
+
 /** Interrogation is not conversation. Two questions, then show something. */
 export const QUESTION_BUDGET = 2;
 const MAX_CARDS = 4;
@@ -146,7 +167,11 @@ export function planTurn(input: TurnInput): TurnPlan {
   // A direct question about a named scheme is never answered with a question
   // of our own. What is missing is said in the reply instead, so they learn
   // the gap without having their question deflected.
-  if (!focusNamed && !conclusive && questionsAsked < QUESTION_BUDGET) {
+  // Someone who has just said "show me" or "I don't know" is asking to be
+  // shown. Answering that with another question is the one response certain
+  // not to help, and it leaves prose naming schemes above a turn with no
+  // cards beneath it.
+  if (!showEverything && !focusNamed && !conclusive && questionsAsked < QUESTION_BUDGET) {
     // Ask about what the citizen just raised. Scoring the whole catalogue
     // first would ask a farmer their age simply because 'age' sorts earlier.
     const relevant = schemes.filter((s) => candidates.includes(s.id));

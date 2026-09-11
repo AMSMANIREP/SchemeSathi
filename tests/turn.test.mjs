@@ -303,3 +303,18 @@ test('a scheme asked about by name is shown whatever its verdict', () => {
   const ids = plan.blocks.filter((b) => b.kind === 'scheme_card').map((b) => b.schemeId);
   assert.deepEqual(ids, ['unknown-one']);
 });
+
+test('a request to be shown is answered with cards, not another question', () => {
+  // "I don't know what I need" and "show me everything" both set this. Asking
+  // again is the one reply certain not to help, and it leaves prose naming
+  // schemes above a turn with no cards beneath it.
+  const plan = planTurn({
+    ...base,
+    profile: {},
+    confirmed: [],
+    questionsAsked: 0, // budget available — it would otherwise ask
+    showEverything: true,
+  });
+  assert.equal(plan.checkpoint, 'PRESENTED');
+  assert.ok(plan.blocks.some((b) => b.kind === 'scheme_card'));
+});

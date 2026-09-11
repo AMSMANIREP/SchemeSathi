@@ -1,7 +1,7 @@
 import { body, db, HttpError, json, limit } from '../http';
 import type { SessionCtx } from '../session';
-import { planTurn } from '../agent/turn';
-import { detectFocus, isDecline, wantsEverything } from '../agent/focus.ts';
+import { planTurn, nextQuestion } from '../agent/turn';
+import { detectFocus, isDecline, isUnsure, wantsEverything } from '../agent/focus.ts';
 import { runAgent } from '../agent/loop';
 import { validateProse } from '../agent/validate.ts';
 import { extract } from './chat';
@@ -383,6 +383,8 @@ async function runTurn(
         );
       }
 
+      const unsure = isUnsure(text);
+
       let candidates: string[];
       if (spoken) {
         candidates = spoken.seen;
@@ -391,12 +393,30 @@ async function runTurn(
         candidates = (await retrieve(query, live)).map((c) => c.schemeId);
       }
 
+      // "I don't know what I need" is the one case where asking again is the
+      // least useful thing we can do. If the model asked instead of searching,
+      // search on whatever is already known — the opening description and the
+      // confirmed facts — so they get something concrete to react to.
+      if (unsure && !candidates.length) {
+        onStatus('searching');
+        const known = Object.entries(merged)
+          .filter(([, v]) => v !== null && v !== undefined)
+          .map(([k, v]) => `${k} ${v}`)
+          .join(' ');
+        const fallbackQuery = [conversation.title as string, known]
+          .filter(Boolean)
+          .join(' ');
+        if (fallbackQuery.trim())
+          candidates = (await retrieve(fallbackQuery, live)).map((c) => c.schemeId);
+      }
+
       const plan = planTurn({
         schemes: live,
         candidates,
         focus,
         focusNamed: detected.named,
-        showEverything: wantsEverything(text),
+        // Not knowing what you need is a reason to be shown what exists.
+        showEverything: wantsEverything(text) || unsure,
         declinedSchemeId: declining
           ? (conversation.focus_scheme_id as string) || null
           : (conversation.declined_scheme_id as string) || null,
@@ -483,13 +503,40 @@ async function runTurn(
           ? '' // its question, our field: never coerce against the mismatch
           : plan.askedField;
 
+      // Every turn ends with a way forward. A reply that states what it heard
+      // and stops leaves the citizen to guess what to type next, which is the
+      // opposite of the conversation this is meant to be. If nothing in the
+      // turn already asks — no question from the model, no save offered — the
+      // planner's own next question is appended, with the chips that answer
+      // it, so the wording and the buttons always agree.
+      let finalText = assistantText;
+      let finalBlocks = blocks;
+      let finalAskedField = askedFieldOut;
+
+      const alreadyAsks = !!modelAsked || assistantText.trim().endsWith('?');
+      const offeringSave = plan.checkpoint === 'SAVE_OFFERED';
+
+      if (!alreadyAsks && !offeringSave) {
+        const q = nextQuestion(live, merged, confirmed, candidates, s.language);
+        if (q?.text) {
+          finalText = `${assistantText.trim()} ${q.text}`.trim();
+          finalAskedField = q.field;
+          finalBlocks = q.options.length
+            ? [
+                ...blocks.filter((b) => b.kind !== 'answer_chips'),
+                { kind: 'answer_chips' as const, field: q.field, options: q.options },
+              ]
+            : blocks;
+        }
+      }
+
       const assistant = {
         id: crypto.randomUUID(),
         conversationId: conversation.id,
         role: 'assistant' as const,
-        text: assistantText,
+        text: finalText,
         inputMode: 'text' as const,
-        blocks,
+        blocks: finalBlocks,
         createdAt: new Date().toISOString(),
       };
 
@@ -502,9 +549,9 @@ async function runTurn(
             assistant.id,
             conversation.id,
             'assistant',
-            assistantText,
+            finalText,
             'text',
-            JSON.stringify(blocks),
+            JSON.stringify(finalBlocks),
             assistant.createdAt,
           ),
         db()
@@ -514,7 +561,7 @@ async function runTurn(
           .bind(
             plan.checkpoint,
             plan.questionsAsked,
-            askedFieldOut || '',
+            finalAskedField || '',
             plan.offeredSchemeId ?? focus,
             turn,
             declining

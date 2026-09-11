@@ -178,6 +178,22 @@ export function wantsEverything(text: string) {
 }
 
 /**
+ * Recognises "I don't know what I need".
+ *
+ * Someone who cannot name what they want should be shown what exists rather
+ * than asked to be more specific, which is the one reply guaranteed not to
+ * help them.
+ */
+export function isUnsure(text: string) {
+  const t = text.trim().toLowerCase();
+  return (
+    /\b(not sure|no idea|don'?t know|dont know|do not know|unsure|anything|whatever)\b/.test(t) ||
+    /(पता नहीं|मालूम नहीं|कुछ भी)/.test(t) ||
+    /(ಗೊತ್ತಿಲ್ಲ|ತಿಳಿದಿಲ್ಲ|ಏನಾದರೂ)/.test(t)
+  );
+}
+
+/**
  * Recognises a refusal, so "no thanks" is not parsed as a profile answer.
  *
  * The Latin forms need a word boundary — otherwise "north Karnataka" reads as

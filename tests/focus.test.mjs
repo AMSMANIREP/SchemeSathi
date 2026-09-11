@@ -4,6 +4,7 @@ import {
   detectFocus,
   shouldOfferSave,
   isDecline,
+  isUnsure,
   DECLINE_COOLDOWN,
 } from '../lib/agent/focus.ts';
 
@@ -196,4 +197,12 @@ test('an ordinary word is not a scheme name, even when only one scheme uses it',
   assert.equal(focus('my health is bad these days'), null);
   // A real name still resolves.
   assert.equal(focus('tell me about Ujjwala'), 'pmuy');
+});
+
+test('not knowing what you need is recognised, in all three languages', () => {
+  for (const s of ['I am not sure', "I don't know what I need", 'no idea', 'पता नहीं', 'ಗೊತ್ತಿಲ್ಲ'])
+    assert.ok(isUnsure(s), s);
+  // But a definite statement is not uncertainty.
+  for (const s of ['I need a gas connection', 'I know I want PM-KISAN'])
+    assert.ok(!isUnsure(s), s);
 });
