@@ -27,6 +27,11 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # local environment
+# .dev.vars is what the Worker actually reads in local dev — it holds real
+# secrets and must never be committed.
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
 .env*
 
 # deployment and generated files

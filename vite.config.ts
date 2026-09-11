@@ -36,7 +36,9 @@ const localBindingConfig = {
 
 export default defineConfig(async () => {
   // Keep Wrangler and Miniflare state project-local. These are non-secret tool
-  // settings; application environment belongs in ignored `.env*` files.
+  // settings. Application secrets belong in `.dev.vars`, which the Cloudflare
+  // plugin turns into Worker bindings; `.env` only reaches CLOUDFLARE_-prefixed
+  // tooling variables and never the app.
   process.env.WRANGLER_WRITE_LOGS ??= 'false';
   process.env.WRANGLER_LOG_PATH ??= '.wrangler/logs';
   process.env.MINIFLARE_REGISTRY_PATH ??= '.wrangler/registry';
