@@ -25,7 +25,7 @@ export const search: SessionRoute = async ({ req, p, method, s, trace }) => {
     throw new HttpError(400, 'Enter a search of up to 400 characters.');
 
   const live = await schemes();
-  const candidates = retrieve(redact(b.query), live);
+  const candidates = await retrieve(redact(b.query), live);
   const profile = JSON.parse(s.profile);
   const confirmed = JSON.parse(s.confirmed);
   const decided = s.version > 0;

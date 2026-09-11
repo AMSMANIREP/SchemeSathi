@@ -14,6 +14,7 @@ export type Settings = {
   AZURE_OPENAI_CHAT_DEPLOYMENT?: string;
   ELEVENLABS_API_KEY?: string;
   ELEVENLABS_VOICE_ID?: string;
+  EMBEDDING_MODEL?: string;
   PINECONE_API_KEY?: string;
   PINECONE_INDEX_HOST?: string;
   AZURE_OPENAI_EMBEDDING_DEPLOYMENT?: string;

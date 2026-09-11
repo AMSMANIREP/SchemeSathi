@@ -22,6 +22,19 @@ AZURE_OPENAI_ENDPOINT=
 AZURE_OPENAI_API_KEY=
 AZURE_OPENAI_CHAT_DEPLOYMENT=
 
+# --- Dense retrieval (optional; lexical search works without it). ---
+# Without these, Hindi and Kannada queries match nothing: the lexical
+# tokenizer keeps [a-z0-9] only, so a non-Latin query produces no terms.
+# The embedding model must not change without re-running `pnpm build:vectors`
+# — query vectors from one model and document vectors from another produce
+# confident nonsense.
+EMBEDDING_MODEL=Qwen/Qwen3-Embedding-8B
+PINECONE_API_KEY=
+# The index host from the Pinecone console, e.g. https://name-abc123.svc....pinecone.io
+# Create the index with the embedding model's dimension count (4096 for the
+# model above) and the cosine metric.
+PINECONE_INDEX_HOST=
+
 # --- Voice. Both are required before voice appears in the interface. ---
 ELEVENLABS_API_KEY=
 ELEVENLABS_VOICE_ID=

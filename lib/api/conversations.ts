@@ -191,7 +191,7 @@ export const conversations: SessionRoute = async ({
       const query = [conversation.title as string, text]
         .filter(Boolean)
         .join(' ');
-      const candidates = retrieve(query, live).map((c) => c.schemeId);
+      const candidates = (await retrieve(query, live)).map((c) => c.schemeId);
 
       const previous = await db()
         .prepare(
