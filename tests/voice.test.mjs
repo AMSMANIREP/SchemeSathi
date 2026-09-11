@@ -13,6 +13,7 @@ import {
   synthesizeSpeech,
   transcribeSpeech,
   defaultVoiceId,
+  VoiceProviderError,
 } from '../lib/elevenlabs.ts';
 import { tamil, malayalam } from '../lib/regional-copy.ts';
 
@@ -93,6 +94,7 @@ test('TTS uses Eleven v3, server key header and requested Tamil/Malayalam langua
         );
         assert.ok(!url.includes('test-key'));
         assert.equal(init.headers['xi-api-key'], 'test-key');
+        assert.equal(init.redirect, 'manual');
         const payload = JSON.parse(init.body);
         assert.equal(payload.model_id, 'eleven_v3');
         assert.equal(payload.language_code, language);
@@ -134,6 +136,7 @@ test('STT automatically detects language and preserves transcript for user revie
     type: 'audio/webm',
   });
   const value = await transcribeSpeech('test-key', file, async (_, init) => {
+    assert.equal(init.redirect, 'manual');
     assert.equal(init.body.get('language_code'), null);
     assert.equal(init.body.get('model_id'), 'scribe_v2');
     assert.equal(init.body.get('file').name, 'sample.webm');
@@ -145,4 +148,47 @@ test('STT automatically detects language and preserves transcript for user revie
   });
   assert.equal(value.text, 'മലയാളം');
   assert.equal(value.languageCode, 'mal');
+});
+
+test('voice requests reject redirects without forwarding credentials', async () => {
+  const redirected = async (_, init) => {
+    assert.equal(init.redirect, 'manual');
+    return new Response(null, {
+      status: 302,
+      headers: { Location: 'https://unexpected.example/voice' },
+    });
+  };
+  await assert.rejects(
+    synthesizeSpeech('test-key', defaultVoiceId, 'Hello', 'en', redirected),
+    { message: 'Voice service unavailable' },
+  );
+  await assert.rejects(
+    transcribeSpeech('test-key', new File(['audio'], 'test.webm'), redirected),
+    { message: 'Voice service unavailable' },
+  );
+});
+
+test('provider quota errors are classified without exposing account diagnostics', async () => {
+  const quota = async () =>
+    Response.json(
+      {
+        detail: {
+          status: 'quota_exceeded',
+          message: 'private provider account information',
+        },
+      },
+      { status: 401 },
+    );
+  const safeQuota = (error) =>
+    error instanceof VoiceProviderError &&
+    error.reason === 'quota' &&
+    error.message === 'Voice service unavailable';
+  await assert.rejects(
+    synthesizeSpeech('test-key', defaultVoiceId, 'Hello', 'en', quota),
+    safeQuota,
+  );
+  await assert.rejects(
+    transcribeSpeech('test-key', new File(['audio'], 'test.webm'), quota),
+    safeQuota,
+  );
 });

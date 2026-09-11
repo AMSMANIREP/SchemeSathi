@@ -211,12 +211,12 @@ const baseCopy = {
     login: 'Log in',
     loginTitle: 'Log in to Scheme Sathi',
     loginNote:
-      'This is a demonstration sign-in. Nothing is checked, nothing is sent, and no password is stored — type anything to continue.',
+      'This is a demonstration sign-in. No password is checked or stored. Your language preference is saved for this browser session.',
     email: 'Email',
     password: 'Password',
     signOut: 'Log out',
     signInName: 'What should we call you?',
-    signInNote: 'No password. No phone number. Nothing leaves this browser.',
+    signInNote: 'Demo sign-in. No password stored. Voice is processed by ElevenLabs.',
     greeting: 'Welcome',
     profileFirst: 'First, tell us a little about yourself',
     profileFirstNote:

@@ -14,7 +14,7 @@ import { useApp } from './providers';
 import { Blocks } from './blocks';
 import { VoiceControls } from './voice-controls';
 import { voiceCopy } from '@/lib/languages';
-import type { Language } from '@/lib/types';
+import { handsFreeCopy } from '@/lib/hands-free-copy';
 
 const SEEN_KEY = 'schemesathi.introSeen';
 
@@ -83,15 +83,12 @@ export default function Chat() {
     loading,
     messages,
     newConversation,
-    record,
-    recording,
+    handsFree,
     caps,
     language,
     speakReply,
   } = useApp();
   const [message, setMessage] = useState('');
-  const [voiceLanguage, setVoiceLanguage] = useState<Language | undefined>();
-  const [inputMode, setInputMode] = useState<'text' | 'voice'>('text');
   const [dismissed, setDismissed] = useState(false);
   const end = useRef<HTMLDivElement>(null);
 
@@ -118,15 +115,9 @@ export default function Chat() {
 
   const submit = async (text?: string) => {
     const value = text ?? message;
-    if (!value.trim() || busy || loading || recording) return;
+    if (!value.trim() || busy || loading) return;
     setMessage('');
-    await ask(
-      value,
-      text === undefined ? inputMode : 'text',
-      text === undefined ? voiceLanguage : undefined,
-    );
-    setInputMode('text');
-    setVoiceLanguage(undefined);
+    await ask(value);
   };
 
   return (
@@ -155,7 +146,7 @@ export default function Chat() {
                     m.language === language && (
                       <button
                         className="btn btn-ghost btn-sm"
-                        disabled={busy || recording}
+                        disabled={busy}
                         onClick={() => speakReply(m)}
                       >
                         <Volume2 size={14} /> {voiceCopy[language].replay}
@@ -181,6 +172,8 @@ export default function Chat() {
           <textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
+            onFocus={() => handsFree.setTyping(true)}
+            onBlur={() => handsFree.setTyping(false)}
             placeholder={started ? t.askAnything : t.prompt}
             maxLength={1800}
             aria-label={t.ask}
@@ -199,20 +192,32 @@ export default function Chat() {
           <div className="composer-bar">
             {caps.voice && (
               <button
-                className={'micbtn' + (recording ? ' recording' : '')}
-                onClick={() =>
-                  void record((text, detected) => {
-                    setMessage(text);
-                    setVoiceLanguage(detected);
-                    setInputMode('voice');
-                  })
+                className={
+                  'micbtn' +
+                  (handsFree.phase === 'listening' ? ' recording' : '')
                 }
-                disabled={busy && !recording}
-                aria-pressed={recording}
-                aria-label={recording ? t.stop : t.record}
+                onClick={() => {
+                  if (handsFree.suspended || handsFree.phase === 'error')
+                    handsFree.resume();
+                  else handsFree.pause();
+                }}
+                aria-pressed={
+                  !handsFree.suspended && handsFree.phase !== 'error'
+                }
+                aria-label={
+                  handsFree.suspended || handsFree.phase === 'error'
+                    ? handsFreeCopy[language].resume
+                    : handsFreeCopy[language].pause
+                }
               >
-                {recording ? <Square size={15} /> : <Mic size={16} />}
-                {recording ? t.stop : t.record}
+                {handsFree.suspended || handsFree.phase === 'error' ? (
+                  <Mic size={16} />
+                ) : (
+                  <Square size={15} />
+                )}
+                {handsFree.suspended || handsFree.phase === 'error'
+                  ? handsFreeCopy[language].resume
+                  : handsFreeCopy[language].pause}
               </button>
             )}
             {started && (
@@ -229,10 +234,10 @@ export default function Chat() {
             <button
               className="btn"
               onClick={() => void submit()}
-              disabled={busy || loading || recording || !message.trim()}
+              disabled={busy || loading || !message.trim()}
               aria-label={t.send}
             >
-              {busy && !recording ? (
+              {busy ? (
                 <Loader2 className="spin" size={15} />
               ) : (
                 <ArrowUp size={15} />

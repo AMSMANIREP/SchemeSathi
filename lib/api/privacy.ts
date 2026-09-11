@@ -1,6 +1,7 @@
 import { body, db, HttpError, json, limit } from '../http';
 import { redact } from '../rules';
 import { isLanguage } from '../languages';
+import { languageStatements } from '../voice-preference';
 import type { SessionRoute } from '../session';
 
 export const privacy: SessionRoute = async ({ req, p, method, s }) => {
@@ -8,12 +9,12 @@ export const privacy: SessionRoute = async ({ req, p, method, s }) => {
     const b = await body(req);
     if (typeof b.enabled !== 'boolean' || !isLanguage(b.language))
       throw new HttpError(400, 'Invalid preference.');
-    await db()
-      .prepare(
-        'UPDATE sessions SET consent=?,language=?,language_selected=1 WHERE id=?',
-      )
-      .bind(b.enabled ? 1 : 0, b.language, s.id)
-      .run();
+    await db().batch([
+      db()
+        .prepare('UPDATE sessions SET consent=? WHERE id=?')
+        .bind(b.enabled ? 1 : 0, s.id),
+      ...languageStatements(s, b.language),
+    ]);
     return json({
       saved: true,
       memoryConsent: b.enabled,

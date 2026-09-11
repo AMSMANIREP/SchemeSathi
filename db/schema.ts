@@ -18,12 +18,25 @@ export const sessions = sqliteTable(
     version: integer('version').notNull().default(0),
     language: text('language').notNull().default('en'),
     languageSelected: integer('language_selected').notNull().default(0),
+    voiceProfile: text('voice_profile'),
     consent: integer('consent').notNull().default(0),
     checkpoint: text('checkpoint').notNull().default('START'),
     expiresAt: integer('expires_at').notNull(),
     createdAt: integer('created_at').notNull(),
   },
   (t) => [uniqueIndex('sessions_token_idx').on(t.tokenHash)],
+);
+export const voicePreferences = sqliteTable(
+  'voice_preferences',
+  {
+    id: text('id').primaryKey(),
+    owner: text('owner')
+      .notNull()
+      .references(() => sessions.id, { onDelete: 'cascade' }),
+    language: text('language').notNull().default('en'),
+    selected: integer('selected').notNull().default(0),
+  },
+  (t) => [index('voice_preferences_owner_idx').on(t.owner)],
 );
 export const applications = sqliteTable(
   'applications',

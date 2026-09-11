@@ -17,7 +17,7 @@ import { useApp } from './providers';
  * *navigation* from it after mount does not.
  *
  * The sign-in is simulated for the demo — a display name in this browser, no
- * credential, nothing sent anywhere. It gates presentation only; every API
+ * credential. A hashed display-name key stores voice preferences within the browser session. It gates presentation only; every API
  * route still runs on the anonymous session cookie exactly as before.
  */
 export function Gate({ children }: { children: React.ReactNode }) {

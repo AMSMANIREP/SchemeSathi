@@ -170,6 +170,14 @@ test('real routes preserve chat flow, ownership and selected voice language', as
     await a('voice/synthesize', 'POST', { kind: 'welcome' }, 401);
     await a('sessions', 'POST', {}, 201);
     await b('sessions', 'POST', { language: 'en' }, 201);
+    const firstLogin = await a('voice/login', 'PUT', {
+      profileKey: 'a'.repeat(64),
+    });
+    assert.equal(firstLogin.language, 'en');
+    assert.equal(firstLogin.languageSelected, false);
+    await a('voice/synthesize', 'POST', { kind: 'welcome', language: 'en' });
+    assert.equal(spoken.at(-1).language_code, 'en');
+    assert.doesNotMatch(spoken.at(-1).text, /[\u0900-\u0d7f]/);
     const conv = await a('conversations', 'POST', {}, 201);
     const preference = await a(
       'conversations/' + conv.id + '/messages',
@@ -178,6 +186,22 @@ test('real routes preserve chat flow, ownership and selected voice language', as
       201,
     );
     assert.equal(preference.message.language, 'ta');
+    assert.equal(
+      (await a('voice/login', 'PUT', { profileKey: 'b'.repeat(64) })).language,
+      'en',
+    );
+    assert.equal(
+      (await a('voice/login', 'PUT', { profileKey: 'a'.repeat(64) })).language,
+      'ta',
+    );
+    assert.equal(
+      (await b('voice/login', 'PUT', { profileKey: 'a'.repeat(64) })).language,
+      'en',
+      'preferences never cross browser sessions',
+    );
+    await a('voice/synthesize', 'POST', { kind: 'welcome', language: 'ta' });
+    assert.equal(spoken.at(-1).language_code, 'ta');
+    assert.match(spoken.at(-1).text, /[\u0b80-\u0bff]/);
     assert.equal(
       preference.profileVersion,
       0,
@@ -231,6 +255,10 @@ test('real routes preserve chat flow, ownership and selected voice language', as
     assert.equal(session.language, 'ta');
     assert.equal(session.languageSelected, true);
     await a('privacy/consent', 'PUT', { enabled: false, language: 'ml' });
+    assert.equal(
+      (await a('voice/login', 'PUT', { profileKey: 'a'.repeat(64) })).language,
+      'ml',
+    );
     const next = await a(
       'conversations/' + conv.id + '/messages',
       'POST',

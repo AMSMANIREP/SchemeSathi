@@ -13,7 +13,7 @@ import { useApp } from './providers';
 /**
  * Simulated sign-in for the demonstration build.
  *
- * Nothing here authenticates: no request is made, no credential is stored,
+ * Nothing here authenticates: no credential is stored,
  * and the password is never read out of the field or kept in state. Only a
  * display name — derived from whatever is typed in the first field — is
  * remembered, in this browser. The dialog says so plainly, because a login
@@ -28,7 +28,7 @@ export function LoginDialog({
   onOpenChange: (v: boolean) => void;
   onSignIn: (displayName: string) => void;
 }) {
-  const { t } = useApp();
+  const { t, busy, loading, error } = useApp();
   const [identifier, setIdentifier] = useState('');
 
   const submit = (e: { preventDefault: () => void }) => {
@@ -61,10 +61,15 @@ export function LoginDialog({
           <label className="field">
             <span>{t.password}</span>
             {/* Uncontrolled on purpose: the value is never read or stored. */}
-            <input type="password" autoComplete="current-password" placeholder="••••••••" />
+            <input
+              type="password"
+              autoComplete="current-password"
+              placeholder="••••••••"
+            />
           </label>
 
-          <button className="btn" type="submit">
+          {error && <p role="alert">{error}</p>}
+          <button className="btn" type="submit" disabled={busy || loading}>
             {t.signIn}
             <ArrowRight size={15} />
           </button>

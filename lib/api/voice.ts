@@ -3,6 +3,7 @@ import {
   defaultVoiceId,
   synthesizeSpeech,
   transcribeSpeech,
+  VoiceProviderError,
 } from '../elevenlabs';
 import {
   isLanguage,
@@ -93,6 +94,8 @@ export const voice: SessionRoute = async ({ req, p, method, s }) => {
       return json({ text, language, confirmationRequired: true });
     } catch (error) {
       if (error instanceof HttpError) throw error;
+      if (error instanceof VoiceProviderError && error.reason === 'quota')
+        throw new HttpError(503, voiceCopy[s.language].quota);
       throw new HttpError(503, voiceCopy[s.language].unavailable);
     }
   }
@@ -161,7 +164,9 @@ export const voice: SessionRoute = async ({ req, p, method, s }) => {
         'X-Content-Type-Options': 'nosniff',
       },
     });
-  } catch {
+  } catch (error) {
+    if (error instanceof VoiceProviderError && error.reason === 'quota')
+      throw new HttpError(503, voiceCopy[s.language].quota);
     throw new HttpError(503, voiceCopy[s.language].unavailable);
   }
 };

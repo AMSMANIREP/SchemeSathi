@@ -28,6 +28,8 @@ export function sessionLanguage(
 
 export const voiceCopy = {
   en: {
+    quota:
+      'The voice service has reached its usage limit. Please type for now; the site owner needs to check ElevenLabs credits and the API key quota.',
     title: 'Welcome to Scheme Sathi',
     choose: 'Choose a language, type its name or say it using the microphone.',
     welcome:
@@ -59,6 +61,8 @@ export const voiceCopy = {
       'This is an official programme reference. Open the official source for current benefits and application requirements. The eligibility rules in this app still need independent review.',
   },
   hi: {
+    quota:
+      'आवाज़ सेवा की उपयोग सीमा पूरी हो गई है। अभी लिखें। साइट के संचालक को ElevenLabs क्रेडिट और API कुंजी की सीमा जाँचनी होगी।',
     title: 'स्कीम साथी में आपका स्वागत है',
     choose: 'भाषा चुनें, उसका नाम लिखें या माइक्रोफ़ोन से बोलें।',
     welcome:
@@ -88,6 +92,8 @@ export const voiceCopy = {
       'यह एक सरकारी कार्यक्रम का संदर्भ है। वर्तमान लाभ और आवेदन की आवश्यकताओं के लिए आधिकारिक स्रोत खोलें। इस ऐप के पात्रता नियमों की स्वतंत्र समीक्षा अभी बाकी है।',
   },
   kn: {
+    quota:
+      'ಧ್ವನಿ ಸೇವೆಯ ಬಳಕೆಯ ಮಿತಿ ತಲುಪಿದೆ. ಈಗ ಬರೆಯಿರಿ. ಸೈಟ್ ನಿರ್ವಾಹಕರು ElevenLabs ಕ್ರೆಡಿಟ್ ಮತ್ತು API ಕೀ ಮಿತಿಯನ್ನು ಪರಿಶೀಲಿಸಬೇಕು.',
     title: 'ಸ್ಕೀಮ್ ಸಾಥಿಗೆ ಸ್ವಾಗತ',
     choose: 'ಭಾಷೆ ಆಯ್ಕೆಮಾಡಿ, ಅದರ ಹೆಸರು ಬರೆಯಿರಿ ಅಥವಾ ಮೈಕ್ರೋಫೋನ್ ಮೂಲಕ ಹೇಳಿ.',
     welcome:
@@ -117,6 +123,8 @@ export const voiceCopy = {
       'ಇದು ಅಧಿಕೃತ ಯೋಜನೆಯ ಉಲ್ಲೇಖ. ಪ್ರಸ್ತುತ ಪ್ರಯೋಜನಗಳು ಮತ್ತು ಅರ್ಜಿಯ ಅಗತ್ಯಗಳಿಗಾಗಿ ಅಧಿಕೃತ ಮೂಲವನ್ನು ತೆರೆಯಿರಿ. ಈ ಆ್ಯಪ್ನ ಅರ್ಹತಾ ನಿಯಮಗಳ ಸ್ವತಂತ್ರ ಪರಿಶೀಲನೆ ಇನ್ನೂ ಬಾಕಿಯಿದೆ.',
   },
   ta: {
+    quota:
+      'குரல் சேவையின் பயன்பாட்டு வரம்பு முடிந்துவிட்டது. இப்போது தட்டச்சு செய்யவும். தள நிர்வாகி ElevenLabs கிரெடிட்களையும் API விசையின் வரம்பையும் சரிபார்க்க வேண்டும்.',
     title: 'ஸ்கீம் சாத்திக்கு வரவேற்கிறோம்',
     choose:
       'மொழியைத் தேர்ந்தெடுக்கவும், அதன் பெயரை எழுதவும் அல்லது ஒலிவாங்கியில் சொல்லவும்.',
@@ -147,6 +155,8 @@ export const voiceCopy = {
       'இது அரசுத் திட்டத்திற்கான குறிப்பு. தற்போதைய பயன்கள் மற்றும் விண்ணப்பத் தேவைகளுக்கு அதிகாரப்பூர்வ ஆதாரத்தைத் திறக்கவும். இந்தச் செயலியின் தகுதி விதிகளுக்கு சுயாதீன ஆய்வு இன்னும் தேவை.',
   },
   ml: {
+    quota:
+      'ശബ്ദ സേവനത്തിന്റെ ഉപയോഗ പരിധി എത്തിയിരിക്കുന്നു. ഇപ്പോൾ ടൈപ്പ് ചെയ്യുക. സൈറ്റ് ഉടമ ElevenLabs ക്രെഡിറ്റുകളും API കീയുടെ പരിധിയും പരിശോധിക്കണം.',
     title: 'സ്കീം സാഥിയിലേക്ക് സ്വാഗതം',
     choose: 'ഭാഷ തിരഞ്ഞെടുക്കുക, അതിന്റെ പേര് എഴുതുക അല്ലെങ്കിൽ മൈക്രോഫോണിലൂടെ പറയുക.',
     welcome:

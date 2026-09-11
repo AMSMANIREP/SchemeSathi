@@ -2,6 +2,21 @@ import type { Language } from './types';
 
 export const defaultVoiceId = 'JBFqnCBsd6RMkjVDRZzb';
 export const speechModel = 'eleven_v3';
+export class VoiceProviderError extends Error {
+  reason: 'quota' | 'unavailable';
+  constructor(reason: 'quota' | 'unavailable') {
+    super('Voice service unavailable');
+    this.reason = reason;
+  }
+}
+async function providerError(response: Response) {
+  const payload = (await response.json().catch(() => null)) as {
+    detail?: { status?: string };
+  } | null;
+  return new VoiceProviderError(
+    payload?.detail?.status === 'quota_exceeded' ? 'quota' : 'unavailable',
+  );
+}
 export async function synthesizeSpeech(
   key: string,
   voiceId: string,
@@ -15,7 +30,9 @@ export async function synthesizeSpeech(
       '?output_format=mp3_44100_128',
     {
       method: 'POST',
-      redirect: 'error',
+      // This Worker runtime rejects redirect: 'error'. Manual mode also prevents
+      // forwarding the API key to another host; non-2xx responses fail below.
+      redirect: 'manual',
       signal: AbortSignal.timeout(45000),
       headers: {
         'xi-api-key': key,
@@ -29,10 +46,8 @@ export async function synthesizeSpeech(
       }),
     },
   );
-  if (
-    !response.ok ||
-    !response.headers.get('content-type')?.startsWith('audio/')
-  )
+  if (!response.ok) throw await providerError(response);
+  if (!response.headers.get('content-type')?.startsWith('audio/'))
     throw new Error('Voice service unavailable');
   return response;
 }
@@ -50,13 +65,13 @@ export async function transcribeSpeech(
     'https://api.elevenlabs.io/v1/speech-to-text',
     {
       method: 'POST',
-      redirect: 'error',
+      redirect: 'manual',
       signal: AbortSignal.timeout(45000),
       headers: { 'xi-api-key': key },
       body: form,
     },
   );
-  if (!response.ok) throw new Error('Voice service unavailable');
+  if (!response.ok) throw await providerError(response);
   const result = (await response.json()) as {
     text?: unknown;
     language_code?: unknown;

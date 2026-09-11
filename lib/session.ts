@@ -29,6 +29,7 @@ export type Session = {
   version: number;
   language: Language;
   language_selected: number;
+  voice_profile?: string | null;
   consent: number;
   expires_at: number;
 };

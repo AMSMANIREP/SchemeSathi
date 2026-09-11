@@ -12,6 +12,7 @@ import { applications } from './api/applications';
 import { reports } from './api/reports';
 import { privacy } from './api/privacy';
 import { voice } from './api/voice';
+import { voiceLogin } from './api/voice-login';
 import { admin } from './api/admin';
 
 /** Reachable without a session cookie. */
@@ -29,6 +30,7 @@ const sessionRoutes: SessionRoute[] = [
   applications,
   reports,
   privacy,
+  voiceLogin,
   voice,
   admin,
 ];

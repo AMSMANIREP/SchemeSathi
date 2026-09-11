@@ -6,6 +6,7 @@ import { retrieve } from '../retrieval';
 import { fields, redact, validateProfile } from '../rules';
 import { schemes } from '../schemes';
 import type { SessionRoute } from '../session';
+import { languageStatements } from '../voice-preference';
 import type { Profile, Provenance } from '../types';
 import {
   isLanguage,
@@ -123,11 +124,7 @@ export const conversations: SessionRoute = async ({
           : s.language;
       s.language = sessionLanguage(text, initial, selected);
       await db().batch([
-        db()
-          .prepare(
-            'UPDATE sessions SET language=?,language_selected=1 WHERE id=?',
-          )
-          .bind(s.language, s.id),
+        ...languageStatements(s, s.language),
         db()
           .prepare('UPDATE conversations SET language=? WHERE id=?')
           .bind(s.language, conversation.id),

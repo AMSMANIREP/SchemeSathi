@@ -16,11 +16,39 @@ type VoiceStatus = 'idle' | 'loading' | 'playing' | 'blocked' | 'unavailable';
 export function useVoice() {
   const [status, setStatus] = useState<VoiceStatus>('idle');
   const [muted, setMuted] = useState(false);
+  const [error, setError] = useState('');
   const mutedRef = useRef(false);
   const request = useRef<AbortController | null>(null);
   const audio = useRef<HTMLAudioElement | null>(null);
+  const player = useRef<HTMLAudioElement | null>(null);
   const audioUrl = useRef<string | null>(null);
   const last = useRef<SpeechRequest | null>(null);
+  // Reuse the element unlocked by the sign-in gesture for subsequent replies.
+  const unlock = useCallback(() => {
+    if (player.current) return;
+    const element = new Audio();
+    player.current = element;
+    const bytes = new Uint8Array(204);
+    const view = new DataView(bytes.buffer);
+    const label = (at: number, text: string) => {
+      for (let i = 0; i < text.length; i++) bytes[at + i] = text.charCodeAt(i);
+    };
+    label(0, 'RIFF');
+    view.setUint32(4, 196, true);
+    label(8, 'WAVEfmt ');
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true);
+    view.setUint16(22, 1, true);
+    view.setUint32(24, 8000, true);
+    view.setUint32(28, 16000, true);
+    view.setUint16(32, 2, true);
+    view.setUint16(34, 16, true);
+    label(36, 'data');
+    view.setUint32(40, 160, true);
+    element.src =
+      'data:audio/wav;base64,' + btoa(String.fromCharCode(...bytes));
+    void element.play().catch(() => {});
+  }, []);
   const release = useCallback(() => {
     request.current?.abort();
     request.current = null;
@@ -76,6 +104,7 @@ export function useVoice() {
         return;
       }
       const controller = new AbortController();
+      setError('');
       request.current = controller;
       setStatus('loading');
       try {
@@ -89,20 +118,29 @@ export function useVoice() {
           },
           body: JSON.stringify(value),
         });
-        if (!result.ok) throw new Error('Speech unavailable');
+        if (!result.ok) {
+          const problem = (await result.json().catch(() => null)) as {
+            error?: unknown;
+          } | null;
+          if (!controller.signal.aborted && typeof problem?.error === 'string')
+            setError(problem.error);
+          throw new Error('Speech unavailable');
+        }
         const blob = await result.blob();
         if (controller.signal.aborted) return;
         const url = URL.createObjectURL(blob);
-        const element = new Audio(url);
+        const element = player.current || new Audio();
+        player.current = element;
+        element.setAttribute('src', url);
         audioUrl.current = url;
         audio.current = element;
-        element.onended = () => {
+        audio.current.onended = () => {
           if (audio.current === element) {
             release();
             setStatus('idle');
           }
         };
-        element.onerror = () => {
+        audio.current.onerror = () => {
           if (audio.current === element) {
             release();
             setStatus('unavailable');
@@ -135,5 +173,5 @@ export function useVoice() {
       /* Optional device preference. */
     }
   }, [stop]);
-  return { status, muted, play, stop, replay, toggleMute };
+  return { status, muted, error, play, stop, replay, toggleMute, unlock };
 }

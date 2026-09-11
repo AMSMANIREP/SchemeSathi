@@ -36,7 +36,6 @@ export function Shell({ children }: { children: React.ReactNode }) {
     language,
     selectLanguage,
     busy,
-    recording,
     visitor,
     signOut,
     applications,
@@ -93,7 +92,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           <Pick
             value={language}
             label="Language / भाषा / ಭಾಷೆ / தமிழ் / മലയാളം"
-            disabled={busy || recording}
+            disabled={busy}
             onChange={(v) => void selectLanguage(v as Language)}
             options={languageOptions}
           />

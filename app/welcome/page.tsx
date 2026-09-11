@@ -2,7 +2,6 @@
 import { useRouter } from 'next/navigation';
 import { useApp } from '../providers';
 import { Landing } from '../landing';
-import { VoiceControls } from '../voice-controls';
 
 /**
  * The landing is a real route, not a conditional render inside the shell.
@@ -15,12 +14,10 @@ export default function Welcome() {
   return (
     <>
       <Landing
-        onEnter={(name) => {
-          signIn(name);
-          router.push('/profile');
+        onEnter={async (name) => {
+          if (await signIn(name)) router.push('/profile');
         }}
       />
-      <VoiceControls />
     </>
   );
 }

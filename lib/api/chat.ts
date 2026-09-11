@@ -8,6 +8,7 @@ import {
 import { guidance } from '../guidance';
 import { redact } from '../rules';
 import type { SessionRoute } from '../session';
+import { languageStatements } from '../voice-preference';
 import type { Language, Profile } from '../types';
 import { sessionLanguage, languageCommand, voiceCopy } from '../languages';
 
@@ -62,10 +63,7 @@ export const chat: SessionRoute = async ({ req, p, method, s, trace }) => {
     s.language,
     !!s.language_selected || s.language !== 'en',
   );
-  await db()
-    .prepare('UPDATE sessions SET language=?,language_selected=1 WHERE id=?')
-    .bind(s.language, s.id)
-    .run();
+  await db().batch(languageStatements(s, s.language));
   const command = languageCommand(b.message);
   const result = command
     ? { profile: {}, mode: 'guided_form' }
