@@ -139,6 +139,8 @@ type Ctx = {
   messages: MessageRecord[];
   conversationId: string | null;
   checkpoint: string;
+  /** What the turn is doing right now, while it is doing it. */
+  stage: string;
   detail: Scheme | null;
   setError: (s: string) => void;
   setNotice: (s: string) => void;
@@ -203,6 +205,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [messages, setMessages] = useState<MessageRecord[]>([]);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [checkpoint, setCheckpoint] = useState('GATHERING');
+  const [stage, setStage] = useState('');
   const initialized = useRef(false);
   const recorder = useRef<MediaRecorder | null>(null);
   const stream = useRef<MediaStream | null>(null);
@@ -323,28 +326,94 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     };
     setMessages((m) => [...m, pending]);
     setBusy(true);
+    setStage('');
     setError('');
     try {
       const id = await ensureConversation();
-      const r = await api<{
-        userMessage: MessageRecord;
-        message: MessageRecord;
-        checkpoint: string;
-      }>('conversations/' + id + '/messages', 'POST', { message: text });
-      setMessages((m) => [
-        ...m.filter((x) => x.id !== pending.id),
-        r.userMessage,
-        r.message,
-      ]);
-      setCheckpoint(r.checkpoint);
-      const s = await api<Session>('sessions');
-      setSession(s);
-      if (s.profileVersion > 0) await refreshDecisions();
+      const r = await fetch('/api/v1/conversations/' + id + '/messages', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'SchemeSathi',
+          // Streaming is opt-in; without this the same endpoint returns JSON.
+          Accept: 'text/event-stream',
+        },
+        body: JSON.stringify({ message: text }),
+      });
+      if (!r.ok || !r.body) {
+        const failure = (await r.json().catch(() => ({}))) as { error?: string };
+        throw new Error(failure.error || 'Request failed');
+      }
+
+      const reader = r.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let event = '';
+      const streamId = 'streaming-' + Date.now();
+
+      let streaming = true;
+      while (streaming) {
+        const chunk = await reader.read();
+        if (chunk.done) {
+          streaming = false;
+          break;
+        }
+        buffer += decoder.decode(chunk.value, { stream: true });
+
+        // SSE frames are separated by a blank line; anything after the last
+        // one is a partial frame and waits for the next chunk.
+        const frames = buffer.split('\n\n');
+        buffer = frames.pop() ?? '';
+
+        for (const frame of frames) {
+          for (const line of frame.split('\n')) {
+            if (line.startsWith('event: ')) event = line.slice(7).trim();
+            else if (line.startsWith('data: ')) {
+              const data = JSON.parse(line.slice(6));
+              if (event === 'status') setStage(data.stage);
+              else if (event === 'user')
+                setMessages((m) => [
+                  ...m.filter((x) => x.id !== pending.id),
+                  data as MessageRecord,
+                ]);
+              else if (event === 'delta') {
+                setStage('');
+                setMessages((m) => {
+                  const rest = m.filter((x) => x.id !== streamId);
+                  return [
+                    ...rest,
+                    {
+                      id: streamId,
+                      role: 'assistant',
+                      text: data.text,
+                      inputMode: 'text',
+                      blocks: [],
+                      createdAt: new Date().toISOString(),
+                    },
+                  ];
+                });
+              } else if (event === 'message')
+                setMessages((m) => [
+                  ...m.filter((x) => x.id !== streamId),
+                  data as MessageRecord,
+                ]);
+              else if (event === 'done') {
+                setCheckpoint(data.checkpoint);
+                const fresh = await api<Session>('sessions');
+                setSession(fresh);
+                if (fresh.profileVersion > 0) await refreshDecisions();
+              } else if (event === 'failed') throw new Error(data.error);
+            }
+          }
+        }
+      }
     } catch (e) {
-      setMessages((m) => m.filter((x) => x.id !== pending.id));
+      setMessages((m) => m.filter((x) => !x.id.startsWith('pending-') && !x.id.startsWith('streaming-')));
       setError((e as Error).message);
     } finally {
       setBusy(false);
+      setStage('');
     }
   };
 
@@ -575,6 +644,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         messages,
         conversationId,
         checkpoint,
+        stage,
         saveScheme,
         updateApplication,
         removeApplication,

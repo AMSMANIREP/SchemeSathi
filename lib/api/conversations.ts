@@ -1,4 +1,5 @@
 import { body, db, HttpError, json, limit } from '../http';
+import type { SessionCtx } from '../session';
 import { planTurn } from '../agent/turn';
 import { detectFocus, isDecline } from '../agent/focus.ts';
 import { runAgent } from '../agent/loop';
@@ -97,6 +98,126 @@ export const conversations: SessionRoute = async ({
     }
 
     if (method === 'POST') {
+      const conversation2 = conversation;
+      // Streaming is opt-in by Accept header, so the JSON contract the API
+      // tests and any non-streaming client rely on is untouched.
+      const wantsStream = (req.headers.get('accept') || '').includes(
+        'text/event-stream',
+      );
+      if (!wantsStream) {
+        const payload = await runTurn({ req, s, trace } as SessionCtx, conversation2, () => {});
+        return json(payload, 201);
+      }
+
+      const { readable, writable } = new TransformStream();
+      const writer = writable.getWriter();
+      const encode = new TextEncoder();
+      const send = (event: string, data: unknown) =>
+        writer.write(encode.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`));
+
+      void (async () => {
+        try {
+          const payload = await runTurn(
+            { req, s, trace } as SessionCtx,
+            conversation2,
+            (stage) => void send('status', { stage }),
+          );
+          await send('user', payload.userMessage);
+          // The text is revealed a few words at a time rather than streamed
+          // from the model. Model tokens cannot be shown before validation,
+          // and roughly one reply in three is currently rejected and replaced
+          // by the deterministic sentence — text appearing and then vanishing
+          // would be worse than text arriving a moment later. The wait this
+          // removes is the tool round trips, which the status events cover.
+          const words = payload.message.text.split(/(\s+)/);
+          let sent = '';
+          for (let i = 0; i < words.length; i += 3) {
+            sent += words.slice(i, i + 3).join('');
+            await send('delta', { text: sent });
+          }
+          await send('message', payload.message);
+          await send('done', {
+            checkpoint: payload.checkpoint,
+            profileVersion: payload.profileVersion,
+          });
+        } catch (error) {
+          await send('failed', {
+            error:
+              error instanceof HttpError
+                ? error.message
+                : 'The service is temporarily unavailable. Please try again.',
+          });
+        } finally {
+          await writer.close();
+        }
+      })();
+
+      return new Response(readable, {
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-store',
+          Connection: 'keep-alive',
+          'X-Content-Type-Options': 'nosniff',
+        },
+      });
+    }
+  }
+
+  if (p.startsWith('conversations/') && !path[2] && method === 'DELETE') {
+    await owned(path[1], s.id);
+    await db()
+      .prepare('DELETE FROM conversations WHERE id=? AND owner=?')
+      .bind(path[1], s.id)
+      .run();
+    return json({ deleted: true });
+  }
+
+  return null;
+};
+
+/**
+ * Reads a direct answer to the field we asked about. Returns null when the
+ * reply is not a usable value, so the turn falls back to extraction and the
+ * agent can ask again rather than recording a guess as a statement.
+ */
+function coerce(field: string, text: string): string | number | null {
+  const spec = fields.find((f) => f.key === field);
+  if (!spec) return null;
+  const value = text.trim().toLowerCase();
+
+  if (spec.type === 'number') {
+    const digits = value
+      .replace(/[०-९]/g, (c) => String(c.charCodeAt(0) - 2406))
+      .replace(/[೦-೯]/g, (c) => String(c.charCodeAt(0) - 3302))
+      .match(/\d+(?:\.\d+)?/);
+    if (!digits) return null;
+    return ok(field, Number(digits[0]));
+  }
+
+  const exact = (spec.values || []).find((v) => v === value);
+  if (exact) return exact;
+  if (/^(yes|y|haan|हाँ|हां|ಹೌದು)$/i.test(value) && spec.values?.includes('yes'))
+    return 'yes';
+  if (/^(no|n|nahi|नहीं|ಇಲ್ಲ)$/i.test(value) && spec.values?.includes('no'))
+    return 'no';
+  return (spec.values || []).find((v) => value.includes(v.replace('_', ' '))) ?? null;
+}
+
+/** Lets the profile validator be the single judge of what a field accepts. */
+function ok(field: string, value: string | number) {
+  try {
+    validateProfile({ [field]: value });
+    return value;
+  } catch {
+    return null;
+  }
+}
+
+async function runTurn(
+  { req, s, trace }: SessionCtx,
+  conversation: Row,
+  onStatus: (stage: string) => void,
+) {
       await limit('turn:' + s.id, 30);
       const b = await body(req);
       if (
@@ -156,6 +277,7 @@ export const conversations: SessionRoute = async ({
         provenance[askedField] = 'answered';
         changed.push({ field: askedField, provenance: 'answered' });
       } else {
+        onStatus('reading');
         const found = await extract(text, s.language);
         for (const [field, value] of Object.entries(found.profile)) {
           if (value === null) continue;
@@ -193,6 +315,7 @@ export const conversations: SessionRoute = async ({
       const query = [conversation.title as string, text]
         .filter(Boolean)
         .join(' ');
+      onStatus('searching');
       const candidates = (await retrieve(query, live)).map((c) => c.schemeId);
 
       const previous = await db()
@@ -260,6 +383,7 @@ export const conversations: SessionRoute = async ({
             )
             .bind(conversation.id)
             .all<{ role: string; text: string }>();
+          onStatus('thinking');
           const spoken = await runAgent({
             schemes: live,
             profile: merged,
@@ -381,65 +505,11 @@ export const conversations: SessionRoute = async ({
           ),
       ]);
 
-      return json(
-        {
-          userMessage,
-          message: assistant,
-          checkpoint: plan.checkpoint,
-          profileVersion: s.version + 1,
-          traceId: trace,
-        },
-        201,
-      );
-    }
-  }
-
-  if (p.startsWith('conversations/') && !path[2] && method === 'DELETE') {
-    await owned(path[1], s.id);
-    await db()
-      .prepare('DELETE FROM conversations WHERE id=? AND owner=?')
-      .bind(path[1], s.id)
-      .run();
-    return json({ deleted: true });
-  }
-
-  return null;
-};
-
-/**
- * Reads a direct answer to the field we asked about. Returns null when the
- * reply is not a usable value, so the turn falls back to extraction and the
- * agent can ask again rather than recording a guess as a statement.
- */
-function coerce(field: string, text: string): string | number | null {
-  const spec = fields.find((f) => f.key === field);
-  if (!spec) return null;
-  const value = text.trim().toLowerCase();
-
-  if (spec.type === 'number') {
-    const digits = value
-      .replace(/[०-९]/g, (c) => String(c.charCodeAt(0) - 2406))
-      .replace(/[೦-೯]/g, (c) => String(c.charCodeAt(0) - 3302))
-      .match(/\d+(?:\.\d+)?/);
-    if (!digits) return null;
-    return ok(field, Number(digits[0]));
-  }
-
-  const exact = (spec.values || []).find((v) => v === value);
-  if (exact) return exact;
-  if (/^(yes|y|haan|हाँ|हां|ಹೌದು)$/i.test(value) && spec.values?.includes('yes'))
-    return 'yes';
-  if (/^(no|n|nahi|नहीं|ಇಲ್ಲ)$/i.test(value) && spec.values?.includes('no'))
-    return 'no';
-  return (spec.values || []).find((v) => value.includes(v.replace('_', ' '))) ?? null;
-}
-
-/** Lets the profile validator be the single judge of what a field accepts. */
-function ok(field: string, value: string | number) {
-  try {
-    validateProfile({ [field]: value });
-    return value;
-  } catch {
-    return null;
-  }
+      return {
+        userMessage,
+        message: assistant,
+        checkpoint: plan.checkpoint,
+        profileVersion: s.version + 1,
+        traceId: trace,
+      };
 }

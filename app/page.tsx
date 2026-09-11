@@ -80,6 +80,7 @@ export default function Chat() {
     record,
     recording,
     caps,
+    stage,
   } = useApp();
   const [message, setMessage] = useState('');
   const [dismissed, setDismissed] = useState(false);
@@ -142,7 +143,13 @@ export default function Chat() {
                 <span className="turn-who label">{t.sathiLabel}</span>
                 <div className="turn-body thinking">
                   <Loader2 className="spin" size={14} />
-                  {t.thinking}
+                  {stage === 'reading'
+                    ? t.stageReading
+                    : stage === 'searching'
+                      ? t.stageSearching
+                      : stage === 'thinking'
+                        ? t.stageThinking
+                        : t.thinking}
                 </div>
               </div>
             )}
