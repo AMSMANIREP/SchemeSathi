@@ -7,6 +7,7 @@ import {
   Trash2,
   Info,
   ArrowRight,
+  FileText,
 } from 'lucide-react';
 import { useApp } from '../providers';
 import { StatusTag, Pick } from '../dialogs';
@@ -194,6 +195,13 @@ export default function Applications() {
                       onClick={() => setEditing({ ...a })}
                     >
                       {t.update}
+                    </button>
+                    <button
+                      className="btn btn-sm"
+                      onClick={() => router.push(`/applications/${a.id}/report`)}
+                    >
+                      <FileText size={13} />
+                      {t.openReport}
                     </button>
                     <button
                       className="btn btn-ghost btn-sm"

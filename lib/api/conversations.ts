@@ -1,5 +1,6 @@
 import { body, db, HttpError, json, limit } from '../http';
 import { planTurn } from '../agent/turn';
+import { detectFocus, isDecline } from '../agent/focus.ts';
 import { extract } from './chat';
 import { retrieve } from '../retrieval';
 import { fields, redact, validateProfile } from '../rules';
@@ -133,9 +134,15 @@ export const conversations: SessionRoute = async ({
         )
         .run();
 
-      // A reply to a question we just asked is a direct answer, so it is
-      // confirmed. Anything else is inference, and stays unconfirmed.
-      const askedField = (conversation.asked_field as string) || '';
+      const turn = (conversation.turns as number) + 1;
+      const offered = conversation.checkpoint === 'SAVE_OFFERED';
+      const declining = offered && isDecline(text);
+
+      // "No thanks" answers the save offer, not the profile. Reading it as a
+      // field value would record a refusal as a fact about the citizen.
+      const askedField = declining
+        ? ''
+        : (conversation.asked_field as string) || '';
       const profile = JSON.parse(s.profile) as Profile;
       const provenance = JSON.parse(s.provenance) as Record<string, Provenance>;
       const changed: { field: string; provenance: Provenance }[] = [];
@@ -179,9 +186,37 @@ export const conversations: SessionRoute = async ({
         .filter(Boolean)
         .join(' ');
       const candidates = retrieve(query, live).map((c) => c.schemeId);
+
+      const previous = await db()
+        .prepare(
+          "SELECT blocks FROM messages WHERE conversation_id=? AND role='assistant' ORDER BY created_at DESC, rowid DESC LIMIT 1",
+        )
+        .bind(conversation.id)
+        .first<{ blocks: string }>();
+      const lastPresented = (
+        JSON.parse(previous?.blocks || '[]') as { kind: string; schemeId?: string }[]
+      )
+        .filter((b) => b.kind === 'scheme_card' && b.schemeId)
+        .map((b) => b.schemeId as string);
+
+      const focus = declining
+        ? null
+        : detectFocus({
+            schemes: live,
+            lastPresented,
+            previousFocus: (conversation.focus_scheme_id as string) || null,
+            text,
+          });
+
       const plan = planTurn({
         schemes: live,
         candidates,
+        focus,
+        declinedSchemeId: declining
+          ? (conversation.focus_scheme_id as string) || null
+          : (conversation.declined_scheme_id as string) || null,
+        declinedAtTurn: declining ? turn : (conversation.declined_at_turn as number),
+        turn,
         profile: merged,
         confirmed,
         changed,
@@ -217,12 +252,18 @@ export const conversations: SessionRoute = async ({
           ),
         db()
           .prepare(
-            'UPDATE conversations SET checkpoint=?,questions_asked=?,asked_field=?,title=CASE WHEN title=\'\' THEN ? ELSE title END,updated_at=? WHERE id=?',
+            'UPDATE conversations SET checkpoint=?,questions_asked=?,asked_field=?,focus_scheme_id=?,turns=?,declined_scheme_id=?,declined_at_turn=?,title=CASE WHEN title=\'\' THEN ? ELSE title END,updated_at=? WHERE id=?',
           )
           .bind(
             plan.checkpoint,
             plan.questionsAsked,
             plan.askedField || '',
+            plan.offeredSchemeId ?? focus,
+            turn,
+            declining
+              ? (conversation.focus_scheme_id as string) || null
+              : (conversation.declined_scheme_id as string) || null,
+            declining ? turn : (conversation.declined_at_turn as number),
             text.slice(0, 60),
             assistant.createdAt,
             conversation.id,

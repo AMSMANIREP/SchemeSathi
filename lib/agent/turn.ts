@@ -1,5 +1,6 @@
 import { evaluateScheme } from '../rules.ts';
 import { hasQuestion, leverage, questionFor } from '../questions.ts';
+import { shouldOfferSave } from './focus.ts';
 import type {
   Block,
   Checkpoint,
@@ -23,6 +24,11 @@ export type TurnInput = {
   /** Fields written this turn, for the profile_updated receipt. */
   changed: { field: string; provenance: Provenance }[];
   savedSchemeIds: string[];
+  /** The scheme this conversation is actually about, if one has emerged. */
+  focus?: string | null;
+  declinedSchemeId?: string | null;
+  declinedAtTurn?: number;
+  turn?: number;
   /** The previous turn asked a question and this reply could not be read. */
   unreadAnswer?: boolean;
   questionsAsked: number;
@@ -35,6 +41,8 @@ export type TurnPlan = {
   checkpoint: Checkpoint;
   questionsAsked: number;
   askedField: string | null;
+  /** Set when this turn offered to save, so the server can record the offer. */
+  offeredSchemeId: string | null;
 };
 
 const RANK: Record<Decision['status'], number> = {
@@ -52,6 +60,11 @@ const said = {
     'Here is what your details point to so far.',
     'आपके विवरण के आधार पर अभी यह दिख रहा है।',
     'ನಿಮ್ಮ ವಿವರಗಳ ಆಧಾರದ ಮೇಲೆ ಇಲ್ಲಿಯವರೆಗೆ ಇದು ಕಾಣಿಸುತ್ತಿದೆ.',
+  ],
+  offerSave: [
+    'Would you like to keep this one in My applications, so you have the next steps to hand?',
+    'क्या आप इसे “मेरे आवेदन” में रखना चाहेंगे, ताकि अगले कदम आपके पास रहें?',
+    'ಮುಂದಿನ ಹೆಜ್ಜೆಗಳು ನಿಮ್ಮ ಬಳಿ ಇರುವಂತೆ ಇದನ್ನು “ನನ್ನ ಅರ್ಜಿಗಳು” ನಲ್ಲಿ ಇರಿಸಬೇಕೆ?',
   ],
   didNotCatch: [
     'Sorry — I did not catch that.',
@@ -78,6 +91,7 @@ export function planTurn(input: TurnInput): TurnPlan {
     confirmed,
     changed,
     savedSchemeIds,
+    focus,
     unreadAnswer,
     questionsAsked,
     language,
@@ -122,6 +136,7 @@ export function planTurn(input: TurnInput): TurnPlan {
         checkpoint: 'ASKED',
         questionsAsked: questionsAsked + 1,
         askedField: next.field,
+        offeredSchemeId: null,
       };
     }
   }
@@ -158,11 +173,51 @@ export function planTurn(input: TurnInput): TurnPlan {
       })),
     });
 
+  let checkpoint: Checkpoint = shown.length ? 'PRESENTED' : 'GATHERING';
+  let offeredSchemeId: string | null = null;
+
+  // The jump point. Every condition is server-owned state, so the offer
+  // arrives because the citizen narrowed to one scheme — not because a model
+  // decided it was a good moment to ask.
+  if (
+    focus &&
+    shouldOfferSave({
+      focus,
+      decision: decisions.get(focus) ?? null,
+      checkpoint,
+      savedSchemeIds,
+      declinedSchemeId: input.declinedSchemeId ?? null,
+      declinedAtTurn: input.declinedAtTurn ?? 0,
+      turn: input.turn ?? 0,
+    })
+  ) {
+    const scheme = schemes.find((s) => s.id === focus);
+    const decision = decisions.get(focus)!;
+    if (scheme) {
+      blocks.push({
+        kind: 'save_prompt',
+        schemeId: focus,
+        // From the rule engine, never written for the occasion.
+        reason:
+          decision.reasons.find((r) => r.result === 'PASS')?.label ?? '',
+      });
+      checkpoint = 'SAVE_OFFERED';
+      offeredSchemeId = focus;
+    }
+  }
+
   return {
-    text: shown.length ? said.presenting[n] : said.nothing[n],
+    text: shown.length
+      ? offeredSchemeId
+        ? said.presenting[n] + ' ' + said.offerSave[n]
+        : said.presenting[n]
+      : offeredSchemeId
+        ? said.offerSave[n]
+        : said.nothing[n],
     blocks,
-    checkpoint: shown.length ? 'PRESENTED' : 'GATHERING',
+    checkpoint,
     questionsAsked,
     askedField: null,
+    offeredSchemeId,
   };
 }

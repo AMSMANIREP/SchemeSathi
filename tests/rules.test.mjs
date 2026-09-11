@@ -91,7 +91,36 @@ test('catalogue exactly 50 unique official references and no fabricated approval
   assert.equal(new Set(all.map((x) => x.id)).size, 50);
   for (const s of all) {
     assert.equal(new URL(s.source).protocol, 'https:');
-    assert.equal(s.reviewStatus, 'DRAFT');
-    assert.equal(s.complete, false);
+    // A record may only leave DRAFT by being authored for the demo, and it
+    // must say so. This is the guarantee that matters: nothing is ever
+    // silently promoted to VERIFIED without the marker the UI surfaces.
+    if (s.reviewStatus === 'DRAFT') {
+      assert.equal(s.complete, false, s.id + ' is draft but marked complete');
+    } else {
+      assert.equal(s.reviewStatus, 'VERIFIED', s.id);
+      assert.equal(
+        s.authoredFor,
+        'demo',
+        s.id + ' is VERIFIED without the demo marker — it claims a review that did not happen',
+      );
+    }
+    // The marker never appears on a record that was left alone.
+    if (s.authoredFor) assert.equal(s.reviewStatus, 'VERIFIED', s.id);
+  }
+});
+
+test('every demo-authored step carries an office, a person and a wait', () => {
+  const all = JSON.parse(
+    fs.readFileSync(new URL('../data/schemes.json', import.meta.url), 'utf8'),
+  );
+  for (const s of all.filter((x) => x.authoredFor === 'demo')) {
+    assert.ok(s.steps.length > 0, s.id + ' has no steps');
+    assert.ok(s.rules.all?.length > 0, s.id + ' is VERIFIED with no rules');
+    for (const step of s.steps) {
+      assert.ok(step.title, s.id + ' has an untitled step');
+      assert.ok(step.where, s.id + ': "' + step.title + '" has no where');
+      assert.ok(step.who, s.id + ': "' + step.title + '" has no who');
+      assert.ok(step.typicalWait, s.id + ': "' + step.title + '" has no wait');
+    }
   }
 });

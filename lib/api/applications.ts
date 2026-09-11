@@ -1,6 +1,5 @@
 import { body, db, HttpError, json } from '../http';
-import { catalogue } from '../catalogue';
-import { redact } from '../rules';
+import { evaluateScheme, redact } from '../rules';
 import { schemes } from '../schemes';
 import type { SessionRoute } from '../session';
 
@@ -35,13 +34,28 @@ export const applications: SessionRoute = async ({ req, p, path, method, s }) =>
 
   if (p === 'applications' && method === 'POST') {
     const b = await body(req);
-    if (!catalogue.some((x) => x.id === b.schemeId))
-      throw new HttpError(400, 'Unknown scheme.');
+    const scheme = (await schemes()).find((x) => x.id === b.schemeId);
+    if (!scheme) throw new HttpError(400, 'Unknown scheme.');
+    // Freeze the verdict at save time. The report is built from this, so a
+    // later profile edit cannot silently rewrite a document already printed.
+    const decision = evaluateScheme(
+      scheme,
+      JSON.parse(s.profile),
+      JSON.parse(s.confirmed),
+    );
     await db()
       .prepare(
-        'INSERT INTO applications(id,owner,scheme_id,updated_at) VALUES(?,?,?,?) ON CONFLICT(owner,scheme_id) DO NOTHING',
+        'INSERT INTO applications(id,owner,scheme_id,decision_snapshot,scheme_version,conversation_id,updated_at) VALUES(?,?,?,?,?,?,?) ON CONFLICT(owner,scheme_id) DO NOTHING',
       )
-      .bind(crypto.randomUUID(), s.id, b.schemeId, new Date().toISOString())
+      .bind(
+        crypto.randomUUID(),
+        s.id,
+        b.schemeId,
+        JSON.stringify(decision),
+        scheme.version,
+        typeof b.conversationId === 'string' ? b.conversationId : null,
+        new Date().toISOString(),
+      )
       .run();
     return json({ saved: true }, 201);
   }

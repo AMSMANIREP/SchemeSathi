@@ -1571,145 +1571,13 @@ button.rowopen small {
   }
 }
 
-/* History lives in a rail at the top left of the chat surface. Collapsed it is
-   just its toggle; open it is a column beside the conversation, never over it. */
+/* The chat surface is a single centred column. It was a two-column grid when
+   a history rail sat beside it; the rail is gone, and with one child left the
+   column was sizing to its content and hugging the left edge. */
 .chatpage {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 0;
-  align-items: start;
-}
-.chatpage.hist-open {
-  gap: 28px;
-}
-
-.histrail {
-  position: sticky;
-  top: 118px;
-  padding-top: 64px;
-  width: auto;
-}
-.histrail.open {
-  width: 268px;
-}
-
-.histtoggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  height: 36px;
-  padding: 0 10px;
-  border: 1px solid var(--rule);
-  background: var(--surface);
-  border-radius: 8px;
-  color: var(--steel);
-  cursor: pointer;
-  font-family: var(--font-mono-stack);
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0.13em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  overflow: hidden;
-  transition:
-    color 0.16s var(--ease-out),
-    border-color 0.16s var(--ease-out),
-    box-shadow 0.16s var(--ease-out);
-}
-.histtoggle:hover {
-  color: var(--ink);
-  border-color: var(--steel);
-  box-shadow: var(--shadow-sm);
-}
-.histtoggle svg {
-  flex: none;
-}
-.histtoggle-text {
-  display: none;
-}
-.histrail.open .histtoggle-text {
-  display: inline;
-}
-.histrail.open .histcount {
-  margin-left: auto;
-}
-.histrail.open .histtoggle {
-  color: var(--ink);
-  width: 100%;
-}
-.histcount {
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--ink);
-  background: var(--panel);
-  border-radius: 99px;
-  padding: 1px 6px;
-}
-
-.histcol {
-  margin-top: 10px;
-  background: var(--surface);
-  border: 1px solid var(--rule);
-  border-radius: 10px;
-  box-shadow: var(--shadow-sm);
-  overflow: hidden;
-  animation: rise 0.24s var(--ease-out);
-}
-.histlist {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  max-height: 46vh;
-  overflow-y: auto;
-}
-.histlist li + li {
-  border-top: 1px solid var(--rule);
-}
-.histlist button {
   display: block;
-  width: 100%;
-  text-align: left;
-  background: none;
-  border: 0;
-  padding: 11px 13px;
-  font: inherit;
-  font-size: 12.5px;
-  line-height: 1.5;
-  color: var(--slate);
-  cursor: pointer;
-  transition: background 0.14s var(--ease-out);
 }
-.histlist button:hover {
-  background: var(--paper);
-}
-.histcol-foot {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 13px;
-  border-top: 1px solid var(--rule);
-  background: var(--paper);
-}
-.histcol-foot button {
-  margin-left: auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  background: none;
-  border: 0;
-  cursor: pointer;
-  font: inherit;
-  font-size: 12.5px;
-  color: var(--steel);
-}
-.histcol-foot button:hover {
-  color: var(--stop);
-}
-.histempty {
-  padding: 14px 13px;
-  font-size: 12.5px;
-  color: var(--steel);
-}
+
 .composer-count {
   margin-left: auto;
 }
@@ -1939,4 +1807,423 @@ button.rowopen small {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--steel);
+}
+
+/* ============================================================
+   Landing. Persuade mode inside the established world: the same
+   ink-on-paper register, given scale and air. The warmth is in
+   the type size and the voice, not in new colour.
+   ============================================================ */
+
+.landing-workspace {
+  padding-top: 0;
+}
+.landing {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 72px 0 56px;
+}
+.landing-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  gap: 64px;
+  align-items: center;
+  padding-bottom: 64px;
+  border-bottom: 1px solid var(--rule);
+}
+.landing-copy h1 {
+  font-size: clamp(2.8rem, 4.4vw, 3.9rem);
+  line-height: 1.06;
+  letter-spacing: -0.03em;
+  margin: 0 0 22px;
+  text-wrap: balance;
+}
+.landing-lede {
+  font-size: 17px;
+  line-height: 1.62;
+  color: var(--steel);
+  max-width: 62ch;
+  margin: 0 0 34px;
+}
+.landing-enter {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  max-width: 480px;
+}
+.landing-enter .field {
+  flex: 1;
+  margin: 0;
+}
+.landing-note {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 14px;
+  font-size: 12.5px;
+  color: var(--steel);
+}
+.landing-note svg {
+  color: var(--accent-go);
+  flex: none;
+}
+
+/* The pass, oversized and tilted a degree off true — a document set down
+   on a desk, not a card in a grid. */
+.landing-pass {
+  perspective: 1400px;
+}
+.landing-pass .pass {
+  transform: rotate(-1.1deg);
+  box-shadow: var(--shadow-md);
+}
+.landing-pass .pass-body h2 {
+  font-size: 1.5rem;
+  margin: 0 0 4px;
+}
+
+.landing-verdicts {
+  padding: 52px 0;
+  border-bottom: 1px solid var(--rule);
+}
+.landing-claim {
+  font-size: 1.45rem;
+  font-weight: 600;
+  letter-spacing: -0.016em;
+  margin: 0 0 20px;
+}
+.landing-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.landing-pills .status {
+  font-size: 11px;
+  padding: 6px 13px;
+}
+.landing-claim-sub {
+  font-size: 15px;
+  line-height: 1.62;
+  color: var(--steel);
+  margin: 0;
+}
+
+.landing-how {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 34px;
+  padding: 52px 0;
+  border-bottom: 1px solid var(--rule);
+}
+.landing-how h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 8px;
+  padding-top: 12px;
+  border-top: 2px solid var(--ink);
+}
+.landing-how p {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--steel);
+  margin: 0;
+}
+
+.landing-foot {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 28px;
+  font-size: 13px;
+  color: var(--steel);
+}
+.landing-foot svg {
+  flex: none;
+}
+.landing-foot .data {
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.visitorchip {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 99px;
+  padding: 6px 13px;
+  cursor: pointer;
+  color: var(--slate);
+}
+.visitorchip:hover {
+  background: var(--ink);
+  color: var(--surface);
+}
+
+/* ============================================================
+   Report. A document, not a dashboard.
+   ============================================================ */
+
+.report {
+  max-width: 860px;
+  margin: 0 auto;
+}
+.reportbar {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.demomark {
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--alert);
+  background: var(--changed-field, #fffdf2);
+  padding: 11px 14px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--slate);
+  margin: 0 0 20px;
+}
+.report-masthead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  background: var(--ink);
+  color: var(--surface);
+  padding: 26px 28px;
+  border-radius: 10px 10px 0 0;
+}
+.report-masthead .label {
+  color: var(--mist);
+}
+.report-masthead h1 {
+  font-size: 2rem;
+  margin: 6px 0 4px;
+  color: var(--surface);
+  letter-spacing: -0.02em;
+}
+.report-masthead p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--mist);
+}
+.report-sit {
+  border: 1px solid var(--rule);
+  border-top: none;
+  background: var(--surface);
+}
+.report-sit blockquote {
+  margin: 0;
+  padding: 18px 28px 20px;
+  border-top: 1px dashed var(--rule);
+  font-size: 15px;
+  line-height: 1.62;
+  color: var(--slate);
+}
+.report-sec {
+  padding: 30px 0;
+  border-bottom: 1px solid var(--rule);
+}
+.report-sec h2 {
+  font-family: var(--font-mono-stack);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--steel);
+  margin: 0 0 14px;
+}
+.report-cols {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 40px;
+}
+.reportfees {
+  margin-top: 12px;
+  font-size: 13.5px;
+  color: var(--steel);
+}
+.reportfees .label {
+  display: block;
+  margin-bottom: 3px;
+}
+.docbox {
+  width: 13px;
+  height: 13px;
+  flex: none;
+  border: 1px solid var(--steel);
+  border-radius: 3px;
+  margin-top: 3px;
+}
+.docbox.held {
+  background: var(--accent-go);
+  border-color: var(--accent-go);
+}
+.reportsteps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+.reportsteps li {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 14px;
+  break-inside: avoid;
+}
+.reportsteps li.for-you {
+  border-left: 3px solid var(--alert);
+  background: #fffdf2;
+  margin-left: -14px;
+  padding: 12px 0 12px 11px;
+}
+.reportstep-n {
+  font-size: 18px;
+  color: var(--steel);
+}
+.reportsteps h3 {
+  font-size: 15.5px;
+  font-weight: 600;
+  margin: 0 0 4px;
+}
+.becauseyou {
+  font-family: var(--font-mono-stack);
+  font-size: 10px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--alert-ink);
+  margin: 0 0 6px;
+}
+.reportsteps .pass-seg {
+  margin-top: 10px;
+  border-top: 1px dashed var(--rule);
+}
+.report-foot {
+  padding-top: 24px;
+}
+.reportmeta {
+  margin-top: 14px;
+  color: var(--mist);
+}
+
+@media print {
+  .report {
+    max-width: none;
+  }
+  .report-masthead {
+    background: #fff;
+    color: #000;
+    border: none;
+    border-bottom: 2px solid #000;
+    border-radius: 0;
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .report-masthead h1 {
+    color: #000;
+  }
+  .report-masthead p,
+  .report-masthead .label {
+    color: #444;
+  }
+  .report-sit {
+    border: none;
+  }
+  .reportsteps li.for-you {
+    background: none;
+    border-left: 2px solid #000;
+  }
+  .report-sec,
+  .reportsteps li,
+  .demomark {
+    break-inside: avoid;
+  }
+  /* Browsers drop background fills when printing, so a ticked document would
+     print identical to an unticked one. Borders always print: fill the box
+     with its own border instead. */
+  .docbox {
+    border: 1px solid #000;
+  }
+  .docbox.held {
+    background: none;
+    border: 6px solid #000;
+  }
+  /* The demo marker must survive onto paper — it is the sheet's own caveat. */
+  .demomark {
+    border: 1px solid #000;
+    border-left: 4px solid #000;
+    background: none;
+  }
+}
+
+/* The save offer: an unissued pass, not a hidden one. */
+.blk-save {
+  max-width: 420px;
+}
+.blk-save .pass-body h3 {
+  font-size: 16px;
+  margin: 0 0 4px;
+}
+.blk-saved b {
+  color: var(--accent-go);
+}
+.blk-profile button {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--steel);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  font: inherit;
+}
+.blk-profile button:hover {
+  color: var(--ink);
+}
+
+/* Account controls replace the privacy pill once the citizen is inside. */
+.accountbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  padding: 6px 10px;
+  color: var(--steel);
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.16s var(--ease-out);
+}
+.accountbtn:hover {
+  border-color: var(--rule);
+  background: var(--surface);
+  color: var(--ink);
+}
+.accountbtn svg {
+  flex: none;
+}
+
+.btn-lg {
+  font-size: 12px;
+  padding: 14px 22px;
+  letter-spacing: 0.12em;
+}
+.loginform {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 4px;
+}
+.loginform .btn {
+  justify-content: center;
+  margin-top: 2px;
+}
+.loginform .landing-note {
+  margin-top: 0;
 }

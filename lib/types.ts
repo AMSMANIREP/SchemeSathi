@@ -51,6 +51,11 @@ export type Scheme = {
   steps: Step[];
   /** What the citizen pays, if anything. Empty until authored. */
   fees: string;
+  /**
+   * Set when a record was drafted for a demonstration build rather than
+   * independently reviewed. The interface shows a notice wherever it appears.
+   */
+  authoredFor?: 'demo';
   tags: string[];
 };
 export type RuleOutcome = {

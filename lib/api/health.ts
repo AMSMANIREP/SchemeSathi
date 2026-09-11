@@ -1,5 +1,6 @@
 import { db, json, settings, type Route } from '../http';
 import { retrievalMode } from '../retrieval';
+import { llm } from '../llm';
 
 export const health: Route = async ({ p, trace }) => {
   if (p === 'health/live')
@@ -16,11 +17,7 @@ export const health: Route = async ({ p, trace }) => {
     return json({
       hosting: e.HOSTING_PROVIDER || 'Sites',
       storage: 'D1',
-      ai: !!(
-        e.AZURE_OPENAI_ENDPOINT &&
-        e.AZURE_OPENAI_API_KEY &&
-        e.AZURE_OPENAI_CHAT_DEPLOYMENT
-      ),
+      ai: !!llm(),
       voice: !!(e.ELEVENLABS_API_KEY && e.ELEVENLABS_VOICE_ID),
       // Lexical retrieval is a build artifact, so it is always present.
       // The dense layer is what a binding turns on.

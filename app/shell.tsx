@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   Compass,
   MessageSquare,
@@ -8,6 +8,8 @@ import {
   UserRound,
   SlidersHorizontal,
   ShieldCheck,
+  UserCircle2,
+  LogOut,
   Globe,
   Info,
   RefreshCw,
@@ -16,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useApp } from './providers';
 import { SchemeDialog, Pick } from './dialogs';
+import { Gate } from './gate';
 import type { Language } from '@/lib/types';
 
 const routes = [
@@ -31,6 +34,8 @@ export function Shell({ children }: { children: React.ReactNode }) {
     t,
     language,
     selectLanguage,
+    visitor,
+    signOut,
     applications,
     notice,
     setNotice,
@@ -39,6 +44,17 @@ export function Shell({ children }: { children: React.ReactNode }) {
     load,
   } = useApp();
   const pathname = usePathname();
+  const router = useRouter();
+
+  // The landing surface is the whole page: no nav, no chrome, nothing to
+  // navigate before there is anything to navigate to. Keyed off the pathname
+  // rather than sign-in state, so the server and the client agree.
+  if (pathname === '/welcome')
+    return (
+      <main className="workspace landing-workspace" id="main">
+        {children}
+      </main>
+    );
 
   return (
     <>
@@ -57,10 +73,20 @@ export function Shell({ children }: { children: React.ReactNode }) {
           </span>
         </Link>
         <div className="topbar-right">
-          <span className="privacy-pill">
-            <ShieldCheck size={13} />
-            {t.private}
-          </span>
+          <Link className="accountbtn" href="/profile">
+            <UserCircle2 size={15} />
+            <span className="label">{visitor || t.profile}</span>
+          </Link>
+          <button
+            className="accountbtn"
+            onClick={() => {
+              signOut();
+              router.push('/welcome');
+            }}
+          >
+            <LogOut size={14} />
+            <span className="label">{t.signOut}</span>
+          </button>
           <Pick
             value={language}
             label="Language / भाषा / ಭಾಷೆ"
@@ -124,7 +150,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
             {t.sourceEnglish}
           </div>
         )}
-        {children}
+        <Gate>{children}</Gate>
       </main>
 
       <footer className="site-footer">

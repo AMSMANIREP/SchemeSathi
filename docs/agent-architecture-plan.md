@@ -580,7 +580,7 @@ Existing endpoints keep their contracts. `POST /chat` stays for one release as a
 
 **`lib/server.ts` splits during this work.** At 660 lines with one linear `if` chain it is already at the edge of comfortable, and this plan roughly doubles it. Split into `lib/api/{sessions,schemes,profile,recommendations,conversations,applications,reports,voice,privacy}.ts` behind a small route table, with `lib/http.ts` holding `json()`, `body()`, `HttpError`, `limit()` and `origin()`. Same behaviour, mechanical change, done first so later phases land in small files.
 
-Rate limits, using the existing `request_limits` table: 30 messages per conversation per hour, 12 report generations per session per hour, retrieval 60/hour.
+Rate limits use the existing `request_limits` table, whose window is **one minute**, not one hour — an earlier draft of this document said per-hour and was wrong about the mechanism. Current ceilings per minute: 30 conversation turns, 20 searches, 12 report generations, 10 new conversations, 8 transcriptions, 8 playbacks, 5 feedback submissions, and 30 session creations per IP.
 
 ---
 
@@ -599,8 +599,13 @@ Two deviations found while building it. **`fuse.ts` was not written** — recipr
 **Phase 2 — Conversation store (~1 day) — ✅ done**
 `conversations` + `messages` in `db/schema.ts`, `pnpm db:generate`. Conversation endpoints, no agent yet — assistant turns come from the existing extractor and deterministic blocks. The chat page becomes a real transcript. **This is the phase that proves the block protocol** with zero model risk.
 
-**Phase 3 — Agent loop (~2 days) — next**
-`lib/agent/{loop,tools,prompt,validate,checkpoints}.ts`. SSE streaming. Tool-calling against the Azure deployment. Checkpoint machine and jump points. Feature-flagged: `capabilities.ai === false` keeps Phase 2 behaviour exactly.
+**Phase 3 — Jump points ✅ done · agent loop — remaining**
+
+*Jump points (done).* `lib/agent/focus.ts` implements §6's focus signal and the save offer. Focus is deterministic and conservative: naming a scheme is the strongest signal, a single presented card the next, otherwise the previous focus carries forward — **four presented cards are not a focus**, because the citizen has not chosen anything and manufacturing a choice is how an advocate becomes a funnel. `shouldOfferSave()` reads only server-owned state, so a model can influence the focus but never fire the offer. Declining is remembered for three turns, per scheme. The `save_prompt` renders as a `pass-blank`, saving emits a `saved_receipt` into the transcript, and that leads straight to the report. 13 tests in `tests/focus.test.mjs`.
+
+Verified live: a broad turn offers nothing, naming PM-KISAN fires the offer with a rule-derived reason, "no thanks" is respected and is *not* read as a profile answer, and re-mentioning inside the cooldown stays suppressed.
+
+*Agent loop (remaining).* `lib/agent/{loop,tools,prompt,validate}.ts`, SSE streaming, tool-calling against the Azure deployment. Feature-flagged: `capabilities.ai === false` keeps the deterministic planner exactly as it is. **Blocked on credentials** — no `AZURE_OPENAI_*` values are configured, so the model path cannot be built against anything real.
 
 **Phase 4 — Chat UI, blocks, and the profile route (~2.5 days) — ✅ done (ahead of Phase 3)**
 Built before the agent loop because the deterministic planner made it possible, and because it proves the block protocol with zero model risk. `app/page.tsx` is now a transcript; `app/blocks.tsx` renders one component per block kind; `app/profile/page.tsx` owns the profile with per-field provenance and the alert edge on unconfirmed inferences; the nav carries a fifth route. `ProfileDialog` and `ProfileFields` are deleted along with the provider state that drove them — the chat no longer has a modal in it at all.
@@ -631,16 +636,36 @@ type Document = {
 
 Shipped: types in `lib/types.ts`; `scripts/migrate-catalogue.mjs` (idempotent, `pnpm migrate:catalogue`) converted all 50 schemes to 200 steps and 102 documents; `lib/steps.ts` implements `personaliseSteps()` and `personaliseDocuments()` with 9 tests. Consumers updated: the scheme dialog, the applications checklist, the index builder, and the checklist validator — which still stores each document's `item` text, so rows saved before the migration remain valid.
 
-**0 of 200 steps carry `where`/`who`/`typicalWait`.** The converter leaves them empty by design rather than inventing an office or a waiting time; the report renders an empty field as not yet recorded. This is the authoring work §14.0 describes, and it is now the only thing between the report and being genuinely useful.
+**Authoring followed (11 September 2026).** `scripts/author-demo-schemes.mjs` (`pnpm author:demo`) authors six schemes chosen to cover the three example prompts already in the interface — PM-KISAN, Ujjwala, Old Age Pension, ADIP, College Scholarships and PM Vishwakarma — with real rules, documents, and 31 steps carrying an office, a person and an indicative wait. They are promoted to `VERIFIED` so the demo reaches a verdict, and every one carries `authoredFor: 'demo'`, which the report surfaces as a visible notice. The remaining 44 stay `DRAFT` and still abstain.
 
-**Phase 5b — Report (~2 days)**
+Two invariants now hold this honest, both tested: a record may only leave `DRAFT` by carrying the demo marker, and only a demo-authored record may reach a verdict.
+
+**Phase 5b — Report (~2 days) — ✅ done**
 `applications` gains `decisionSnapshot`, `schemeVersion` and the nullable `conversationId`; `application_reports`; `lib/report/{build,prompt,validate}.ts`; the report route, the print stylesheet, the regeneration notice.
 
 **Phase 6 — Voice (~1 day)**
 Mic moves into the chat composer with the draft-and-confirm flow; `messages.inputMode`; `lib/voice/speak.ts` with one `speak()` per block kind; `/voice/speak` replacing `/voice/synthesize`; playback controls on assistant turns and report steps. Ships last because §7.3 needs blocks and report steps to exist first.
 
-**Phase 7 — Hardening (~1 day)**
-Vectorize binding behind the flag. Rate limits. Prompt-injection tests (a scheme record is trusted data; a citizen message is not). Print QA in Chrome and Firefox at A4. Kannada and Hindi passes over every new string. `scripts/validate-release.mjs` extended to assert the index artifacts are fresh against `data/schemes.json`.
+**Phase 7 — Hardening (~1 day) — ✅ mostly done**
+
+Shipped:
+
+- **Release gate rewritten.** `scripts/validate-release.mjs` now refuses three things: a VERIFIED record without review evidence, demo-authored records unless `--allow-demo` is passed, and a retrieval index built from a different catalogue than the one shipping. `pnpm deploy:cloudflare` stays strict; `pnpm deploy:demo` is a separate, explicitly named action. A demo build can no longer ship as production by habit.
+- **A VERIFIED step must carry an office, a person and a wait.** A printed report must not send someone to a blank address.
+- **i18n parity is tested** (`tests/i18n.test.mjs`): identical keys across all three languages, no empty strings, no prose left in English, no placeholders, and a label for every field the rules use. A missing key renders `undefined` to a Hindi speaker while English looks perfect; nothing else was catching that.
+- **Untrusted-input boundary is tested** (`tests/untrusted.test.mjs`): an injected instruction cannot become a profile field, an unconfirmed value never reaches a verdict, blocks and source URLs come only from the planner and the catalogue, report steps are never invented, and identifiers are redacted before storage.
+- **Print hardened.** Browsers drop background fills when printing, so a ticked document box printed identically to an unticked one; both it and the demo marker now use borders, which always print.
+- **Rate-limit documentation corrected** — the window is one minute, not one hour. See §11.
+
+Found while hardening: `shouldOfferSave` would offer any verified scheme to a citizen who had told us nothing, because an empty profile makes every verified record `POSSIBLY_ELIGIBLE`. That is the catalogue's default state, not a narrowing. An offer now also requires at least one rule to have actually passed.
+
+Remaining: the Vectorize dense-retrieval binding (needs Cloudflare configuration), and a human print check at A4 in Chrome and Firefox — the rules are verified structurally but nothing here substitutes for looking at a printed sheet.
+
+**Provider neutrality (11 September 2026).** The chat provider is now a setting, not an architectural choice. `lib/llm.ts` resolves `LLM_BASE_URL` / `LLM_API_KEY` / `LLM_MODEL` for any OpenAI-compatible endpoint, falling back to the `AZURE_OPENAI_*` names so existing deployments keep working. The model extracts fields, calls tools and writes two validated prose slots; the deterministic engine owns every verdict, so a provider swap costs a base URL and a model name and cannot move a verdict.
+
+`pnpm eval:extraction` scores profile extraction per language against `tests/extraction-cases.json`, using the configured provider or the deterministic fallback when none is set. It exists to answer "can this provider read Kannada?" with numbers before a provider is chosen. It counts **invented** facts separately from missed ones, because a fact nobody stated becomes a wrong verdict while a missing one becomes an honest question.
+
+Baseline today, no provider configured: English 0/8, Hindi 5/7, Kannada 5/6, **0 invented**.
 
 Roughly **10.5 working days** end to end; Phases 0–2 alone (~2.5 days) already deliver a real chat transcript with cards.
 

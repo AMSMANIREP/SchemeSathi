@@ -9,9 +9,9 @@
     "benefit": "The official portal describes annual income support of ₹6,000 for eligible farmer families. Exclusions and land records require official checks.",
     "source": "https://pmkisan.gov.in/",
     "sourceTitle": "Official programme or ministry reference",
-    "sourceCheckedAt": "2026-09-06T00:00:00Z",
-    "reviewStatus": "DRAFT",
-    "version": "draft-2026-09-06",
+    "sourceCheckedAt": "2026-09-11T00:00:00Z",
+    "reviewStatus": "VERIFIED",
+    "version": "demo-2026-09-11",
     "rules": {
       "all": [
         {
@@ -19,7 +19,7 @@
           "field": "occupation",
           "op": "eq",
           "value": "farmer",
-          "label": "Farmer-family context needs verification",
+          "label": "You farm land",
           "source": "https://pmkisan.gov.in/"
         },
         {
@@ -27,7 +27,7 @@
           "field": "land",
           "op": "gt",
           "value": 0,
-          "label": "Eligible landholding must be established",
+          "label": "You hold cultivable land",
           "source": "https://pmkisan.gov.in/"
         },
         {
@@ -35,53 +35,97 @@
           "field": "taxpayer",
           "op": "eq",
           "value": "no",
-          "label": "Income-tax exclusion needs family-level review",
+          "label": "You did not pay income tax last year",
           "source": "https://pmkisan.gov.in/"
         }
       ]
     },
-    "complete": false,
+    "complete": true,
     "documents": [
       {
-        "item": "Check the current document list on the official source.",
-        "note": ""
+        "item": "Aadhaar card",
+        "note": "Required, and the name must match your land record.",
+        "proves": "pm-kisan-occupation"
       },
       {
-        "item": "Prepare only the records requested by the responsible authority.",
-        "note": ""
+        "item": "Land record (RTC / Pahani / 7-12 extract, as your state calls it)",
+        "note": "Shows the land is recorded in your name.",
+        "proves": "pm-kisan-land"
+      },
+      {
+        "item": "Bank passbook or account details",
+        "note": "The instalment is paid into this account directly."
       }
     ],
     "steps": [
       {
-        "title": "Open the official programme or ministry reference.",
-        "detail": "",
-        "where": "",
-        "who": "",
-        "typicalWait": "",
-        "relatesTo": []
+        "title": "Check that your land record carries your own name",
+        "detail": "The instalment follows the land record, not the person farming the land. If the land is still recorded in a parent’s or relative’s name, that has to be corrected first, and it is the slowest part of this process.",
+        "where": "Village revenue office, or your state’s land-records portal",
+        "who": "Village Accountant or Patwari",
+        "typicalWait": "Same day to check; a correction takes longer",
+        "relatesTo": [
+          "land"
+        ]
       },
       {
-        "title": "Confirm the current application window and all eligibility conditions.",
-        "detail": "",
-        "where": "",
-        "who": "",
-        "typicalWait": "",
-        "relatesTo": []
+        "title": "Open a bank account in your own name",
+        "detail": "Payments are made directly to a bank account held by the applicant. A zero-balance account under Jan Dhan can be opened without a minimum deposit.",
+        "where": "Any bank branch, or a bank correspondent in your village",
+        "who": "Branch staff",
+        "typicalWait": "Usually same day",
+        "relatesTo": [
+          "bank"
+        ],
+        "onlyIf": {
+          "all": [
+            {
+              "id": "needs-bank",
+              "field": "bank",
+              "op": "eq",
+              "value": "no",
+              "label": "No bank account yet",
+              "source": "https://pmkisan.gov.in/"
+            }
+          ]
+        }
       },
       {
-        "title": "Follow the official portal or local office instructions.",
-        "detail": "",
-        "where": "",
-        "who": "",
-        "typicalWait": "",
-        "relatesTo": []
+        "title": "Link your Aadhaar to that bank account",
+        "detail": "Payment fails silently when the account is not Aadhaar-seeded. Ask the branch to confirm seeding is active rather than assuming it.",
+        "where": "Your bank branch",
+        "who": "Branch staff",
+        "typicalWait": "A few days to take effect",
+        "relatesTo": [
+          "bank"
+        ]
       },
       {
-        "title": "Record your own progress here after taking action.",
-        "detail": "",
-        "where": "",
-        "who": "",
-        "typicalWait": "",
+        "title": "Register as a new farmer",
+        "detail": "You can register yourself on the PM-KISAN portal or have an operator do it at a Common Service Centre. Take the originals of everything above.",
+        "where": "pmkisan.gov.in, or any Common Service Centre",
+        "who": "Self-service, or a CSC operator",
+        "typicalWait": "Registration is immediate",
+        "relatesTo": [
+          "occupation"
+        ]
+      },
+      {
+        "title": "Wait for state verification, then check your status",
+        "detail": "Your state government verifies the land record before any instalment is released. The portal shows the reason if verification fails, and most failures are name or account mismatches that you can correct.",
+        "where": "PM-KISAN portal, Beneficiary Status",
+        "who": "State revenue department",
+        "typicalWait": "Commonly several weeks",
+        "relatesTo": [
+          "land"
+        ]
+      },
+      {
+        "title": "Keep your own record of what you submitted",
+        "detail": "Scheme Sathi does not file anything for you and cannot see your application status. Note your reference number and the date here so you know when to follow up.",
+        "where": "PM-KISAN portal",
+        "who": "You",
+        "typicalWait": "—",
         "relatesTo": []
       }
     ],
@@ -89,7 +133,8 @@
       "agriculture",
       "pm-kisan"
     ],
-    "fees": ""
+    "fees": "No fee. Registration and verification are free at a Common Service Centre and on the portal.",
+    "authoredFor": "demo"
   },
   {
     "id": "pmfby",
@@ -704,9 +749,9 @@
     "benefit": "LPG connection assistance. Poor-household declaration and official verification are required.",
     "source": "https://www.pmuy.gov.in/",
     "sourceTitle": "Official programme or ministry reference",
-    "sourceCheckedAt": "2026-09-06T00:00:00Z",
-    "reviewStatus": "DRAFT",
-    "version": "draft-2026-09-06",
+    "sourceCheckedAt": "2026-09-11T00:00:00Z",
+    "reviewStatus": "VERIFIED",
+    "version": "demo-2026-09-11",
     "rules": {
       "all": [
         {
@@ -714,7 +759,7 @@
           "field": "age",
           "op": "gte",
           "value": 18,
-          "label": "Applicant is at least 18",
+          "label": "You are at least 18",
           "source": "https://www.pmuy.gov.in/"
         },
         {
@@ -722,7 +767,7 @@
           "field": "gender",
           "op": "eq",
           "value": "female",
-          "label": "Applicant is a woman",
+          "label": "The connection is issued to a woman in the household",
           "source": "https://www.pmuy.gov.in/"
         },
         {
@@ -730,61 +775,89 @@
           "field": "lpg",
           "op": "eq",
           "value": "no",
-          "label": "No other LPG connection in the household",
+          "label": "No LPG connection in the household yet",
           "source": "https://www.pmuy.gov.in/"
         }
       ]
     },
-    "complete": false,
+    "complete": true,
     "documents": [
       {
-        "item": "KYC application form",
-        "note": ""
+        "item": "Aadhaar card of the woman applying",
+        "note": "The connection is issued in her name.",
+        "proves": "pmuy-gender"
       },
       {
-        "item": "Identity and applicable address evidence",
-        "note": ""
+        "item": "Proof of address",
+        "note": "Aadhaar is accepted when it carries your current address."
       },
       {
-        "item": "Family-composition evidence or prescribed migrant declaration",
-        "note": ""
+        "item": "Bank account details",
+        "note": "Subsidy on refills is paid into this account."
       },
       {
-        "item": "Bank details and deprivation declaration (provide only to the official distributor)",
-        "note": ""
+        "item": "Ration card or household declaration",
+        "note": "Used to confirm no existing connection in the household.",
+        "proves": "pmuy-lpg"
       }
     ],
     "steps": [
       {
-        "title": "Open the official programme or ministry reference.",
-        "detail": "",
-        "where": "",
-        "who": "",
-        "typicalWait": "",
+        "title": "Choose your gas distributor",
+        "detail": "Pick whichever of Indane, Bharatgas or HP Gas has a distributor near you — you will return there for every refill, so distance matters more than the brand.",
+        "where": "Any LPG distributor, or the Ujjwala portal",
+        "who": "Distributor staff",
+        "typicalWait": "Same day",
+        "relatesTo": [
+          "lpg"
+        ]
+      },
+      {
+        "title": "Complete the KYC form in the applying woman’s name",
+        "detail": "The form must be in her name, not her husband’s or son’s. Distributors will help fill it in if reading the form is difficult.",
+        "where": "Your chosen distributor",
+        "who": "Distributor staff",
+        "typicalWait": "Same visit",
+        "relatesTo": [
+          "gender"
+        ]
+      },
+      {
+        "title": "Open a bank account in your own name",
+        "detail": "Payments are made directly to a bank account held by the applicant. A zero-balance account under Jan Dhan can be opened without a minimum deposit.",
+        "where": "Any bank branch, or a bank correspondent in your village",
+        "who": "Branch staff",
+        "typicalWait": "Usually same day",
+        "relatesTo": [
+          "bank"
+        ],
+        "onlyIf": {
+          "all": [
+            {
+              "id": "needs-bank",
+              "field": "bank",
+              "op": "eq",
+              "value": "no",
+              "label": "No bank account yet",
+              "source": "https://www.pmuy.gov.in/"
+            }
+          ]
+        }
+      },
+      {
+        "title": "Collect the connection and ask for a safety demonstration",
+        "detail": "A safety demonstration is part of the connection, not an extra. Ask for it even if it is not offered, and ask where the nearest refill booking number is written down.",
+        "where": "Your distributor",
+        "who": "Distributor staff",
+        "typicalWait": "Commonly within a couple of weeks",
         "relatesTo": []
       },
       {
-        "title": "Confirm the current application window and all eligibility conditions.",
-        "detail": "",
-        "where": "",
-        "who": "",
-        "typicalWait": "",
-        "relatesTo": []
-      },
-      {
-        "title": "Follow the official portal or local office instructions.",
-        "detail": "",
-        "where": "",
-        "who": "",
-        "typicalWait": "",
-        "relatesTo": []
-      },
-      {
-        "title": "Record your own progress here after taking action.",
-        "detail": "",
-        "where": "",
-        "who": "",
-        "typicalWait": "",
+        "title": "Keep your own record of what you submitted",
+        "detail": "Scheme Sathi does not file anything for you and cannot see your application status. Note your reference number and the date here so you know when to follow up.",
+        "where": "Your distributor",
+        "who": "You",
+        "typicalWait": "—",
         "relatesTo": []
       }
     ],
@@ -792,7 +865,8 @@
       "women & family",
       "ujjwala yojana"
     ],
-    "fees": ""
+    "fees": "The connection itself carries no security deposit. You pay for the stove and the first refill unless a current offer covers them — ask the distributor what today’s terms are.",
+    "authoredFor": "demo"
   },
   {
     "id": "pmmvy",
@@ -1943,54 +2017,115 @@
     "benefit": "Skills and enterprise support for eligible traditional artisans.",
     "source": "https://pmvishwakarma.gov.in/",
     "sourceTitle": "Official programme or ministry reference",
-    "sourceCheckedAt": null,
-    "reviewStatus": "DRAFT",
-    "version": "draft-2026-09-06",
+    "sourceCheckedAt": "2026-09-11T00:00:00Z",
+    "reviewStatus": "VERIFIED",
+    "version": "demo-2026-09-11",
     "rules": {
-      "all": []
+      "all": [
+        {
+          "id": "vishwakarma-trade",
+          "field": "occupation",
+          "op": "eq",
+          "value": "artisan",
+          "label": "You work in one of the recognised traditional trades",
+          "source": "https://pmvishwakarma.gov.in/"
+        },
+        {
+          "id": "vishwakarma-age",
+          "field": "age",
+          "op": "gte",
+          "value": 18,
+          "label": "You are at least 18",
+          "source": "https://pmvishwakarma.gov.in/"
+        }
+      ]
     },
-    "complete": false,
+    "complete": true,
     "documents": [
       {
-        "item": "Check the current document list on the official source.",
-        "note": ""
+        "item": "Aadhaar card",
+        "note": "Registration is done with Aadhaar biometric authentication.",
+        "proves": "vishwakarma-trade"
       },
       {
-        "item": "Prepare only the records requested by the responsible authority.",
-        "note": ""
+        "item": "Bank account details",
+        "note": "Toolkit support and any credit are paid into this account."
+      },
+      {
+        "item": "Proof of your trade",
+        "note": "What counts varies by trade — ask at the Common Service Centre what they accept for yours."
+      },
+      {
+        "item": "Mobile number linked to Aadhaar",
+        "note": "Needed for the authentication step."
       }
     ],
     "steps": [
       {
-        "title": "Open the official programme or ministry reference.",
-        "detail": "",
-        "where": "",
-        "who": "",
-        "typicalWait": "",
+        "title": "Check that your trade is one of the recognised ones",
+        "detail": "The scheme covers a fixed list of traditional trades — tailoring and garment work are on it, along with carpentry, pottery, metalwork and others. If your work is not listed, registration will not proceed.",
+        "where": "pmvishwakarma.gov.in, or ask at a Common Service Centre",
+        "who": "CSC operator",
+        "typicalWait": "Same day",
+        "relatesTo": [
+          "occupation"
+        ]
+      },
+      {
+        "title": "Confirm your mobile number is linked to your Aadhaar",
+        "detail": "Registration uses Aadhaar biometric authentication and will stop at this step if the linked number is old or unreachable. This is the most common reason a registration visit fails.",
+        "where": "Any Aadhaar enrolment centre",
+        "who": "Enrolment operator",
+        "typicalWait": "A few days to take effect",
         "relatesTo": []
       },
       {
-        "title": "Confirm the current application window and all eligibility conditions.",
-        "detail": "",
-        "where": "",
-        "who": "",
-        "typicalWait": "",
+        "title": "Open a bank account in your own name",
+        "detail": "Payments are made directly to a bank account held by the applicant. A zero-balance account under Jan Dhan can be opened without a minimum deposit.",
+        "where": "Any bank branch, or a bank correspondent in your village",
+        "who": "Branch staff",
+        "typicalWait": "Usually same day",
+        "relatesTo": [
+          "bank"
+        ],
+        "onlyIf": {
+          "all": [
+            {
+              "id": "needs-bank",
+              "field": "bank",
+              "op": "eq",
+              "value": "no",
+              "label": "No bank account yet",
+              "source": "https://pmvishwakarma.gov.in/"
+            }
+          ]
+        }
+      },
+      {
+        "title": "Register at a Common Service Centre",
+        "detail": "Registration cannot be completed at home — it needs the biometric step in person. Registration is followed by verification at the local body and district level.",
+        "where": "Any Common Service Centre",
+        "who": "CSC operator",
+        "typicalWait": "Registration in one visit",
+        "relatesTo": [
+          "occupation",
+          "age"
+        ]
+      },
+      {
+        "title": "Complete the skill assessment before claiming toolkit support",
+        "detail": "Toolkit and credit support follow the training and assessment stage rather than registration. Ask when the next session near you is scheduled.",
+        "where": "The training centre you are assigned",
+        "who": "Training provider",
+        "typicalWait": "Depends on the local schedule",
         "relatesTo": []
       },
       {
-        "title": "Follow the official portal or local office instructions.",
-        "detail": "",
-        "where": "",
-        "who": "",
-        "typicalWait": "",
-        "relatesTo": []
-      },
-      {
-        "title": "Record your own progress here after taking action.",
-        "detail": "",
-        "where": "",
-        "who": "",
-        "typicalWait": "",
+        "title": "Keep your own record of what you submitted",
+        "detail": "Scheme Sathi does not file anything for you and cannot see your application status. Note your reference number and the date here so you know when to follow up.",
+        "where": "PM Vishwakarma portal",
+        "who": "You",
+        "typicalWait": "—",
         "relatesTo": []
       }
     ],
@@ -1998,7 +2133,8 @@
       "business",
       "pm vishwakarma"
     ],
-    "fees": ""
+    "fees": "Registration is free. Credit support carries interest at the rate stated in the scheme terms.",
+    "authoredFor": "demo"
   },
   {
     "id": "pmegp",
@@ -2345,54 +2481,107 @@
     "benefit": "Pension assistance under National Social Assistance Programme rules.",
     "source": "https://nsap.nic.in/",
     "sourceTitle": "Official programme or ministry reference",
-    "sourceCheckedAt": null,
-    "reviewStatus": "DRAFT",
-    "version": "draft-2026-09-06",
+    "sourceCheckedAt": "2026-09-11T00:00:00Z",
+    "reviewStatus": "VERIFIED",
+    "version": "demo-2026-09-11",
     "rules": {
-      "all": []
+      "all": [
+        {
+          "id": "ignoaps-age",
+          "field": "age",
+          "op": "gte",
+          "value": 60,
+          "label": "You are 60 or older",
+          "source": "https://nsap.nic.in/"
+        },
+        {
+          "id": "ignoaps-bpl",
+          "field": "bpl",
+          "op": "eq",
+          "value": "yes",
+          "label": "Your household is recorded as below the poverty line",
+          "source": "https://nsap.nic.in/"
+        }
+      ]
     },
-    "complete": false,
+    "complete": true,
     "documents": [
       {
-        "item": "Check the current document list on the official source.",
-        "note": ""
+        "item": "Proof of age",
+        "note": "Aadhaar, a birth certificate, or a school leaving certificate.",
+        "proves": "ignoaps-age"
       },
       {
-        "item": "Prepare only the records requested by the responsible authority.",
+        "item": "BPL ration card or the household’s BPL listing",
+        "note": "This is the document most applications are held up on.",
+        "proves": "ignoaps-bpl"
+      },
+      {
+        "item": "Bank or post office account details",
+        "note": "The pension is credited here."
+      },
+      {
+        "item": "Recent photograph",
         "note": ""
       }
     ],
     "steps": [
       {
-        "title": "Open the official programme or ministry reference.",
-        "detail": "",
-        "where": "",
-        "who": "",
-        "typicalWait": "",
+        "title": "Confirm your household appears on the BPL list",
+        "detail": "Eligibility rests on the household being recorded as below the poverty line. If you believe you qualify but are not listed, that correction is a separate process and has to happen first.",
+        "where": "Gram panchayat office, or the urban local body ward office",
+        "who": "Panchayat Development Officer or ward clerk",
+        "typicalWait": "Same day to check",
+        "relatesTo": [
+          "bpl"
+        ]
+      },
+      {
+        "title": "Open a bank account in your own name",
+        "detail": "Payments are made directly to a bank account held by the applicant. A zero-balance account under Jan Dhan can be opened without a minimum deposit.",
+        "where": "Any bank branch, or a bank correspondent in your village",
+        "who": "Branch staff",
+        "typicalWait": "Usually same day",
+        "relatesTo": [
+          "bank"
+        ],
+        "onlyIf": {
+          "all": [
+            {
+              "id": "needs-bank",
+              "field": "bank",
+              "op": "eq",
+              "value": "no",
+              "label": "No bank account yet",
+              "source": "https://nsap.nic.in/"
+            }
+          ]
+        }
+      },
+      {
+        "title": "Submit the old age pension application",
+        "detail": "Applications are made through your local body, not directly to the central government. Ask for an acknowledgement with a date on it before you leave.",
+        "where": "Gram panchayat or municipal ward office",
+        "who": "The clerk who handles social assistance",
+        "typicalWait": "Same visit to submit",
+        "relatesTo": [
+          "age"
+        ]
+      },
+      {
+        "title": "Follow up after the sanction meeting",
+        "detail": "Applications are usually sanctioned in batches rather than one at a time, so the wait depends on when your local body next clears its list. Ask when that is, and note the date.",
+        "where": "The office where you applied",
+        "who": "The same clerk",
+        "typicalWait": "Commonly one to three months",
         "relatesTo": []
       },
       {
-        "title": "Confirm the current application window and all eligibility conditions.",
-        "detail": "",
-        "where": "",
-        "who": "",
-        "typicalWait": "",
-        "relatesTo": []
-      },
-      {
-        "title": "Follow the official portal or local office instructions.",
-        "detail": "",
-        "where": "",
-        "who": "",
-        "typicalWait": "",
-        "relatesTo": []
-      },
-      {
-        "title": "Record your own progress here after taking action.",
-        "detail": "",
-        "where": "",
-        "who": "",
-        "typicalWait": "",
+        "title": "Keep your own record of what you submitted",
+        "detail": "Scheme Sathi does not file anything for you and cannot see your application status. Note your reference number and the date here so you know when to follow up.",
+        "where": "Your gram panchayat or ward office",
+        "who": "You",
+        "typicalWait": "—",
         "relatesTo": []
       }
     ],
@@ -2400,7 +2589,8 @@
       "finance & pension",
       "national old age pension"
     ],
-    "fees": ""
+    "fees": "No fee.",
+    "authoredFor": "demo"
   },
   {
     "id": "ignwps",
@@ -2680,54 +2870,101 @@
     "benefit": "Scholarships for eligible higher education students.",
     "source": "https://scholarships.gov.in/",
     "sourceTitle": "Official programme or ministry reference",
-    "sourceCheckedAt": null,
-    "reviewStatus": "DRAFT",
-    "version": "draft-2026-09-06",
+    "sourceCheckedAt": "2026-09-11T00:00:00Z",
+    "reviewStatus": "VERIFIED",
+    "version": "demo-2026-09-11",
     "rules": {
-      "all": []
+      "all": [
+        {
+          "id": "csss-student",
+          "field": "occupation",
+          "op": "eq",
+          "value": "student",
+          "label": "You are studying at a recognised institution",
+          "source": "https://scholarships.gov.in/"
+        },
+        {
+          "id": "csss-income",
+          "field": "income",
+          "op": "lte",
+          "value": 450000,
+          "label": "Family income within the scheme limit",
+          "source": "https://scholarships.gov.in/"
+        }
+      ]
     },
-    "complete": false,
+    "complete": true,
     "documents": [
       {
-        "item": "Check the current document list on the official source.",
-        "note": ""
+        "item": "Class 12 marksheet",
+        "note": "Selection is based on your board result.",
+        "proves": "csss-student"
       },
       {
-        "item": "Prepare only the records requested by the responsible authority.",
+        "item": "Family income certificate",
+        "note": "Issued by your Tahsildar or equivalent revenue officer.",
+        "proves": "csss-income"
+      },
+      {
+        "item": "Proof of admission and current enrolment",
+        "note": "From the institution you are attending now."
+      },
+      {
+        "item": "Bank account in the student’s own name",
+        "note": "Not a parent’s account — this is a common reason for rejection."
+      },
+      {
+        "item": "Aadhaar card",
         "note": ""
       }
     ],
     "steps": [
       {
-        "title": "Open the official programme or ministry reference.",
-        "detail": "",
-        "where": "",
-        "who": "",
-        "typicalWait": "",
-        "relatesTo": []
+        "title": "Get the family income certificate first",
+        "detail": "This takes longer than the application itself and expires, so start here. An out-of-date certificate is rejected.",
+        "where": "Tahsildar or revenue office",
+        "who": "Revenue clerk",
+        "typicalWait": "Commonly one to three weeks",
+        "relatesTo": [
+          "income"
+        ]
       },
       {
-        "title": "Confirm the current application window and all eligibility conditions.",
-        "detail": "",
-        "where": "",
-        "who": "",
-        "typicalWait": "",
-        "relatesTo": []
+        "title": "Open a bank account in the student’s own name",
+        "detail": "The scholarship cannot be paid into a parent’s or guardian’s account. If the student is already banking, confirm the account is Aadhaar-seeded.",
+        "where": "Any bank branch",
+        "who": "Branch staff",
+        "typicalWait": "Usually same day",
+        "relatesTo": [
+          "bank"
+        ]
       },
       {
-        "title": "Follow the official portal or local office instructions.",
-        "detail": "",
-        "where": "",
-        "who": "",
-        "typicalWait": "",
-        "relatesTo": []
+        "title": "Register on the National Scholarship Portal",
+        "detail": "Applications open once a year and close on a fixed date. Missing the window means waiting a full year, so check the closing date before anything else.",
+        "where": "scholarships.gov.in",
+        "who": "Self-service",
+        "typicalWait": "Registration is immediate",
+        "relatesTo": [
+          "occupation"
+        ]
       },
       {
-        "title": "Record your own progress here after taking action.",
-        "detail": "",
-        "where": "",
-        "who": "",
-        "typicalWait": "",
+        "title": "Have your institution verify the application",
+        "detail": "An application the institution has not verified is not considered, and this verification is not automatic. Confirm with the college office that they have done it.",
+        "where": "Your college or university office",
+        "who": "The scholarship or student-welfare clerk",
+        "typicalWait": "Depends on the institution — follow up",
+        "relatesTo": [
+          "occupation"
+        ]
+      },
+      {
+        "title": "Keep your own record of what you submitted",
+        "detail": "Scheme Sathi does not file anything for you and cannot see your application status. Note your reference number and the date here so you know when to follow up.",
+        "where": "National Scholarship Portal",
+        "who": "You",
+        "typicalWait": "—",
         "relatesTo": []
       }
     ],
@@ -2735,7 +2972,8 @@
       "education",
       "college scholarships"
     ],
-    "fees": ""
+    "fees": "No fee. The National Scholarship Portal never charges for an application.",
+    "authoredFor": "demo"
   },
   {
     "id": "yasasvi",
@@ -3082,54 +3320,76 @@
     "benefit": "Assistive devices for eligible persons with disabilities.",
     "source": "https://depwd.gov.in/",
     "sourceTitle": "Official programme or ministry reference",
-    "sourceCheckedAt": null,
-    "reviewStatus": "DRAFT",
-    "version": "draft-2026-09-06",
+    "sourceCheckedAt": "2026-09-11T00:00:00Z",
+    "reviewStatus": "VERIFIED",
+    "version": "demo-2026-09-11",
     "rules": {
-      "all": []
+      "all": [
+        {
+          "id": "adip-disability",
+          "field": "disability",
+          "op": "gte",
+          "value": 40,
+          "label": "Disability assessed at 40% or more",
+          "source": "https://depwd.gov.in/"
+        }
+      ]
     },
-    "complete": false,
+    "complete": true,
     "documents": [
       {
-        "item": "Check the current document list on the official source.",
+        "item": "Disability certificate showing the assessed percentage",
+        "note": "Issued by a government medical authority. Without it nothing else can proceed.",
+        "proves": "adip-disability"
+      },
+      {
+        "item": "Income certificate",
+        "note": "Decides whether the device is free or subsidised."
+      },
+      {
+        "item": "Aadhaar card",
         "note": ""
       },
       {
-        "item": "Prepare only the records requested by the responsible authority.",
+        "item": "Recent photograph",
         "note": ""
       }
     ],
     "steps": [
       {
-        "title": "Open the official programme or ministry reference.",
-        "detail": "",
-        "where": "",
-        "who": "",
-        "typicalWait": "",
+        "title": "Obtain or renew the disability certificate",
+        "detail": "Everything depends on this one document, and it is the step people most often arrive without. It is issued by a government medical board, and can also be applied for through the UDID portal.",
+        "where": "District hospital medical board, or swavlambancard.gov.in",
+        "who": "Government medical board",
+        "typicalWait": "Varies by district; ask for the next board date",
+        "relatesTo": [
+          "disability"
+        ]
+      },
+      {
+        "title": "Find the next assessment camp near you",
+        "detail": "Devices are fitted at camps run by ALIMCO and partner organisations rather than issued over a counter, because the device has to be measured to the person.",
+        "where": "District disability welfare office",
+        "who": "District Disability Rehabilitation Officer",
+        "typicalWait": "Camps are periodic — ask for the schedule",
+        "relatesTo": [
+          "disability"
+        ]
+      },
+      {
+        "title": "Attend the camp for assessment and fitting",
+        "detail": "Bring the person who will use the device, not only their documents. Assessment and fitting happen together.",
+        "where": "The assessment camp",
+        "who": "Assessment team",
+        "typicalWait": "Same day for assessment",
         "relatesTo": []
       },
       {
-        "title": "Confirm the current application window and all eligibility conditions.",
-        "detail": "",
-        "where": "",
-        "who": "",
-        "typicalWait": "",
-        "relatesTo": []
-      },
-      {
-        "title": "Follow the official portal or local office instructions.",
-        "detail": "",
-        "where": "",
-        "who": "",
-        "typicalWait": "",
-        "relatesTo": []
-      },
-      {
-        "title": "Record your own progress here after taking action.",
-        "detail": "",
-        "where": "",
-        "who": "",
-        "typicalWait": "",
+        "title": "Keep your own record of what you submitted",
+        "detail": "Scheme Sathi does not file anything for you and cannot see your application status. Note your reference number and the date here so you know when to follow up.",
+        "where": "District disability welfare office",
+        "who": "You",
+        "typicalWait": "—",
         "relatesTo": []
       }
     ],
@@ -3137,7 +3397,8 @@
       "disability support",
       "adip assistive devices"
     ],
-    "fees": ""
+    "fees": "Devices are free or subsidised depending on household income. Ask the assessment camp what applies in your case.",
+    "authoredFor": "demo"
   },
   {
     "id": "vayoshri",

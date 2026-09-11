@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2, Check, MessageSquare, PenLine } from 'lucide-react';
+import { Loader2, Check, MessageSquare, PenLine, ArrowRight } from 'lucide-react';
 import { useApp } from '../providers';
 import { Pick } from '../dialogs';
 import { fields } from '@/lib/rules';
@@ -19,6 +19,9 @@ export default function Profile() {
     loading,
     busy,
     saveProfile,
+    onboarded,
+    completeOnboarding,
+    visitor,
   } = useApp();
   // Derived, not synced: the saved profile is the source of truth until the
   // citizen edits, and clearing the edit re-derives from the fresh session.
@@ -54,8 +57,16 @@ export default function Profile() {
     <>
       <div className="pagehead">
         <div>
-          <h1>{t.profile}</h1>
-          <p className="measure">{t.profileLede}</p>
+          <h1>
+            {onboarded
+              ? t.profile
+              : visitor
+                ? `${t.greeting}, ${visitor}`
+                : t.profileFirst}
+          </h1>
+          <p className="measure">
+            {onboarded ? t.profileLede : t.profileFirstNote}
+          </p>
         </div>
         {known.length > 0 && (
           <span className="count">
@@ -72,7 +83,7 @@ export default function Profile() {
         </div>
       )}
 
-      {!known.length && (
+      {!known.length && onboarded && (
         <section className="pass pass-blank" style={{ marginBottom: 22 }}>
           <div className="pass-head">
             <span className="label">{t.profile}</span>
@@ -150,13 +161,34 @@ export default function Profile() {
           className="btn"
           disabled={busy}
           onClick={async () => {
-            await saveProfile(draft);
+            if (known.length) await saveProfile(draft);
             setEdited(null);
+            if (!onboarded) {
+              completeOnboarding();
+              router.push('/');
+            }
           }}
         >
-          {busy ? <Loader2 className="spin" size={15} /> : <Check size={15} />}
-          {t.confirm}
+          {busy ? (
+            <Loader2 className="spin" size={15} />
+          ) : onboarded ? (
+            <Check size={15} />
+          ) : (
+            <ArrowRight size={15} />
+          )}
+          {onboarded ? t.confirm : t.next}
         </button>
+        {!onboarded && (
+          <button
+            className="btn btn-ghost btn-sm"
+            onClick={() => {
+              completeOnboarding();
+              router.push('/');
+            }}
+          >
+            {t.skipForNow}
+          </button>
+        )}
         <span className="label measure">{t.confirmNote}</span>
       </div>
 

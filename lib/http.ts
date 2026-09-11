@@ -5,6 +5,10 @@ export type Settings = {
   DB: D1Database;
   RULE_SERVICE_URL?: string;
   RULE_SERVICE_API_KEY?: string;
+  // Provider-neutral chat configuration; takes precedence over AZURE_OPENAI_*.
+  LLM_BASE_URL?: string;
+  LLM_API_KEY?: string;
+  LLM_MODEL?: string;
   AZURE_OPENAI_ENDPOINT?: string;
   AZURE_OPENAI_API_KEY?: string;
   AZURE_OPENAI_CHAT_DEPLOYMENT?: string;

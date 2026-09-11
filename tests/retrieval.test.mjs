@@ -55,12 +55,26 @@ test('every chunk resolves to a live scheme at its own version', () => {
   }
 });
 
-test('boilerplate repeated across schemes is dropped', () => {
+test('boilerplate is dropped, but authored steps survive', () => {
   const all = schemes.flatMap(chunksFor);
   const { kept, dropped } = dropBoilerplate(all);
-  assert.ok(dropped > 0, 'expected the placeholder steps/documents to be dropped');
+  assert.ok(dropped > 0, 'the placeholder steps and documents should be dropped');
   assert.equal(kept.length, chunks.chunks.length);
-  assert.ok(!kept.some((c) => c.kind === 'steps'), 'steps are identical across all 50 schemes today');
+
+  // A scheme left on the placeholder text contributes no step chunk...
+  const placeholder = schemes.find((x) => !x.authoredFor);
+  assert.ok(
+    !kept.some((c) => c.schemeId === placeholder.id && c.kind === 'steps'),
+    'unauthored steps are identical across schemes and must not be indexed',
+  );
+
+  // ...while a scheme with real authored steps does.
+  const authored = schemes.find((x) => x.authoredFor === 'demo');
+  assert.ok(authored, 'expected at least one authored scheme');
+  assert.ok(
+    kept.some((c) => c.schemeId === authored.id && c.kind === 'steps'),
+    'authored steps carry real content and must be retrievable',
+  );
 });
 
 test('tokenizer drops stopwords and single characters', () => {

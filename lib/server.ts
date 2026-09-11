@@ -9,6 +9,7 @@ import { chat } from './api/chat';
 import { conversations } from './api/conversations';
 import { search } from './api/search';
 import { applications } from './api/applications';
+import { reports } from './api/reports';
 import { privacy } from './api/privacy';
 import { voice } from './api/voice';
 import { admin } from './api/admin';
@@ -26,6 +27,7 @@ const sessionRoutes: SessionRoute[] = [
   conversations,
   search,
   applications,
+  reports,
   privacy,
   voice,
   admin,
