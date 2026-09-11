@@ -74,8 +74,17 @@ export async function handle(req: Request, path: string[]) {
       error instanceof Error &&
       /Profile|profile field|Enter a valid|Choose a valid/.test(error.message);
     const status = known ? error.status : validation ? 400 : 503;
+    // The citizen sees a generic message, deliberately. The server log keeps
+    // the real cause against the same trace id — without it, a misconfigured
+    // secret is indistinguishable from an outage.
     console.log(
-      JSON.stringify({ traceId: trace, event: 'request_failed', status }),
+      JSON.stringify({
+        traceId: trace,
+        event: 'request_failed',
+        status,
+        path: path.join('/'),
+        cause: error instanceof Error ? error.message : String(error),
+      }),
     );
     return json(
       {

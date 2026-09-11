@@ -23,6 +23,23 @@ export type Settings = {
 };
 
 export const settings = () => env as unknown as Settings;
+
+/**
+ * Reads a string setting, trimmed, treating empty as absent.
+ *
+ * Secrets are pasted by hand and frequently arrive with a stray leading or
+ * trailing space. Untrimmed, such a value is a valid-looking string that
+ * passes every `if (key)` check and then makes an HTTP header value invalid,
+ * so `fetch` throws before the request leaves and the citizen sees an opaque
+ * "temporarily unavailable". Trimming at the single point of entry removes
+ * that whole class of failure.
+ */
+export function conf<K extends keyof Settings>(key: K): string | undefined {
+  const value = settings()[key];
+  if (typeof value !== 'string') return undefined;
+  const trimmed = value.trim();
+  return trimmed || undefined;
+}
 export const db = () => settings().DB;
 
 export class HttpError extends Error {

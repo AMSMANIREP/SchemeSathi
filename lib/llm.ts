@@ -1,4 +1,4 @@
-import { settings } from './http';
+import { conf } from './http';
 
 /**
  * Resolves whichever chat provider is configured.
@@ -21,10 +21,15 @@ export type LlmConfig = {
 };
 
 export function llm(): LlmConfig | null {
-  const e = settings();
+  const baseUrl = conf('LLM_BASE_URL');
+  const apiKey = conf('LLM_API_KEY');
+  const model = conf('LLM_MODEL');
+  const azureEndpoint = conf('AZURE_OPENAI_ENDPOINT');
+  const azureKey = conf('AZURE_OPENAI_API_KEY');
+  const azureDeployment = conf('AZURE_OPENAI_CHAT_DEPLOYMENT');
 
-  if (e.LLM_BASE_URL && e.LLM_API_KEY && e.LLM_MODEL) {
-    const base = e.LLM_BASE_URL.replace(/\/+$/, '');
+  if (baseUrl && apiKey && model) {
+    const base = baseUrl.replace(/\/+$/, '');
     // Accept a base given with or without the version segment, since
     // providers document it both ways.
     const url = /\/v\d+$/.test(base)
@@ -33,26 +38,22 @@ export function llm(): LlmConfig | null {
     return {
       url,
       headers: {
-        Authorization: `Bearer ${e.LLM_API_KEY}`,
+        Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
-      model: e.LLM_MODEL,
+      model,
       provider: 'openai-compatible',
     };
   }
 
-  if (
-    e.AZURE_OPENAI_ENDPOINT &&
-    e.AZURE_OPENAI_API_KEY &&
-    e.AZURE_OPENAI_CHAT_DEPLOYMENT
-  ) {
+  if (azureEndpoint && azureKey && azureDeployment) {
     return {
-      url: `${e.AZURE_OPENAI_ENDPOINT.replace(/\/+$/, '')}/openai/v1/chat/completions`,
+      url: `${azureEndpoint.replace(/\/+$/, '')}/openai/v1/chat/completions`,
       headers: {
-        'api-key': e.AZURE_OPENAI_API_KEY,
+        'api-key': azureKey,
         'Content-Type': 'application/json',
       },
-      model: e.AZURE_OPENAI_CHAT_DEPLOYMENT,
+      model: azureDeployment,
       provider: 'azure',
     };
   }

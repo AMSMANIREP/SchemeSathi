@@ -1,4 +1,4 @@
-import { body, external, HttpError, json, limit, settings } from '../http';
+import { body, conf, external, HttpError, json, limit } from '../http';
 import { guidance } from '../guidance';
 import { redact } from '../rules';
 import { schemes } from '../schemes';
@@ -7,8 +7,8 @@ import type { SessionRoute } from '../session';
 export const voice: SessionRoute = async ({ req, p, method, s }) => {
   if (p === 'voice/transcribe' && method === 'POST') {
     await limit('voice:' + s.id, 8);
-    const e = settings();
-    if (!e.ELEVENLABS_API_KEY)
+    const apiKey = conf('ELEVENLABS_API_KEY');
+    if (!apiKey)
       throw new HttpError(
         503,
         'Voice is not connected yet. Please type or use the profile form.',
@@ -28,7 +28,7 @@ export const voice: SessionRoute = async ({ req, p, method, s }) => {
     );
     const r = await external('https://api.elevenlabs.io/v1/speech-to-text', {
       method: 'POST',
-      headers: { 'xi-api-key': e.ELEVENLABS_API_KEY },
+      headers: { 'xi-api-key': apiKey },
       body: outbound,
     });
     const v = (await r.json()) as { text: string };
@@ -38,8 +38,9 @@ export const voice: SessionRoute = async ({ req, p, method, s }) => {
 
   if (p === 'voice/synthesize' && method === 'POST') {
     await limit('tts:' + s.id, 8);
-    const e = settings();
-    if (!e.ELEVENLABS_API_KEY || !e.ELEVENLABS_VOICE_ID)
+    const apiKey = conf('ELEVENLABS_API_KEY');
+    const voiceId = conf('ELEVENLABS_VOICE_ID');
+    if (!apiKey || !voiceId)
       throw new HttpError(
         503,
         'Speech is not connected yet. The guidance is available as text.',
@@ -51,11 +52,11 @@ export const voice: SessionRoute = async ({ req, p, method, s }) => {
       scheme.name + '. ' + scheme.summary + '. ' + guidance[s.language];
     const r = await external(
       'https://api.elevenlabs.io/v1/text-to-speech/' +
-        encodeURIComponent(e.ELEVENLABS_VOICE_ID),
+        encodeURIComponent(voiceId),
       {
         method: 'POST',
         headers: {
-          'xi-api-key': e.ELEVENLABS_API_KEY,
+          'xi-api-key': apiKey,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ text, model_id: 'eleven_v3' }),
