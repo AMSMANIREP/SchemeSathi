@@ -178,3 +178,22 @@ test('a word shared across schemes identifies none of them', () => {
   assert.equal(focus('I want a yojana').schemeId, null);
   assert.equal(focus('pradhan mantri something').schemeId, null);
 });
+
+test('an ordinary word is not a scheme name, even when only one scheme uses it', () => {
+  // "Farm Mechanization" and "Soil Health Card" each own the words "farm" and
+  // "health" uniquely, so uniqueness alone read "I farm two acres" as naming a
+  // programme and narrowed the whole reply to it.
+  const catalogue = [
+    { id: 'smam', shortName: 'Farm Mechanization', name: 'Farm Mechanization' },
+    { id: 'soil-health', shortName: 'Soil Health Card', name: 'Soil Health Card' },
+    { id: 'pmuy', shortName: 'Ujjwala Yojana', name: 'Pradhan Mantri Ujjwala Yojana' },
+  ];
+  const focus = (text) =>
+    detectFocus({ schemes: catalogue, lastPresented: [], previousFocus: null, text })
+      .schemeId;
+
+  assert.equal(focus('I farm two acres in Kolar'), null);
+  assert.equal(focus('my health is bad these days'), null);
+  // A real name still resolves.
+  assert.equal(focus('tell me about Ujjwala'), 'pmuy');
+});

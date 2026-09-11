@@ -40,11 +40,39 @@ const wordsOf = (s: Scheme) =>
     .filter((w) => w.length >= 4);
 
 /**
+ * Ordinary words that happen to appear in programme names.
+ *
+ * Uniqueness alone is not enough to tell a name from a word. "Farm" appears in
+ * exactly one scheme title — Farm Mechanization — and so did "health", in Soil
+ * Health Card. Matching on them meant "I farm two acres" and "my health is
+ * bad" were read as naming those programmes, and the reply narrowed to a
+ * scheme the citizen had never mentioned.
+ *
+ * Corpus frequency cannot separate these: "farm" and "ujjwala" each appear in
+ * one scheme's text. The real difference is that one is a word of the language
+ * and the other is a name, so that is what is written down. This list is
+ * English vocabulary, not a per-scheme list — it changes when the language
+ * does, not when the catalogue does.
+ */
+const ORDINARY = new Set(
+  `account achievers agricultural agriculture aids appliances assistance
+   assistive award benefit card categories central citizens class college
+   credit devices disability disabled education eligible employment
+   enterprises family farm fitting food fund generation guarantee health
+   higher housing infrastructure insurance livelihoods micro ministers
+   national other overseas pension persons prime processing programme
+   promotion purchase savings scholarship scholarships sector senior skill
+   stand street training university urban vendors widow young yojana`
+    .split(/\s+/)
+    .filter(Boolean),
+);
+
+/**
  * Words that identify exactly one scheme.
  *
- * Computed from the catalogue rather than a hand-kept stop list, so it stays
- * correct as schemes are added. "Ujjwala" names one programme; "yojana",
- * "pradhan" and "national" name many and are therefore ignored on their own.
+ * Computed from the catalogue, so it stays correct as schemes are added, then
+ * filtered against the vocabulary above. "Ujjwala" names one programme;
+ * "yojana" names many, and "farm" is simply a word.
  */
 function distinctiveWords(schemes: Scheme[]) {
   const owners = new Map<string, Set<string>>();
@@ -56,7 +84,7 @@ function distinctiveWords(schemes: Scheme[]) {
     }
   const unique = new Map<string, string>();
   for (const [word, ids] of owners)
-    if (ids.size === 1) unique.set(word, [...ids][0]);
+    if (ids.size === 1 && !ORDINARY.has(word)) unique.set(word, [...ids][0]);
   return unique;
 }
 
