@@ -149,3 +149,32 @@ test('a merely possible verdict with nothing established is not offered', () => 
   };
   assert.equal(shouldOfferSave({ ...base, decision: somethingKnown }), true);
 });
+
+test('a scheme is recognised by the name people actually say', () => {
+  const catalogue = [
+    { id: 'pmuy', shortName: 'Ujjwala Yojana', name: 'Pradhan Mantri Ujjwala Yojana' },
+    { id: 'pmmvy', shortName: 'Matru Vandana Yojana', name: 'PM Matru Vandana Yojana' },
+    { id: 'ignoaps', shortName: 'National Old Age Pension', name: 'National Old Age Pension' },
+  ];
+  const focus = (text) =>
+    detectFocus({ schemes: catalogue, lastPresented: [], previousFocus: null, text });
+
+  // Nobody says the full name.
+  assert.deepEqual(focus('Tell me more about Ujjwala'), { schemeId: 'pmuy', named: true });
+  assert.deepEqual(focus('what about matru vandana'), { schemeId: 'pmmvy', named: true });
+});
+
+test('a word shared across schemes identifies none of them', () => {
+  const catalogue = [
+    { id: 'pmuy', shortName: 'Ujjwala Yojana', name: 'Pradhan Mantri Ujjwala Yojana' },
+    { id: 'pmmvy', shortName: 'Matru Vandana Yojana', name: 'Pradhan Mantri Matru Vandana Yojana' },
+    { id: 'pmay', shortName: 'Awaas Yojana', name: 'Pradhan Mantri Awaas Yojana' },
+  ];
+  const focus = (text) =>
+    detectFocus({ schemes: catalogue, lastPresented: [], previousFocus: null, text });
+
+  // "yojana" and "pradhan" belong to several; matching on them would narrow
+  // the answer to an arbitrary scheme the citizen never named.
+  assert.equal(focus('I want a yojana').schemeId, null);
+  assert.equal(focus('pradhan mantri something').schemeId, null);
+});

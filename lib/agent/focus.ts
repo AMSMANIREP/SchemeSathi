@@ -32,9 +32,38 @@ export type Focus = {
  * citizen has not chosen anything yet, and manufacturing a choice they did
  * not make is how an advocate turns into a funnel.
  */
+const wordsOf = (s: Scheme) =>
+  [s.shortName, s.name, s.id.replace(/-/g, ' ')]
+    .join(' ')
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter((w) => w.length >= 4);
+
+/**
+ * Words that identify exactly one scheme.
+ *
+ * Computed from the catalogue rather than a hand-kept stop list, so it stays
+ * correct as schemes are added. "Ujjwala" names one programme; "yojana",
+ * "pradhan" and "national" name many and are therefore ignored on their own.
+ */
+function distinctiveWords(schemes: Scheme[]) {
+  const owners = new Map<string, Set<string>>();
+  for (const s of schemes)
+    for (const w of wordsOf(s)) {
+      const set = owners.get(w) ?? new Set<string>();
+      set.add(s.id);
+      owners.set(w, set);
+    }
+  const unique = new Map<string, string>();
+  for (const [word, ids] of owners)
+    if (ids.size === 1) unique.set(word, [...ids][0]);
+  return unique;
+}
+
 export function detectFocus(input: FocusInput): Focus {
   const text = input.text.toLowerCase();
 
+  // A full name is the strongest signal.
   const named = input.schemes.find((s) => {
     const forms = [s.shortName, s.name, s.id.replace(/-/g, ' ')]
       .map((f) => f.toLowerCase())
@@ -42,6 +71,16 @@ export function detectFocus(input: FocusInput): Focus {
     return forms.some((f) => text.includes(f));
   });
   if (named) return { schemeId: named.id, named: true };
+
+  // Otherwise a word that belongs to only one scheme. People say "Ujjwala",
+  // not "Ujjwala Yojana", and asking about a programme by the name they know
+  // should narrow the answer just the same.
+  const unique = distinctiveWords(input.schemes);
+  for (const word of text.split(/[^a-z0-9]+/))
+    if (word.length >= 4) {
+      const id = unique.get(word);
+      if (id) return { schemeId: id, named: true };
+    }
 
   if (input.lastPresented.length === 1)
     return { schemeId: input.lastPresented[0], named: false };
