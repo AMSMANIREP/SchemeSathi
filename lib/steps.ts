@@ -1,7 +1,7 @@
 import { evaluateTree } from './rules.ts';
 import type { Decision, Profile, Scheme, Step } from './types';
 
-export type StepRelevance = 'for_you' | 'standard' | 'already_done';
+export type StepRelevance = 'for_you' | 'standard';
 
 export type PersonalStep = Step & {
   n: number;
@@ -17,6 +17,12 @@ export type PersonalStep = Step & {
  * eligibility, and `becauseYou` is a rule's own label. The model is not in
  * this path at all, which is the point — a step in a printed report must be
  * traceable to the catalogue, not to a sentence someone's assistant produced.
+ *
+ * There is deliberately no "already done" state. A rule passing establishes a
+ * *fact*, not that the citizen has performed an *action*: being a farmer does
+ * not mean you have registered. A step the citizen genuinely does not need is
+ * removed by `onlyIf`, which is the honest way to say it — marking a step done
+ * on a printed sheet could make someone skip work they still have to do.
  */
 export function personaliseSteps(
   scheme: Scheme,
@@ -24,32 +30,41 @@ export function personaliseSteps(
   confirmed: string[],
   decision: Decision,
 ): PersonalStep[] {
-  const applicable = scheme.steps.filter((step) => {
-    if (!step.onlyIf) return true;
-    // UNKNOWN keeps the step: we would rather show a step someone may not
-    // need than hide one they do. Unknown never means no.
-    return evaluateTree(step.onlyIf, profile, confirmed).result !== 'FAIL';
-  });
+  const out: PersonalStep[] = [];
 
-  return applicable.map((step, i) => {
-    const related = decision.reasons.filter((r) =>
-      step.relatesTo.includes(r.field),
-    );
-    const unresolved = related.find((r) => r.result !== 'PASS');
+  for (const step of scheme.steps) {
+    let relevance: StepRelevance = 'standard';
+    let becauseYou: string | null = null;
 
-    const relevance: StepRelevance = unresolved
-      ? 'for_you'
-      : related.length
-        ? 'already_done'
-        : 'standard';
+    if (step.onlyIf) {
+      const gate = evaluateTree(step.onlyIf, profile, confirmed);
+      // FAIL means this citizen does not need the step at all.
+      if (gate.result === 'FAIL') continue;
+      // PASS means the step exists *because* of their situation.
+      if (gate.result === 'PASS') {
+        relevance = 'for_you';
+        becauseYou = gate.reasons.find((r) => r.result === 'PASS')?.label ?? null;
+      }
+      // UNKNOWN keeps the step at standard: we would rather show a step
+      // someone may not need than hide one they do. Unknown never means no.
+    }
 
-    return {
-      ...step,
-      n: i + 1,
-      relevance,
-      becauseYou: unresolved ? unresolved.label : null,
-    };
-  });
+    if (relevance === 'standard') {
+      // Otherwise a step is theirs when it addresses something still blocking
+      // or failing for them.
+      const unresolved = decision.reasons.find(
+        (r) => step.relatesTo.includes(r.field) && r.result !== 'PASS',
+      );
+      if (unresolved) {
+        relevance = 'for_you';
+        becauseYou = unresolved.label;
+      }
+    }
+
+    out.push({ ...step, n: out.length + 1, relevance, becauseYou });
+  }
+
+  return out;
 }
 
 /** Documents, marked with what the citizen already holds and what each proves. */

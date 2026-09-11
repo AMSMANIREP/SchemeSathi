@@ -6,6 +6,7 @@ import {
   useEffect,
   useRef,
   useCallback,
+  useSyncExternalStore,
 } from 'react';
 import { copy } from '@/lib/i18n';
 import type {
@@ -34,6 +35,52 @@ export type Capabilities = {
 };
 
 const HISTORY_KEY = 'schemesathi.history';
+/** Simulated sign-in for the demo: a display name and a flag, nothing more.
+ *  No credential is exchanged and nothing is sent anywhere. */
+const VISITOR_KEY = 'schemesathi.visitor';
+
+/**
+ * The simulated sign-in lives in localStorage, which does not exist during
+ * SSR. Reading it into state would make the server render the signed-out
+ * shell and the client render the signed-in one — a hydration mismatch that
+ * tears the tree down. useSyncExternalStore is the sanctioned way to read a
+ * client-only store: React hydrates with the server snapshot and re-renders
+ * with the real value immediately after, without a mismatch.
+ *
+ * The snapshot is the raw string so its identity stays stable between calls.
+ */
+const visitorListeners = new Set<() => void>();
+
+const visitorStore = {
+  subscribe: (cb: () => void) => {
+    visitorListeners.add(cb);
+    window.addEventListener('storage', cb);
+    return () => {
+      visitorListeners.delete(cb);
+      window.removeEventListener('storage', cb);
+    };
+  },
+  snapshot: () => {
+    try {
+      return localStorage.getItem(VISITOR_KEY) ?? '';
+    } catch {
+      return '';
+    }
+  },
+  serverSnapshot: () => '',
+};
+
+const emitVisitor = () => visitorListeners.forEach((cb) => cb());
+
+function parseVisitor(raw: string): { name: string | null; onboarded: boolean } {
+  if (!raw) return { name: null, onboarded: false };
+  try {
+    const v = JSON.parse(raw);
+    return { name: v.name ?? '', onboarded: !!v.onboarded };
+  } catch {
+    return { name: null, onboarded: false };
+  }
+}
 
 export type HistoryEntry = { at: number; text: string };
 
@@ -112,6 +159,12 @@ type Ctx = {
   record: (onText: (text: string) => void) => Promise<void>;
   history: HistoryEntry[];
   clearHistory: () => void;
+  visitor: string | null;
+  signedIn: boolean;
+  signIn: (name: string) => void;
+  signOut: () => void;
+  onboarded: boolean;
+  completeOnboarding: () => void;
 };
 
 const AppContext = createContext<Ctx | null>(null);
@@ -141,6 +194,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [detail, setDetail] = useState<Scheme | null>(null);
   const [recording, setRecording] = useState(false);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const visitorRaw = useSyncExternalStore(
+    visitorStore.subscribe,
+    visitorStore.snapshot,
+    visitorStore.serverSnapshot,
+  );
+  const { name: visitor, onboarded } = parseVisitor(visitorRaw);
   const [messages, setMessages] = useState<MessageRecord[]>([]);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [checkpoint, setCheckpoint] = useState('GATHERING');
@@ -354,6 +413,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setMessages([]);
       setConversationId(null);
       setCheckpoint('GATHERING');
+      persistVisitor(null, false);
       setSession(null);
       setHistory([]);
       writeHistory([]);
@@ -378,6 +438,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setBusy(false);
     }
   };
+
+  const persistVisitor = (name: string | null, done: boolean) => {
+    try {
+      if (name === null) localStorage.removeItem(VISITOR_KEY);
+      else
+        localStorage.setItem(VISITOR_KEY, JSON.stringify({ name, onboarded: done }));
+    } catch {
+      /* storage unavailable: the session still works, it just forgets */
+    }
+    emitVisitor();
+  };
+
+  const signIn = (name: string) => persistVisitor(name, false);
+  const signOut = () => persistVisitor(null, false);
+  const completeOnboarding = () => persistVisitor(visitor ?? '', true);
 
   const clearHistory = () => {
     setHistory([]);
@@ -485,6 +560,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         record,
         history,
         clearHistory,
+        visitor,
+        signedIn: visitor !== null,
+        signIn,
+        signOut,
+        onboarded,
+        completeOnboarding,
       }}
     >
       {children}

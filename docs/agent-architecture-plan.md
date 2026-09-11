@@ -631,9 +631,11 @@ type Document = {
 
 Shipped: types in `lib/types.ts`; `scripts/migrate-catalogue.mjs` (idempotent, `pnpm migrate:catalogue`) converted all 50 schemes to 200 steps and 102 documents; `lib/steps.ts` implements `personaliseSteps()` and `personaliseDocuments()` with 9 tests. Consumers updated: the scheme dialog, the applications checklist, the index builder, and the checklist validator — which still stores each document's `item` text, so rows saved before the migration remain valid.
 
-**0 of 200 steps carry `where`/`who`/`typicalWait`.** The converter leaves them empty by design rather than inventing an office or a waiting time; the report renders an empty field as not yet recorded. This is the authoring work §14.0 describes, and it is now the only thing between the report and being genuinely useful.
+**Authoring followed (11 September 2026).** `scripts/author-demo-schemes.mjs` (`pnpm author:demo`) authors six schemes chosen to cover the three example prompts already in the interface — PM-KISAN, Ujjwala, Old Age Pension, ADIP, College Scholarships and PM Vishwakarma — with real rules, documents, and 31 steps carrying an office, a person and an indicative wait. They are promoted to `VERIFIED` so the demo reaches a verdict, and every one carries `authoredFor: 'demo'`, which the report surfaces as a visible notice. The remaining 44 stay `DRAFT` and still abstain.
 
-**Phase 5b — Report (~2 days)**
+Two invariants now hold this honest, both tested: a record may only leave `DRAFT` by carrying the demo marker, and only a demo-authored record may reach a verdict.
+
+**Phase 5b — Report (~2 days) — ✅ done**
 `applications` gains `decisionSnapshot`, `schemeVersion` and the nullable `conversationId`; `application_reports`; `lib/report/{build,prompt,validate}.ts`; the report route, the print stylesheet, the regeneration notice.
 
 **Phase 6 — Voice (~1 day)**

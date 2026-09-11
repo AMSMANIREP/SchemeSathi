@@ -19,7 +19,8 @@
     "deploy:cloudflare": "node scripts/validate-release.mjs && pnpm build && pnpm run db:migrate:cloudflare && wrangler deploy --config wrangler.cloudflare.jsonc",
     "prebuild": "node scripts/build-index.mjs",
     "build:index": "node scripts/build-index.mjs",
-    "migrate:catalogue": "node scripts/migrate-catalogue.mjs"
+    "migrate:catalogue": "node scripts/migrate-catalogue.mjs",
+    "author:demo": "node scripts/author-demo-schemes.mjs"
   },
   "dependencies": {
     "react": "19.2.6",

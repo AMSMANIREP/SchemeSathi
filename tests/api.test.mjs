@@ -65,11 +65,20 @@ await a(
   { profile: { age: 45 }, version: 0, confirmed: true },
   409,
 );
+// An unreviewed record must still abstain, whatever else is in the catalogue.
 check(
-  (await a('recommendations')).results.every(
-    (x) => x.decision.status === 'UNABLE_TO_DETERMINE',
-  ),
+  (await a('recommendations')).results
+    .filter((x) => x.scheme.reviewStatus === 'DRAFT')
+    .every((x) => x.decision.status === 'UNABLE_TO_DETERMINE'),
   'draft sources abstain',
+);
+// And anything that does reach a verdict must be a record that says it was
+// authored for the demo rather than independently reviewed.
+check(
+  (await a('recommendations')).results
+    .filter((x) => x.decision.status !== 'UNABLE_TO_DETERMINE')
+    .every((x) => x.scheme.authoredFor === 'demo'),
+  'only demo-authored records reach a verdict',
 );
 const response = await a('chat', 'POST', {
   message: 'I am a 62 years old farmer from Karnataka',

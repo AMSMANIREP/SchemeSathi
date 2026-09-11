@@ -36,6 +36,11 @@ export const applications = sqliteTable(
     reference: text('reference').notNull().default(''),
     notes: text('notes').notNull().default(''),
     checklist: text('checklist').notNull().default('[]'),
+    // Frozen at save time so a printed report cannot silently disagree with
+    // itself after the citizen edits their profile.
+    decisionSnapshot: text('decision_snapshot').notNull().default('{}'),
+    schemeVersion: text('scheme_version').notNull().default(''),
+    conversationId: text('conversation_id'),
     updatedAt: text('updated_at').notNull(),
   },
   (t) => [uniqueIndex('application_owner_scheme').on(t.owner, t.schemeId)],
@@ -106,4 +111,21 @@ export const messages = sqliteTable(
     createdAt: text('created_at').notNull(),
   },
   (t) => [index('messages_conversation_idx').on(t.conversationId, t.createdAt)],
+);
+export const applicationReports = sqliteTable(
+  'application_reports',
+  {
+    id: text('id').primaryKey(),
+    applicationId: text('application_id')
+      .notNull()
+      .references(() => applications.id, { onDelete: 'cascade' }),
+    payload: text('payload').notNull(),
+    // Regenerate when either drifts — never swap silently under a document
+    // someone may already have printed.
+    schemeVersion: text('scheme_version').notNull(),
+    decisionHash: text('decision_hash').notNull(),
+    mode: text('mode').notNull().default('deterministic'),
+    generatedAt: text('generated_at').notNull(),
+  },
+  (t) => [uniqueIndex('report_application_idx').on(t.applicationId)],
 );

@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useApp } from './providers';
 import { SchemeDialog, Pick } from './dialogs';
+import { Gate } from './gate';
 import type { Language } from '@/lib/types';
 
 const routes = [
@@ -31,6 +32,8 @@ export function Shell({ children }: { children: React.ReactNode }) {
     t,
     language,
     selectLanguage,
+    visitor,
+    signOut,
     applications,
     notice,
     setNotice,
@@ -39,6 +42,16 @@ export function Shell({ children }: { children: React.ReactNode }) {
     load,
   } = useApp();
   const pathname = usePathname();
+
+  // The landing surface is the whole page: no nav, no chrome, nothing to
+  // navigate before there is anything to navigate to. Keyed off the pathname
+  // rather than sign-in state, so the server and the client agree.
+  if (pathname === '/welcome')
+    return (
+      <main className="workspace landing-workspace" id="main">
+        {children}
+      </main>
+    );
 
   return (
     <>
@@ -57,6 +70,11 @@ export function Shell({ children }: { children: React.ReactNode }) {
           </span>
         </Link>
         <div className="topbar-right">
+          {visitor ? (
+            <button className="visitorchip" onClick={signOut} title={t.forget}>
+              <span className="label">{visitor || t.greeting}</span>
+            </button>
+          ) : null}
           <span className="privacy-pill">
             <ShieldCheck size={13} />
             {t.private}
@@ -124,7 +142,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
             {t.sourceEnglish}
           </div>
         )}
-        {children}
+        <Gate>{children}</Gate>
       </main>
 
       <footer className="site-footer">

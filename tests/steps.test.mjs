@@ -74,7 +74,7 @@ test('the same step is shown to a citizen who needs it', () => {
   const steps = personaliseSteps(scheme, profile, confirmed, decide(profile, confirmed));
   const opening = steps.find((s) => s.title === 'Open a bank account');
   assert.ok(opening, 'the step must appear');
-  assert.equal(opening.relevance, 'for_you');
+  assert.equal(opening.relevance, 'for_you', 'a step gated on their situation is theirs');
   assert.equal(opening.becauseYou, 'bank must be established');
 });
 
@@ -85,11 +85,13 @@ test('an unknown never hides a step — unknown does not mean no', () => {
   assert.ok(steps.some((s) => s.title === 'Open a bank account'));
 });
 
-test('a satisfied step is marked already done, not hidden', () => {
+test('a satisfied fact does not mark its step done — a fact is not an action', () => {
   const profile = { land: 2, bank: 'yes' };
   const confirmed = ['land', 'bank'];
   const steps = personaliseSteps(scheme, profile, confirmed, decide(profile, confirmed));
-  assert.equal(steps.find((s) => s.title === 'Confirm your landholding').relevance, 'already_done');
+  // Holding land does not mean you have confirmed the record carries your name.
+  assert.equal(steps.find((s) => s.title === 'Confirm your landholding').relevance, 'standard');
+  assert.ok(!steps.some((s) => s.relevance === 'already_done'));
 });
 
 test('a step relating to nothing stays standard', () => {
