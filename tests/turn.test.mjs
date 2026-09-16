@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { planTurn, QUESTION_BUDGET } from '../lib/agent/turn.ts';
+import { planTurn, nextQuestion, QUESTION_BUDGET } from '../lib/agent/turn.ts';
+import { coerceAnswer, mergeExtractedProfile } from '../lib/agent/profile.ts';
 import { leverage, fieldsUsedBy, questionFor } from '../lib/questions.ts';
 
 const scheme = (id, rules, extra = {}) => ({
@@ -122,13 +123,108 @@ test('an inferred field is not treated as known, so it is still asked about', ()
 });
 
 test('no candidates yields no cards and no invented question', () => {
-  const plan = planTurn({ ...base, candidates: [], questionsAsked: QUESTION_BUDGET });
+  const plan = planTurn({
+    ...base,
+    candidates: [],
+    questionsAsked: QUESTION_BUDGET,
+  });
   assert.equal(plan.checkpoint, 'GATHERING');
   assert.deepEqual(plan.blocks, []);
 });
 
+test('an unsupported request stops even with unused question budget', () => {
+  const plan = planTurn({ ...base, candidates: [], questionsAsked: 0 });
+  assert.equal(plan.noSupportedSchemes, true);
+  assert.match(plan.text, /^There are no supported schemes as of now\./);
+  assert.doesNotMatch(plan.text, /LPG|\?/i);
+  assert.equal(plan.askedField, null);
+  assert.deepEqual(plan.blocks, []);
+  assert.equal(nextQuestion(base.schemes, {}, [], [], 'en'), null);
+});
+
+test('unreviewed skill records do not send the citizen into LPG questions', () => {
+  const skill = scheme(
+    'skills',
+    { all: [] },
+    { reviewStatus: 'DRAFT', complete: false },
+  );
+  const plan = planTurn({
+    ...base,
+    schemes: [skill, cooking],
+    candidates: ['skills'],
+  });
+  assert.equal(plan.noSupportedSchemes, true);
+  assert.match(plan.text, /still need verification/);
+  assert.equal(plan.askedField, null);
+  assert.equal(nextQuestion([skill, cooking], {}, [], ['skills'], 'en'), null);
+});
+
+test('disability questions remain about disability, with no catalogue fallback', () => {
+  const disability = scheme('disability', {
+    all: [rule('disability', 'gte', 40)],
+  });
+  for (const language of ['en', 'hi', 'kn', 'ta', 'ml']) {
+    const plan = planTurn({
+      ...base,
+      schemes: [disability, cooking],
+      candidates: ['disability'],
+      language,
+    });
+    assert.equal(plan.askedField, 'disability');
+    assert.ok(plan.text.length > 10);
+  }
+  assert.equal(
+    nextQuestion(
+      [disability, cooking],
+      { disability: 50 },
+      ['disability'],
+      ['disability'],
+      'en',
+    ),
+    null,
+  );
+});
+
+test('income answers preserve annual household scope and comma-separated amounts', () => {
+  const prompt = questionFor('income', 'en').text;
+  assert.equal(coerceAnswer('income', '20,000 rupees', prompt), 20000);
+  assert.equal(
+    coerceAnswer(
+      'income',
+      '20,000 rupees',
+      'What is your monthly income in rupees?',
+    ),
+    null,
+  );
+  assert.equal(coerceAnswer('income', '20000 per month', prompt), null);
+  assert.equal(coerceAnswer('income', '2 lakh', prompt), null);
+  assert.equal(coerceAnswer('income', '-20000', prompt), null);
+  assert.equal(coerceAnswer('age', '32 and my brother is 20', ''), null);
+  assert.equal(coerceAnswer('category', 'I am from OBC', ''), 'obc');
+  assert.equal(coerceAnswer('category', 'just checking', ''), null);
+});
+
+test('a current correction replaces the old value but requires confirmation', () => {
+  const update = mergeExtractedProfile(
+    { age: 72, occupation: 'farmer', state: 'Tamil Nadu' },
+    { age: 'entered', occupation: 'answered', state: 'entered' },
+    { age: 32, occupation: 'salaried', state: 'Tamil Nadu' },
+  );
+  assert.deepEqual(update.profile, {
+    age: 32,
+    occupation: 'salaried',
+    state: 'Tamil Nadu',
+  });
+  assert.equal(update.provenance.age, 'inferred');
+  assert.equal(update.provenance.occupation, 'inferred');
+  assert.equal(update.provenance.state, 'entered');
+  assert.equal(update.changed.length, 2);
+});
+
 test('leverage counts the schemes a field blocks', () => {
-  const both = scheme('both', { all: [rule('land', 'gt', 0), rule('lpg', 'eq', 'no')] });
+  const both = scheme('both', {
+    all: [rule('land', 'gt', 0), rule('lpg', 'eq', 'no')],
+  });
   const ranked = leverage([farming, cooking, both], {}, []);
   assert.equal(ranked[0].field, 'land');
   assert.equal(ranked[0].blocks, 2);
@@ -148,10 +244,17 @@ test('planning is pure — the same input twice gives the same plan', () => {
 test('an unreadable answer is acknowledged, not silently repeated', () => {
   const plain = planTurn(base);
   const retry = planTurn({ ...base, unreadAnswer: true });
-  assert.equal(retry.askedField, plain.askedField, 'it asks the same thing again');
+  assert.equal(
+    retry.askedField,
+    plain.askedField,
+    'it asks the same thing again',
+  );
   assert.notEqual(retry.text, plain.text);
   assert.ok(retry.text.startsWith('Sorry'), retry.text);
-  assert.ok(retry.text.includes(plain.text), 'the question itself is still there');
+  assert.ok(
+    retry.text.includes(plain.text),
+    'the question itself is still there',
+  );
 });
 
 test('naming a scheme leads with it, however retrieval ranked it', () => {
@@ -165,7 +268,11 @@ test('naming a scheme leads with it, however retrieval ranked it', () => {
     questionsAsked: QUESTION_BUDGET,
   });
   const cards = plan.blocks.filter((b) => b.kind === 'scheme_card');
-  assert.equal(cards[0].schemeId, 'farm-one', 'the scheme they asked about leads');
+  assert.equal(
+    cards[0].schemeId,
+    'farm-one',
+    'the scheme they asked about leads',
+  );
 });
 
 test('a focused turn answers about that scheme, not in general', () => {
@@ -214,7 +321,10 @@ test('a scheme named this message is the whole answer', () => {
   assert.equal(cards[0].schemeId, 'farm-one');
   // And the sources strip follows the cards, not the candidate list.
   const sources = plan.blocks.find((b) => b.kind === 'sources');
-  assert.deepEqual(sources.items.map((i) => i.schemeId), ['farm-one']);
+  assert.deepEqual(
+    sources.items.map((i) => i.schemeId),
+    ['farm-one'],
+  );
 });
 
 test('a focus merely carried over still shows the others', () => {
@@ -241,7 +351,11 @@ test('asking about a scheme is never deflected into a question', () => {
     confirmed: [],
     questionsAsked: 0, // budget available — it would otherwise ask
   });
-  assert.equal(plan.askedField, null, 'their question is answered, not deflected');
+  assert.equal(
+    plan.askedField,
+    null,
+    'their question is answered, not deflected',
+  );
   assert.ok(plan.text.startsWith('farm-one'), plan.text);
   // The gap is still communicated, just not as a deflection.
   assert.ok(/still to establish/i.test(plan.text), plan.text);
@@ -250,10 +364,14 @@ test('asking about a scheme is never deflected into a question', () => {
 test('a scheme nothing can be said about is not offered as an option', () => {
   // Undetermined means the rules could not decide. Showing it as a card reads
   // as a suggestion, which is the confident-looking answer the product avoids.
-  const undecided = scheme('unknown-one', { all: [rule('bpl', 'eq', 'yes')] }, {
-    reviewStatus: 'DRAFT',
-    complete: false,
-  });
+  const undecided = scheme(
+    'unknown-one',
+    { all: [rule('bpl', 'eq', 'yes')] },
+    {
+      reviewStatus: 'DRAFT',
+      complete: false,
+    },
+  );
   const plan = planTurn({
     ...base,
     schemes: [farming, undecided],
@@ -262,15 +380,21 @@ test('a scheme nothing can be said about is not offered as an option', () => {
     confirmed: ['land'],
     questionsAsked: QUESTION_BUDGET,
   });
-  const ids = plan.blocks.filter((b) => b.kind === 'scheme_card').map((b) => b.schemeId);
+  const ids = plan.blocks
+    .filter((b) => b.kind === 'scheme_card')
+    .map((b) => b.schemeId);
   assert.deepEqual(ids, ['farm-one']);
 });
 
 test('asking for everything shows the undetermined ones too', () => {
-  const undecided = scheme('unknown-one', { all: [rule('bpl', 'eq', 'yes')] }, {
-    reviewStatus: 'DRAFT',
-    complete: false,
-  });
+  const undecided = scheme(
+    'unknown-one',
+    { all: [rule('bpl', 'eq', 'yes')] },
+    {
+      reviewStatus: 'DRAFT',
+      complete: false,
+    },
+  );
   const plan = planTurn({
     ...base,
     schemes: [farming, undecided],
@@ -280,16 +404,22 @@ test('asking for everything shows the undetermined ones too', () => {
     showEverything: true,
     questionsAsked: QUESTION_BUDGET,
   });
-  const ids = plan.blocks.filter((b) => b.kind === 'scheme_card').map((b) => b.schemeId);
+  const ids = plan.blocks
+    .filter((b) => b.kind === 'scheme_card')
+    .map((b) => b.schemeId);
   assert.ok(ids.includes('unknown-one'), 'narrowing must be opt-out-able');
 });
 
 test('a scheme asked about by name is shown whatever its verdict', () => {
   // Refusing to answer is worse than answering "we cannot tell".
-  const undecided = scheme('unknown-one', { all: [rule('bpl', 'eq', 'yes')] }, {
-    reviewStatus: 'DRAFT',
-    complete: false,
-  });
+  const undecided = scheme(
+    'unknown-one',
+    { all: [rule('bpl', 'eq', 'yes')] },
+    {
+      reviewStatus: 'DRAFT',
+      complete: false,
+    },
+  );
   const plan = planTurn({
     ...base,
     schemes: [farming, undecided],
@@ -300,7 +430,9 @@ test('a scheme asked about by name is shown whatever its verdict', () => {
     confirmed: ['land'],
     questionsAsked: QUESTION_BUDGET,
   });
-  const ids = plan.blocks.filter((b) => b.kind === 'scheme_card').map((b) => b.schemeId);
+  const ids = plan.blocks
+    .filter((b) => b.kind === 'scheme_card')
+    .map((b) => b.schemeId);
   assert.deepEqual(ids, ['unknown-one']);
 });
 

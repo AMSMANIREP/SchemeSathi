@@ -3,7 +3,9 @@ import { z } from 'zod';
 import { evaluateScheme } from '../rules';
 import { retrieve } from '../retrieval';
 import { fields } from '../rules';
-import type { Decision, Profile, Scheme } from '../types';
+import type { Decision, Language, Profile, Scheme } from '../types';
+import { questionFor } from '../questions';
+import { QUESTION_BUDGET } from './turn';
 
 /**
  * What the model is allowed to do.
@@ -20,14 +22,20 @@ export type ToolContext = {
   confirmed: string[];
   /** Filled in as the model searches, so the caller can see what it saw. */
   seen: Set<string>;
+  checked: Set<string>;
   /** Set when the model chooses to ask about a field this turn. */
   asking: { field: string; options: string[] } | null;
+  searched: boolean;
+  blockedQuestion: boolean;
+  questionsAsked: number;
+  language: Language;
 };
 
 export function buildTools(ctx: ToolContext) {
   const searchSchemes = tool(
     async ({ query }: { query: string }) => {
       const candidates = await retrieve(query, ctx.schemes, 6);
+      ctx.searched = true;
       for (const c of candidates) ctx.seen.add(c.schemeId);
       if (!candidates.length) return 'No programme matched that.';
       return candidates
@@ -40,9 +48,11 @@ export function buildTools(ctx: ToolContext) {
     {
       name: 'search_schemes',
       description:
-        "Find Central Government programmes matching a description of someone's situation. Works in English, Hindi and Kannada. Returns scheme ids.",
+        "Search only the supported catalogue for the citizen's current request. Use English search terms for keyword retrieval, translating the request if needed. Returns candidates, not proof of eligibility or relevance; check each before asking anything.",
       schema: z.object({
-        query: z.string().describe("The citizen's situation, in their own words"),
+        query: z
+          .string()
+          .describe("The citizen's situation, in their own words"),
       }),
     },
   );
@@ -53,6 +63,7 @@ export function buildTools(ctx: ToolContext) {
         const scheme = ctx.schemes.find((x) => x.id === id);
         if (!scheme) return `${id} | unknown scheme`;
         ctx.seen.add(id);
+        ctx.checked.add(id);
         const d: Decision = evaluateScheme(scheme, ctx.profile, ctx.confirmed);
         const missing = d.missingFields.length
           ? ` | still unestablished: ${d.missingFields.join(', ')}`
@@ -77,7 +88,12 @@ export function buildTools(ctx: ToolContext) {
       const askable = fields
         .map((f) => f.key)
         .filter((k) => !ctx.confirmed.includes(k));
-      return `confirmed: ${known.join(', ') || '(nothing yet)'}\nnot yet established: ${askable.join(', ')}`;
+      const pending = Object.entries(ctx.profile)
+        .filter(
+          ([field, value]) => value != null && !ctx.confirmed.includes(field),
+        )
+        .map(([field, value]) => `${field}=${value}`);
+      return `confirmed: ${known.join(', ') || '(nothing yet)'}\npending confirmation (latest statements, do not replace with old values): ${pending.join(', ') || '(none)'}\nnot yet established: ${askable.join(', ')}`;
     },
     {
       name: 'what_is_known',
@@ -89,6 +105,21 @@ export function buildTools(ctx: ToolContext) {
 
   const askAbout = tool(
     async ({ field }: { field: string }) => {
+      const relevant = ctx.schemes.filter((s) => ctx.checked.has(s.id));
+      const canAsk =
+        ctx.questionsAsked < QUESTION_BUDGET &&
+        relevant.some((s) => {
+          const decision = evaluateScheme(s, ctx.profile, ctx.confirmed);
+          return (
+            decision.status === 'POSSIBLY_ELIGIBLE' &&
+            decision.missingFields.includes(field)
+          );
+        });
+      if (!canAsk) {
+        ctx.blockedQuestion = true;
+        ctx.asking = null;
+        return 'Do not ask that question. No relevant supported scheme needs this answer, or the question budget is exhausted. If nothing supported matches, state that clearly and stop.';
+      }
       const spec = fields.find((f) => f.key === field);
       if (!spec)
         return `There is no field called "${field}". Choose one of: ${fields.map((f) => f.key).join(', ')}.`;
@@ -97,10 +128,11 @@ export function buildTools(ctx: ToolContext) {
       // The model phrases the question; the answerable values are ours. A
       // field it cannot name cannot be asked about, and the chips a citizen
       // taps come from the same list the validator accepts.
-      ctx.asking = { field, options: spec.type === 'select' ? spec.values ?? [] : [] };
-      return spec.type === 'select'
-        ? `Ask about ${field}. Buttons will be shown for: ${(spec.values ?? []).join(', ')}. Ask in one short sentence.`
-        : `Ask about ${field}. It is a number. Ask in one short sentence, and say the unit if there is one.`;
+      ctx.asking = {
+        field,
+        options: spec.type === 'select' ? (spec.values ?? []) : [],
+      };
+      return `Ask exactly: ${questionFor(field, ctx.language).text} Do not change its units or scope. Buttons: ${(spec.values ?? []).join(', ')}.`;
     },
     {
       name: 'ask_about',

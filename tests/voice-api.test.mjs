@@ -397,6 +397,223 @@ test('real routes preserve chat flow, ownership and selected voice language', as
       'ml',
       'missing voice does not break text/session',
     );
+
+    // Exercise the real conversation route and agent loop with a provider
+    // deliberately attempting the irrelevant question from the bug report.
+    Object.assign(globalThis.__voiceTestEnv, {
+      LLM_BASE_URL: 'https://llm.test/v1',
+      LLM_API_KEY: 'synthetic-test-key',
+      LLM_MODEL: 'test-model',
+    });
+    let agentReplies = [];
+    let extracted = {};
+    const agentMessages = [];
+    const toolCall = (name, args) => ({
+      role: 'assistant',
+      content: null,
+      tool_calls: [
+        {
+          id: 'test-' + name,
+          type: 'function',
+          function: { name, arguments: JSON.stringify(args) },
+        },
+      ],
+    });
+    globalThis.fetch = async (url, init) => {
+      const address =
+        typeof url === 'string' ? url : url instanceof URL ? url.href : url.url;
+      assert.equal(address, 'https://llm.test/v1/chat/completions');
+      const request = JSON.parse(init.body);
+      let message;
+      if (request.tools) {
+        agentMessages.push(request.messages);
+        assert.ok(agentReplies.length, 'unexpected agent call');
+        message = agentReplies.shift();
+      } else {
+        message = {
+          role: 'assistant',
+          content: JSON.stringify({ profile: extracted }),
+        };
+      }
+      return Response.json({
+        id: 'test',
+        object: 'chat.completion',
+        model: 'test-model',
+        choices: [
+          {
+            index: 0,
+            message,
+            finish_reason: message.tool_calls ? 'tool_calls' : 'stop',
+          },
+        ],
+      });
+    };
+    const citizen = client();
+    await citizen('sessions', 'POST', { language: 'en' }, 201);
+    await citizen('profile/confirm', 'PUT', {
+      profile: { age: 72, occupation: 'farmer', state: 'Tamil Nadu' },
+      version: 0,
+      confirmed: true,
+    });
+    const thread = await citizen('conversations', 'POST', {}, 201);
+    agentReplies = [
+      {
+        role: 'assistant',
+        content: 'What kind of support are you looking for?',
+      },
+    ];
+    const greeting = await citizen(
+      'conversations/' + thread.id + '/messages',
+      'POST',
+      { message: 'How are you today?' },
+      201,
+    );
+    assert.equal(
+      greeting.message.text,
+      'What kind of support are you looking for?',
+    );
+    extracted = { age: 32, occupation: 'salaried' };
+    agentReplies = [
+      toolCall('search_schemes', { query: 'zzunsupportedzz' }),
+      toolCall('ask_about', { field: 'lpg' }),
+      {
+        role: 'assistant',
+        content: 'Does your household have an LPG connection?',
+      },
+    ];
+    const noMatch = await citizen(
+      'conversations/' + thread.id + '/messages',
+      'POST',
+      {
+        message:
+          'I am 32 years old, a software engineer. I need software skill improvement.',
+      },
+      201,
+    );
+    assert.match(
+      noMatch.message.text,
+      /^There are no supported schemes as of now\./,
+    );
+    assert.doesNotMatch(noMatch.message.text, /LPG|farmer|\?/);
+    assert.ok(!noMatch.message.blocks.some((b) => b.kind === 'answer_chips'));
+    const row = sqlite
+      .prepare('SELECT asked_field,owner FROM conversations WHERE id=?')
+      .get(thread.id);
+    assert.equal(row.asked_field, '');
+    const updated = sqlite
+      .prepare('SELECT profile,provenance,confirmed FROM sessions WHERE id=?')
+      .get(row.owner);
+    assert.equal(JSON.parse(updated.profile).occupation, 'salaried');
+    assert.equal(JSON.parse(updated.profile).age, 32);
+    assert.equal(JSON.parse(updated.provenance).occupation, 'inferred');
+    assert.ok(!JSON.parse(updated.confirmed).includes('occupation'));
+    assert.ok(
+      agentMessages
+        .at(-1)
+        .some(
+          (m) => m.role === 'assistant' && m.content === greeting.message.text,
+        ),
+    );
+
+    // Existing conversations may still contain the old monthly question.
+    // Its answer must not be coerced to an annual household amount.
+    sqlite
+      .prepare('UPDATE conversations SET asked_field=? WHERE id=?')
+      .run('income', thread.id);
+    sqlite
+      .prepare('UPDATE messages SET text=? WHERE id=?')
+      .run('What is your monthly income in rupees?', noMatch.message.id);
+    extracted = {};
+    agentReplies = [
+      toolCall('ask_about', { field: 'lpg' }),
+      { role: 'assistant', content: 'Do you have LPG?' },
+    ];
+    const stopped = await citizen(
+      'conversations/' + thread.id + '/messages',
+      'POST',
+      { message: '20,000 rupees' },
+      201,
+    );
+    assert.match(
+      stopped.message.text,
+      /^There are no supported schemes as of now\./,
+    );
+    assert.equal(
+      JSON.parse(
+        sqlite.prepare('SELECT profile FROM sessions WHERE id=?').get(row.owner)
+          .profile,
+      ).income,
+      undefined,
+    );
+
+    await citizen('privacy/consent', 'PUT', { enabled: false, language: 'ta' });
+    agentReplies = [
+      toolCall('search_schemes', { query: 'zzunsupportedzz' }),
+      { role: 'assistant', content: 'உங்கள் வீட்டில் எரிவாயு இணைப்பு உள்ளதா?' },
+    ];
+    const tamil = await citizen(
+      'conversations/' + thread.id + '/messages',
+      'POST',
+      { message: 'மென்பொருள் திறன் பயிற்சி வேண்டும்' },
+      201,
+    );
+    assert.match(tamil.message.text, /^தற்போது ஆதரிக்கப்படும் திட்டங்கள் எதுவும் இல்லை/);
+    assert.doesNotMatch(tamil.message.text, /எரிவாயு|\?/);
+
+    const { buildTools } = await import('../lib/agent/tools.ts');
+    const reviewed = {
+      id: 'training',
+      rules: {
+        all: [
+          {
+            id: 'age',
+            field: 'age',
+            op: 'gte',
+            value: 18,
+            label: 'Adult',
+            source: 'https://example.gov.in',
+          },
+        ],
+      },
+      reviewStatus: 'VERIFIED',
+      complete: true,
+      sourceCheckedAt: new Date().toISOString(),
+    };
+    const context = {
+      schemes: [reviewed],
+      profile: {},
+      confirmed: [],
+      seen: new Set(['training']),
+      checked: new Set(),
+      asking: null,
+      searched: true,
+      blockedQuestion: false,
+      questionsAsked: 0,
+      language: 'en',
+    };
+    const ask = buildTools(context).find((t) => t.name === 'ask_about');
+    await ask.invoke({ field: 'age' });
+    assert.equal(
+      context.asking,
+      null,
+      'retrieval alone must not authorize profile collection',
+    );
+    context.checked.add('training');
+    await ask.invoke({ field: 'lpg' });
+    assert.equal(context.asking, null, 'unrelated fields are rejected');
+    await ask.invoke({ field: 'age' });
+    assert.equal(
+      context.asking.field,
+      'age',
+      'a relevant reviewed rule can ask',
+    );
+    context.questionsAsked = 2;
+    await ask.invoke({ field: 'age' });
+    assert.equal(
+      context.asking,
+      null,
+      'the question budget is enforced for the model',
+    );
   } finally {
     globalThis.fetch = originalFetch;
     hooks.deregister();

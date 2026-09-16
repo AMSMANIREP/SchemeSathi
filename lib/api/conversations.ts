@@ -1,6 +1,8 @@
 import { body, db, HttpError, json, limit } from '../http';
 import type { SessionCtx } from '../session';
-import { planTurn, nextQuestion } from '../agent/turn';
+import { planTurn, QUESTION_BUDGET } from '../agent/turn';
+import { coerceAnswer, mergeExtractedProfile } from '../agent/profile';
+import { questionFor } from '../questions';
 import {
   detectFocus,
   isDecline,
@@ -12,7 +14,7 @@ import { validateProse, schemesMentioned } from '../agent/validate.ts';
 import { judgeProse } from '../agent/judge';
 import { extract } from './chat';
 import { retrieve } from '../retrieval';
-import { fields, redact, validateProfile } from '../rules';
+import { redact, validateProfile } from '../rules';
 import { schemes } from '../schemes';
 import { applicationRepository } from '../storage';
 import type { SessionRoute } from '../session';
@@ -200,54 +202,6 @@ export const conversations: SessionRoute = async ({
   return null;
 };
 
-/**
- * Reads a direct answer to the field we asked about. Returns null when the
- * reply is not a usable value, so the turn falls back to extraction and the
- * agent can ask again rather than recording a guess as a statement.
- */
-function coerce(field: string, text: string): string | number | null {
-  const spec = fields.find((f) => f.key === field);
-  if (!spec) return null;
-  const value = text.trim().toLowerCase();
-
-  if (spec.type === 'number') {
-    const digits = value
-      .replace(/[०-९]/g, (c) => String(c.charCodeAt(0) - 2406))
-      .replace(/[೦-೯]/g, (c) => String(c.charCodeAt(0) - 3302))
-      .replace(/[௦-௯]/g, (c) => String(c.charCodeAt(0) - 3046))
-      .replace(/[൦-൯]/g, (c) => String(c.charCodeAt(0) - 3430))
-      .match(/\d+(?:\.\d+)?/);
-    if (!digits) return null;
-    return ok(field, Number(digits[0]));
-  }
-
-  const exact = (spec.values || []).find((v) => v === value);
-  if (exact) return exact;
-  if (
-    /^(yes|y|haan|हाँ|हां|ಹೌದು|ஆம்|ஆமாம்|അതെ)$/i.test(value) &&
-    spec.values?.includes('yes')
-  )
-    return 'yes';
-  if (
-    /^(no|n|nahi|नहीं|ಇಲ್ಲ|இல்லை|ഇല്ല)$/i.test(value) &&
-    spec.values?.includes('no')
-  )
-    return 'no';
-  return (
-    (spec.values || []).find((v) => value.includes(v.replace('_', ' '))) ?? null
-  );
-}
-
-/** Lets the profile validator be the single judge of what a field accepts. */
-function ok(field: string, value: string | number) {
-  try {
-    validateProfile({ [field]: value });
-    return value;
-  } catch {
-    return null;
-  }
-}
-
 async function runTurn(
   { req, s, trace }: SessionCtx,
   conversation: Row,
@@ -365,36 +319,34 @@ async function runTurn(
     ? ''
     : (conversation.asked_field as string) || '';
   const profile = JSON.parse(s.profile) as Profile;
-  const provenance = JSON.parse(s.provenance) as Record<string, Provenance>;
+  let provenance = JSON.parse(s.provenance) as Record<string, Provenance>;
   const changed: { field: string; provenance: Provenance }[] = [];
   let merged: Profile = { ...profile };
 
-  const answered = askedField ? coerce(askedField, text) : null;
+  const previous = await db()
+    .prepare(
+      "SELECT text,blocks FROM messages WHERE conversation_id=? AND role='assistant' ORDER BY created_at DESC, rowid DESC LIMIT 1",
+    )
+    .bind(conversation.id)
+    .first<{ text: string; blocks: string }>();
+  const answered = askedField
+    ? coerceAnswer(askedField, text, previous?.text || '')
+    : null;
   if (answered !== null) {
     merged = validateProfile({ ...merged, [askedField]: answered });
     provenance[askedField] = 'answered';
     changed.push({ field: askedField, provenance: 'answered' });
-  } else {
+  }
+  // A long answer may also correct occupation, age or other details. Short
+  // chip/numeric replies do not need an additional model call.
+  if (answered === null || text.length > 40) {
     onStatus('reading');
     const found = await extract(text, s.language);
-    for (const [field, value] of Object.entries(found.profile)) {
-      if (value === null) continue;
-      // Never let a model's reading overwrite something the citizen
-      // stated themselves. Downgrading an entered or answered field to
-      // "inferred" drops it out of `confirmed`, which silently changes a
-      // verdict — the citizen's own entry outranks an extraction.
-      const held = provenance[field];
-      if (held === 'answered' || held === 'entered') continue;
-      // One unusable value must not fail the whole turn — the citizen
-      // said something, and the agent should reply, not error.
-      try {
-        merged = validateProfile({ ...merged, [field]: value });
-        provenance[field] = 'inferred';
-        changed.push({ field, provenance: 'inferred' });
-      } catch {
-        continue;
-      }
-    }
+    if (answered !== null) delete found.profile[askedField];
+    const update = mergeExtractedProfile(merged, provenance, found.profile);
+    merged = update.profile;
+    provenance = update.provenance;
+    changed.push(...update.changed);
   }
 
   const confirmed = Object.keys(merged).filter(
@@ -404,17 +356,20 @@ async function runTurn(
   const live = await schemes();
   const saved = await applicationRepository().list(s.id);
 
-  // Retrieve against the opening description plus this message. A bare
-  // answer like "44" matches nothing on its own, and the citizen should
-  // not lose the thread of what they came in saying.
-  const query = [conversation.title as string, text].filter(Boolean).join(' ');
-
-  const previous = await db()
+  const recent = await db()
     .prepare(
-      "SELECT blocks FROM messages WHERE conversation_id=? AND role='assistant' ORDER BY created_at DESC, rowid DESC LIMIT 1",
+      'SELECT role,text FROM messages WHERE conversation_id=? ORDER BY created_at DESC, rowid DESC LIMIT 13',
     )
     .bind(conversation.id)
-    .first<{ blocks: string }>();
+    .all<{ role: string; text: string }>();
+  const history = recent.results.reverse();
+  // A greeting used as the title is not the request. Keep recent user turns
+  // so a short answer does not lose the skill/disability request behind it.
+  const query = history
+    .filter((m) => m.role === 'user')
+    .map((m) => m.text)
+    .join(' ');
+
   const lastPresented = (
     JSON.parse(previous?.blocks || '[]') as {
       kind: string;
@@ -432,7 +387,7 @@ async function runTurn(
         previousFocus: (conversation.focus_scheme_id as string) || null,
         text,
       });
-  const focus = detected.schemeId;
+  let focus = detected.schemeId;
 
   // The planner decides first, then the model speaks — never the reverse.
   //
@@ -450,23 +405,17 @@ async function runTurn(
   // configured the deterministic path retrieves for itself, as before.
   let spoken: Awaited<ReturnType<typeof runAgent>> = null;
   try {
-    const recent = await db()
-      .prepare(
-        'SELECT role,text FROM messages WHERE conversation_id=? ORDER BY created_at DESC, rowid DESC LIMIT 7',
-      )
-      .bind(conversation.id)
-      .all<{ role: string; text: string }>();
     onStatus('thinking');
     spoken = await runAgent({
       schemes: live,
       profile: merged,
       confirmed,
       language: s.language,
-      history: recent.results
-        .reverse()
+      history: history
         .slice(0, -1)
         .map((m) => ({ role: m.role as 'user' | 'assistant', text: m.text })),
       message: text,
+      questionsAsked: conversation.questions_asked as number,
     });
   } catch (error) {
     console.log(
@@ -482,7 +431,9 @@ async function runTurn(
 
   let candidates: string[];
   if (spoken) {
-    candidates = spoken.seen;
+    // Search results are candidates, not recommendations. Only schemes the
+    // agent selected for checking may drive profile questions and cards.
+    candidates = spoken.checked;
   } else {
     onStatus('searching');
     candidates = (await retrieve(query, live)).map((c) => c.schemeId);
@@ -505,6 +456,7 @@ async function runTurn(
       candidates = (await retrieve(fallbackQuery, live)).map((c) => c.schemeId);
   }
 
+  if (!detected.named && focus && !candidates.includes(focus)) focus = null;
   const plan = planTurn({
     schemes: live,
     candidates,
@@ -528,16 +480,28 @@ async function runTurn(
     language: s.language,
   });
 
-  const modelAsked = spoken?.asking ?? null;
-  // True when the model's own words are shown in place of the planner's.
-  const modelSpoke = !!spoken?.text;
+  const catalogueChecked =
+    !spoken ||
+    spoken.searched ||
+    spoken.checked.length > 0 ||
+    spoken.blockedQuestion ||
+    !!spoken.asking;
+  const terminal = plan.noSupportedSchemes && catalogueChecked;
+  // A rejected model reply must never leave its chips/asked field behind.
+  let acceptedModel = false;
+  const modelAsked =
+    !terminal &&
+    spoken?.asking &&
+    (conversation.questions_asked as number) < QUESTION_BUDGET
+      ? spoken.asking
+      : null;
 
   // Validation happens here rather than at generation, because it needs
   // the verdicts the planner just computed. Prose that overreaches is
   // replaced by the deterministic sentence, and prose that asks about a
   // different field than the chips beneath it is set aside entirely.
   let assistantText = plan.text;
-  if (spoken?.text) {
+  if (spoken?.text && !terminal) {
     const verdict = validateProse(spoken.text, {
       onScreen: plan.blocks
         .filter((b) => b.kind === 'scheme_card')
@@ -546,14 +510,10 @@ async function runTurn(
       schemes: live,
       decisions: plan.decisions,
     });
-    // The model reliably asks good questions and just as reliably declines
-    // to call ask_about for them, so its words were being thrown away.
-    // A question only contradicts the buttons if buttons are shown, so
-    // when it speaks without the tool we keep its wording and show none —
-    // and drop the planner's field with them, because coercing the next
-    // reply against a field the citizen was never asked about is how "2
-    // acres" becomes an age of 2.
-    const wouldContradict = false;
+    // After a lookup, every profile question must be justified by a relevant
+    // rule. A plain clarification before searching may still be conversational.
+    const wouldContradict =
+      catalogueChecked && /[?？]/.test(spoken.text) && !modelAsked;
     if (!verdict.ok)
       console.log(
         JSON.stringify({
@@ -567,7 +527,8 @@ async function runTurn(
         JSON.stringify({
           traceId: trace,
           event: 'prose_unused',
-          reason: 'the planner is asking and the model did not',
+          reason:
+            'question has no relevant supported field or exceeds the budget',
         }),
       );
     else {
@@ -592,8 +553,12 @@ async function runTurn(
           }),
         );
       }
-      if (judged.ok) assistantText = spoken.text;
-      else
+      if (judged.ok) {
+        assistantText = modelAsked
+          ? questionFor(modelAsked.field, s.language).text
+          : spoken.text;
+        acceptedModel = true;
+      } else
         console.log(
           JSON.stringify({
             traceId: trace,
@@ -604,12 +569,11 @@ async function runTurn(
     }
   }
 
-  // A question the model asked replaces the planner's: the wording is its
-  // own, the chips and the field are ours, and the answer is coerced
-  // against that field exactly as before. The planner's own question is
-  // the fallback for when no model is configured.
+  // Only an accepted question can supply chips or an answer field. Its
+  // canonical wording preserves the unit and scope the profile stores.
   const blocks =
-    modelAsked || (modelSpoke && plan.checkpoint === 'ASKED')
+    (acceptedModel && modelAsked) ||
+    (acceptedModel && plan.checkpoint === 'ASKED')
       ? [
           ...plan.blocks.filter(
             (b) => b.kind === 'profile_updated' || b.kind === 'notice',
@@ -626,42 +590,21 @@ async function runTurn(
             : []),
         ]
       : plan.blocks;
-  const askedFieldOut = modelAsked
-    ? modelAsked.field
-    : modelSpoke && plan.checkpoint === 'ASKED'
-      ? '' // its question, our field: never coerce against the mismatch
-      : plan.askedField;
+  const askedFieldOut =
+    acceptedModel && modelAsked
+      ? modelAsked.field
+      : acceptedModel && plan.checkpoint === 'ASKED'
+        ? '' // its question, our field: never coerce against the mismatch
+        : plan.askedField;
 
-  // Every turn ends with a way forward. A reply that states what it heard
-  // and stops leaves the citizen to guess what to type next, which is the
-  // opposite of the conversation this is meant to be. If nothing in the
-  // turn already asks — no question from the model, no save offered — the
-  // planner's own next question is appended, with the chips that answer
-  // it, so the wording and the buttons always agree.
-  let finalText = assistantText;
-  let finalBlocks = blocks;
-  let finalAskedField = askedFieldOut;
-
-  const alreadyAsks = !!modelAsked || assistantText.trim().endsWith('?');
-  const offeringSave = plan.checkpoint === 'SAVE_OFFERED';
-
-  if (!alreadyAsks && !offeringSave) {
-    const q = nextQuestion(live, merged, confirmed, candidates, s.language);
-    if (q?.text) {
-      finalText = `${assistantText.trim()} ${q.text}`.trim();
-      finalAskedField = q.field;
-      finalBlocks = q.options.length
-        ? [
-            ...blocks.filter((b) => b.kind !== 'answer_chips'),
-            {
-              kind: 'answer_chips' as const,
-              field: q.field,
-              options: q.options,
-            },
-          ]
-        : blocks;
-    }
-  }
+  // A terminal result is a complete answer. Never append a catalogue-wide
+  // question to it, and never revive a rejected model question.
+  const finalText = assistantText;
+  const finalBlocks = blocks;
+  const finalAskedField = askedFieldOut;
+  const finalQuestionsAsked = finalAskedField
+    ? Math.min(QUESTION_BUDGET, (conversation.questions_asked as number) + 1)
+    : plan.questionsAsked;
 
   const assistant = {
     id: crypto.randomUUID(),
@@ -695,9 +638,9 @@ async function runTurn(
       )
       .bind(
         plan.checkpoint,
-        plan.questionsAsked,
+        finalQuestionsAsked,
         finalAskedField || '',
-        plan.offeredSchemeId ?? focus,
+        terminal ? null : (plan.offeredSchemeId ?? focus),
         turn,
         declining
           ? (conversation.focus_scheme_id as string) || null

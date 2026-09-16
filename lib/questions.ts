@@ -1,5 +1,6 @@
 import { fields } from './rules.ts';
 import { languageIndex } from './languages.ts';
+import { copy } from './i18n.ts';
 import type { Language, Profile, Scheme } from './types';
 
 /**
@@ -48,6 +49,20 @@ export function leverage(
  * rule is askable before its bespoke copy is written.
  */
 const asked: Record<string, string[]> = {
+  income: [
+    'What is your total annual household income in rupees?',
+    'आपके पूरे परिवार की कुल वार्षिक आय रुपये में कितनी है?',
+    'ನಿಮ್ಮ ಕುಟುಂಬದ ಒಟ್ಟು ವಾರ್ಷಿಕ ಆದಾಯ ರೂಪಾಯಿಗಳಲ್ಲಿ ಎಷ್ಟು?',
+    'உங்கள் குடும்பத்தின் மொத்த ஆண்டு வருமானம் ரூபாயில் எவ்வளவு?',
+    'നിങ്ങളുടെ കുടുംബത്തിന്റെ ആകെ വാർഷിക വരുമാനം രൂപയിൽ എത്രയാണ്?',
+  ],
+  disability: [
+    'What disability percentage is recorded on your disability certificate?',
+    'आपके दिव्यांगता प्रमाणपत्र पर दिव्यांगता का प्रतिशत कितना है?',
+    'ನಿಮ್ಮ ಅಂಗವೈಕಲ್ಯ ಪ್ರಮಾಣಪತ್ರದಲ್ಲಿ ದಾಖಲಾದ ಶೇಕಡಾವಾರು ಎಷ್ಟು?',
+    'உங்கள் மாற்றுத்திறனாளி சான்றிதழில் குறிப்பிடப்பட்டுள்ள சதவீதம் என்ன?',
+    'നിങ്ങളുടെ ഭിന്നശേഷി സർട്ടിഫിക്കറ്റിൽ രേഖപ്പെടുത്തിയ ശതമാനം എത്രയാണ്?',
+  ],
   occupation: [
     'What kind of work do you do?',
     'आप किस तरह का काम करते हैं?',
@@ -96,9 +111,10 @@ const li = languageIndex;
 
 export function questionFor(field: string, language: Language) {
   const spec = fields.find((f) => f.key === field);
+  const label = copy[language][field as keyof typeof copy.en];
   return {
     field,
-    text: asked[field]?.[li(language)] ?? '',
+    text: asked[field]?.[li(language)] ?? (spec && label ? `${label}?` : ''),
     // Raw values only. The client labels them from lib/i18n.ts, so a
     // transcript reads correctly in a language chosen after the turn.
     options: spec?.type === 'select' ? spec.values || [] : [],
@@ -106,5 +122,5 @@ export function questionFor(field: string, language: Language) {
 }
 
 export function hasQuestion(field: string) {
-  return field in asked;
+  return fields.some((spec) => spec.key === field);
 }

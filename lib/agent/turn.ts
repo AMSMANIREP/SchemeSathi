@@ -16,9 +16,8 @@ import type {
 /**
  * The single most useful thing still unknown, phrased.
  *
- * Exposed so a turn that would otherwise end in a statement can close with a
- * question instead. A reply that names what someone said and stops is not a
- * conversation; it leaves them to work out what to type next.
+ * Only ask when a relevant, reviewed scheme has an undecided verdict.
+ * Missing catalogue coverage cannot be repaired by collecting more details.
  */
 export function nextQuestion(
   schemes: Scheme[],
@@ -27,10 +26,14 @@ export function nextQuestion(
   candidates: string[],
   language: Language,
 ) {
-  const relevant = schemes.filter((s) => candidates.includes(s.id));
-  const pick =
-    leverage(relevant, profile, confirmed).find((x) => hasQuestion(x.field)) ||
-    leverage(schemes, profile, confirmed).find((x) => hasQuestion(x.field));
+  const relevant = schemes.filter(
+    (s) =>
+      candidates.includes(s.id) &&
+      evaluateScheme(s, profile, confirmed).status === 'POSSIBLY_ELIGIBLE',
+  );
+  const pick = leverage(relevant, profile, confirmed).find((x) =>
+    hasQuestion(x.field),
+  );
   return pick ? questionFor(pick.field, language) : null;
 }
 
@@ -65,6 +68,8 @@ export type TurnInput = {
 };
 
 export type TurnPlan = {
+  /** A terminal catalogue result; never append another profile question. */
+  noSupportedSchemes: boolean;
   text: string;
   blocks: Block[];
   checkpoint: Checkpoint;
@@ -126,11 +131,18 @@ const said = {
     'ക്ഷമിക്കണം, അത് മനസ്സിലായില്ല.',
   ],
   nothing: [
-    'I could not match that to a programme yet. Tell me a little more about your situation — your work, your family, your land, your age.',
-    'अभी इसे किसी योजना से नहीं जोड़ा जा सका। अपनी स्थिति के बारे में थोड़ा और बताइए — काम, परिवार, ज़मीन, उम्र।',
-    'ಇದನ್ನು ಇನ್ನೂ ಯಾವುದೇ ಯೋಜನೆಗೆ ಹೊಂದಿಸಲಾಗಿಲ್ಲ. ನಿಮ್ಮ ಪರಿಸ್ಥಿತಿಯ ಬಗ್ಗೆ ಸ್ವಲ್ಪ ಹೆಚ್ಚು ತಿಳಿಸಿ — ಕೆಲಸ, ಕುಟುಂಬ, ಭೂಮಿ, ವಯಸ್ಸು.',
-    'இன்னும் பொருத்தமான திட்டத்தைக் கண்டறிய முடியவில்லை. உங்கள் வேலை, குடும்பம், நிலம் அல்லது வயது பற்றிச் சிறிது கூறுங்கள்.',
-    'ഇതുവരെ അനുയോജ്യമായ പദ്ധതി കണ്ടെത്താനായില്ല. ജോലി, കുടുംബം, ഭൂമി, പ്രായം എന്നിവയെക്കുറിച്ച് അല്പം കൂടി പറയൂ.',
+    'There are no supported schemes as of now. This applies to your request within our current catalogue, not to every government programme.',
+    'फ़िलहाल कोई समर्थित योजना उपलब्ध नहीं है। यह हमारे वर्तमान संग्रह में आपके अनुरोध के लिए है, सभी सरकारी योजनाओं के लिए नहीं।',
+    'ಸದ್ಯಕ್ಕೆ ಬೆಂಬಲಿತ ಯೋಜನೆಗಳು ಲಭ್ಯವಿಲ್ಲ. ಇದು ನಮ್ಮ ಪ್ರಸ್ತುತ ಪಟ್ಟಿಯಲ್ಲಿ ನಿಮ್ಮ ವಿನಂತಿಗೆ ಅನ್ವಯಿಸುತ್ತದೆ, ಎಲ್ಲಾ ಸರ್ಕಾರಿ ಯೋಜನೆಗಳಿಗಲ್ಲ.',
+    'தற்போது ஆதரிக்கப்படும் திட்டங்கள் எதுவும் இல்லை. இது எங்கள் தற்போதைய பட்டியலில் உங்கள் கோரிக்கைக்கு மட்டுமே பொருந்தும்; அனைத்து அரசு திட்டங்களுக்கும் அல்ல.',
+    'നിലവിൽ പിന്തുണയ്ക്കുന്ന പദ്ധതികളൊന്നുമില്ല. ഇത് ഞങ്ങളുടെ നിലവിലെ പട്ടികയിൽ നിങ്ങളുടെ ആവശ്യത്തിന് ബാധകമാണ്; എല്ലാ സർക്കാർ പദ്ധതികൾക്കും അല്ല.',
+  ],
+  unreviewed: [
+    'Related records still need verification, so this does not mean you are ineligible.',
+    'संबंधित विवरणों का सत्यापन बाकी है; इसका मतलब यह नहीं कि आप अपात्र हैं।',
+    'ಸಂಬಂಧಿತ ದಾಖಲೆಗಳನ್ನು ಇನ್ನೂ ಪರಿಶೀಲಿಸಬೇಕು; ನೀವು ಅನರ್ಹರು ಎಂದರ್ಥವಲ್ಲ.',
+    'தொடர்புடைய பதிவுகள் இன்னும் சரிபார்க்கப்பட வேண்டும்; இதனால் நீங்கள் தகுதியற்றவர் என்று பொருளல்ல.',
+    'ബന്ധപ്പെട്ട രേഖകൾ ഇനിയും പരിശോധിക്കേണ്ടതുണ്ട്; നിങ്ങൾ അയോഗ്യരാണെന്ന് ഇതിന് അർത്ഥമില്ല.',
   ],
 };
 
@@ -187,16 +199,8 @@ export function planTurn(input: TurnInput): TurnPlan {
     !conclusive &&
     questionsAsked < QUESTION_BUDGET
   ) {
-    // Ask about what the citizen just raised. Scoring the whole catalogue
-    // first would ask a farmer their age simply because 'age' sorts earlier.
-    const relevant = schemes.filter((s) => candidates.includes(s.id));
-    const next =
-      leverage(relevant, profile, confirmed).find((x) =>
-        hasQuestion(x.field),
-      ) ||
-      leverage(schemes, profile, confirmed).find((x) => hasQuestion(x.field));
-    if (next) {
-      const q = questionFor(next.field, language);
+    const q = nextQuestion(schemes, profile, confirmed, candidates, language);
+    if (q) {
       if (q.options.length)
         blocks.push({
           kind: 'answer_chips',
@@ -204,11 +208,12 @@ export function planTurn(input: TurnInput): TurnPlan {
           options: q.options,
         });
       return {
+        noSupportedSchemes: false,
         text: unreadAnswer ? said.didNotCatch[n] + ' ' + q.text : q.text,
         blocks,
         checkpoint: 'ASKED',
         questionsAsked: questionsAsked + 1,
-        askedField: next.field,
+        askedField: q.field,
         offeredSchemeId: null,
         decisions,
       };
@@ -306,9 +311,15 @@ export function planTurn(input: TurnInput): TurnPlan {
       )
     : shown.length
       ? said.presenting[n]
-      : said.nothing[n];
+      : said.nothing[n] +
+        (ranked.some(
+          (id) => decisions.get(id)?.status === 'UNABLE_TO_DETERMINE',
+        )
+          ? ' ' + said.unreviewed[n]
+          : '');
 
   return {
+    noSupportedSchemes: !shown.length,
     text: offeredSchemeId ? opening + ' ' + said.offerSave[n] : opening,
     blocks,
     checkpoint,
