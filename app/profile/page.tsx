@@ -1,7 +1,13 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2, Check, MessageSquare, PenLine, ArrowRight } from 'lucide-react';
+import {
+  Loader2,
+  Check,
+  MessageSquare,
+  PenLine,
+  ArrowRight,
+} from 'lucide-react';
 import { useApp } from '../providers';
 import { Pick } from '../dialogs';
 import { fields } from '@/lib/rules';
@@ -147,7 +153,11 @@ export default function Profile() {
                   ...(f.values || []).map((v) => ({
                     value: v,
                     label:
-                      v === 'yes' ? t.yes : v === 'no' ? t.no : v.replaceAll('_', ' '),
+                      v === 'yes'
+                        ? t.yes
+                        : v === 'no'
+                          ? t.no
+                          : v.replaceAll('_', ' '),
                   })),
                 ]}
               />
@@ -161,7 +171,7 @@ export default function Profile() {
           className="btn"
           disabled={busy}
           onClick={async () => {
-            if (known.length) await saveProfile(draft);
+            if ((known.length || edited) && !(await saveProfile(draft))) return;
             setEdited(null);
             if (!onboarded) {
               completeOnboarding();

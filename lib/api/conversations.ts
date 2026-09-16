@@ -64,6 +64,9 @@ export const conversations: SessionRoute = async ({
   trace,
 }) => {
   if (p === 'conversations' && method === 'POST') {
+    // Consume the JSON body before returning. Leaving it unread can reset a
+    // reused connection in the Worker proxy and lose the first chat message.
+    await body(req);
     await limit('conv:' + s.id, 10);
     const now = new Date().toISOString();
     const id = crypto.randomUUID();

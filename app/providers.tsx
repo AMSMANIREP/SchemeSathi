@@ -173,10 +173,10 @@ type Ctx = {
   ) => Promise<void>;
   speech: ReturnType<typeof useVoice>;
   speakReply: (message: MessageRecord) => void;
-  saveProfile: (profile: Profile) => Promise<void>;
+  saveProfile: (profile: Profile) => Promise<boolean>;
   newConversation: () => Promise<void>;
   saveScheme: (s: Scheme) => Promise<void>;
-  updateApplication: (a: ApplicationRecord) => Promise<void>;
+  updateApplication: (a: ApplicationRecord) => Promise<boolean>;
   removeApplication: (id: string) => Promise<void>;
   forget: () => Promise<void>;
   sendFeedback: (rating: string, comment: string) => Promise<void>;
@@ -541,8 +541,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setSession(await api<Session>('sessions'));
       if (r.profileVersion > 0) await refreshDecisions();
       setNotice(t.profileReady);
+      return true;
     } catch (e) {
       setError((e as Error).message);
+      return false;
     } finally {
       setBusy(false);
     }
@@ -595,8 +597,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       await api('applications/' + a.id, 'PATCH', a);
       await refreshApps();
       setNotice(t.updated);
+      return true;
     } catch (e) {
       setError((e as Error).message);
+      return false;
     } finally {
       setBusy(false);
     }

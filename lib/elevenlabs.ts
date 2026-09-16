@@ -2,9 +2,17 @@ import type { Language } from './types';
 
 export const defaultVoiceId = 'JBFqnCBsd6RMkjVDRZzb';
 export const speechModel = 'eleven_v3';
+export type VoiceFailure =
+  | 'quota'
+  | 'authentication'
+  | 'permission'
+  | 'voice_not_found'
+  | 'rate_limited'
+  | 'invalid_request'
+  | 'unavailable';
 export class VoiceProviderError extends Error {
-  reason: 'quota' | 'unavailable';
-  constructor(reason: 'quota' | 'unavailable') {
+  reason: VoiceFailure;
+  constructor(reason: VoiceFailure) {
     super('Voice service unavailable');
     this.reason = reason;
   }
@@ -13,9 +21,26 @@ async function providerError(response: Response) {
   const payload = (await response.json().catch(() => null)) as {
     detail?: { status?: string };
   } | null;
-  return new VoiceProviderError(
-    payload?.detail?.status === 'quota_exceeded' ? 'quota' : 'unavailable',
-  );
+  const status = payload?.detail?.status;
+  const reason: VoiceFailure =
+    status === 'quota_exceeded'
+      ? 'quota'
+      : status === 'invalid_api_key' || status === 'not_authenticated'
+        ? 'authentication'
+        : status === 'missing_permissions' || response.status === 403
+          ? 'permission'
+          : status === 'voice_not_found' || response.status === 404
+            ? 'voice_not_found'
+            : response.status === 401
+              ? 'authentication'
+              : response.status === 429
+                ? 'rate_limited'
+                : response.status === 400 || response.status === 422
+                  ? 'invalid_request'
+                  : 'unavailable';
+  // Only a fixed diagnostic enum escapes this adapter. Provider messages can
+  // contain account details and must never reach the browser or application log.
+  return new VoiceProviderError(reason);
 }
 export async function synthesizeSpeech(
   key: string,

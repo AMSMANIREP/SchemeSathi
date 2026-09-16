@@ -93,6 +93,7 @@ async function handleRequest(req: Request, path: string[]) {
         traceId: trace,
         event: 'request_failed',
         status,
+        ...(known && error.code ? { code: error.code } : {}),
         path: path.join('/'),
         cause: error instanceof Error ? error.message : String(error),
       }),
@@ -104,6 +105,7 @@ async function handleRequest(req: Request, path: string[]) {
             ? (error as Error).message
             : 'The service is temporarily unavailable. Please try again.',
         traceId: trace,
+        ...(known && error.code ? { code: error.code } : {}),
       },
       status,
     );
@@ -112,6 +114,13 @@ async function handleRequest(req: Request, path: string[]) {
 
 export async function handle(req: Request, path: string[]) {
   const response = await handleRequest(req, path);
+  // Consume small rejected JSON bodies before responding. Cancelling an
+  // unread body can interrupt the next request in the local Worker proxy.
+  if (response.status >= 400 && req.body && !req.bodyUsed) {
+    const length = Number(req.headers.get('content-length'));
+    if (length > 0 && length <= 16000) await req.text().catch(() => {});
+    else await req.body.cancel().catch(() => {});
+  }
   // Retry on normal traffic as well as through the independent sync worker.
   // Health checks and rejected requests do not trigger remote data writes.
   if (

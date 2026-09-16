@@ -17,6 +17,19 @@ import { redact } from '../rules';
 import { schemes } from '../schemes';
 import type { Block } from '../types';
 import type { SessionRoute } from '../session';
+import type { Language } from '../types';
+
+function voiceError(error: unknown, language: Language) {
+  const reason =
+    error instanceof VoiceProviderError ? error.reason : 'unavailable';
+  return new HttpError(
+    503,
+    reason === 'quota'
+      ? voiceCopy[language].quota
+      : voiceCopy[language].unavailable,
+    'VOICE_' + reason.toUpperCase(),
+  );
+}
 
 async function audioForm(req: Request) {
   const type = req.headers.get('content-type') || '';
@@ -60,7 +73,12 @@ export const voice: SessionRoute = async ({ req, p, method, s }) => {
     60,
   );
   const apiKey = conf('ELEVENLABS_API_KEY');
-  if (!apiKey) throw new HttpError(503, voiceCopy[s.language].unavailable);
+  if (!apiKey)
+    throw new HttpError(
+      503,
+      voiceCopy[s.language].unavailable,
+      'VOICE_NOT_CONFIGURED',
+    );
 
   if (p === 'voice/transcribe') {
     const form = await audioForm(req);
@@ -93,9 +111,7 @@ export const voice: SessionRoute = async ({ req, p, method, s }) => {
       return json({ text, language, confirmationRequired: true });
     } catch (error) {
       if (error instanceof HttpError) throw error;
-      if (error instanceof VoiceProviderError && error.reason === 'quota')
-        throw new HttpError(503, voiceCopy[s.language].quota);
-      throw new HttpError(503, voiceCopy[s.language].unavailable);
+      throw voiceError(error, s.language);
     }
   }
 
@@ -164,8 +180,6 @@ export const voice: SessionRoute = async ({ req, p, method, s }) => {
       },
     });
   } catch (error) {
-    if (error instanceof VoiceProviderError && error.reason === 'quota')
-      throw new HttpError(503, voiceCopy[s.language].quota);
-    throw new HttpError(503, voiceCopy[s.language].unavailable);
+    throw voiceError(error, s.language);
   }
 };

@@ -368,6 +368,27 @@ test('real routes preserve chat flow, ownership and selected voice language', as
         assert.equal(spoken.at(-1).language_code, language);
       }
     }
+    globalThis.fetch = async () =>
+      Response.json(
+        {
+          detail: {
+            status: 'invalid_api_key',
+            message: 'private provider account data',
+          },
+        },
+        { status: 401 },
+      );
+    const failedVoice = await newcomer(
+      'voice/synthesize',
+      'POST',
+      { kind: 'welcome' },
+      503,
+    );
+    assert.equal(failedVoice.code, 'VOICE_AUTHENTICATION');
+    assert.ok(
+      !JSON.stringify(failedVoice).includes('private provider account data'),
+    );
+    assert.equal(typeof failedVoice.traceId, 'string');
     globalThis.__voiceTestEnv.ELEVENLABS_API_KEY = '';
     assert.equal((await a('capabilities')).voice, false);
     await a('voice/synthesize', 'POST', { kind: 'welcome' }, 503);

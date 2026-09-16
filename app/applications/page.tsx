@@ -179,7 +179,7 @@ export default function Applications() {
                     </div>
                     <div>
                       <span className="label">{t.segRef}</span>
-                      <b>{a.reference ? '····' + a.reference : '—'}</b>
+                      <b>{a.reference || '—'}</b>
                     </div>
                   </div>
                   <div
@@ -196,7 +196,10 @@ export default function Applications() {
                       onClick={() =>
                         setEditing({
                           ...a,
-                          reference: a.reference.replace(/^(?:••••|\.{4}) /, ''),
+                          reference: a.reference.replace(
+                            /^(?:••••|\.{4}) /,
+                            '',
+                          ),
                         })
                       }
                     >
@@ -204,7 +207,9 @@ export default function Applications() {
                     </button>
                     <button
                       className="btn btn-sm"
-                      onClick={() => router.push(`/applications/${a.id}/report`)}
+                      onClick={() =>
+                        router.push(`/applications/${a.id}/report`)
+                      }
                     >
                       <FileText size={13} />
                       {t.openReport}
@@ -243,7 +248,7 @@ export default function Applications() {
                   <span>{t.status}</span>
                   <Pick
                     value={editing.status}
-                    label={t.update}
+                    label={t.status}
                     onChange={(v) => setEditing({ ...editing, status: v })}
                     options={steps.map((s) => ({ value: s, label: s }))}
                   />
@@ -265,7 +270,9 @@ export default function Applications() {
                         }
                       />
                       <span>{doc.item}</span>
-                      {doc.note && <small className="docnote">{doc.note}</small>}
+                      {doc.note && (
+                        <small className="docnote">{doc.note}</small>
+                      )}
                     </label>
                   ))}
                 </div>
@@ -307,12 +314,11 @@ export default function Applications() {
                   disabled={busy}
                   onClick={async () => {
                     if (!referenceInput.current?.reportValidity()) return;
-                    await updateApplication(editing);
-                    setEditing(null);
+                    if (await updateApplication(editing)) setEditing(null);
                   }}
                 >
                   {busy ? <Loader2 className="spin" size={15} /> : null}
-                  {t.submit}
+                  {t.update}
                 </button>
                 <button
                   className="btn btn-danger btn-sm"
@@ -322,7 +328,7 @@ export default function Applications() {
                   }}
                 >
                   <Trash2 size={13} />
-                  {t.forget}
+                  {t.remove}
                 </button>
               </div>
             </>

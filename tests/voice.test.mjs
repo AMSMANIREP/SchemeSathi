@@ -192,3 +192,40 @@ test('provider quota errors are classified without exposing account diagnostics'
     safeQuota,
   );
 });
+
+test('provider authentication and availability errors retain only safe diagnostic codes', async () => {
+  for (const [status, providerStatus, reason] of [
+    [401, 'invalid_api_key', 'authentication'],
+    [401, 'missing_permissions', 'permission'],
+    [403, 'forbidden', 'permission'],
+    [404, 'voice_not_found', 'voice_not_found'],
+    [429, 'too_many_requests', 'rate_limited'],
+    [422, 'invalid_parameters', 'invalid_request'],
+    [503, 'private_account_detail', 'unavailable'],
+  ]) {
+    const request = async () =>
+      Response.json(
+        {
+          detail: { status: providerStatus, message: 'secret account data' },
+        },
+        { status },
+      );
+    for (const operation of [
+      () =>
+        synthesizeSpeech('test-key', defaultVoiceId, 'Welcome', 'en', request),
+      () =>
+        transcribeSpeech(
+          'test-key',
+          new File(['audio'], 'sample.webm'),
+          request,
+        ),
+    ]) {
+      await assert.rejects(operation, (error) => {
+        assert.equal(error.reason, reason);
+        assert.equal(error.message, 'Voice service unavailable');
+        assert.ok(!JSON.stringify(error).includes('secret account data'));
+        return true;
+      });
+    }
+  }
+});
