@@ -19,6 +19,7 @@ import {
 import { useApp } from './providers';
 import { SchemeDialog, Pick } from './dialogs';
 import { Gate } from './gate';
+import { Brand } from './brand';
 import type { Language } from '@/lib/types';
 import { languageOptions } from '@/lib/languages';
 
@@ -66,13 +67,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
 
       <header className="topbar">
         <Link className="brand" href="/">
-          <span className="brand-mark">
-            <Compass />
-          </span>
-          <span>
-            <b>Scheme Sathi</b>
-            <small>{t.companion}</small>
-          </span>
+          <Brand companion={t.companion} />
         </Link>
         <div className="topbar-right">
           <Link className="accountbtn" href="/profile">

@@ -48,6 +48,5 @@ jobs:
           test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo "Add the CLOUDFLARE_ACCOUNT_ID Actions secret."; exit 1; }
           pnpm run db:migrate:cloudflare
           pnpm exec wrangler deploy --config wrangler.cloudflare.jsonc
-      - name: Check public health
-        run: |
-          node --input-type=module -e 'const r=await fetch("https://india.scheme-sathi.workers.dev/health/ready");const b=await r.json();if(!r.ok||b.status!=="ok"||b.database!=="connected")throw Error("Deployment health check failed");console.log("Site and database are healthy.");'
+      - name: Check public health and login isolation
+        run: node scripts/verify-cloudflare.mjs

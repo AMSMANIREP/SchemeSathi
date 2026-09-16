@@ -31,6 +31,17 @@ The login flow also requests offline access for token refresh. Cloudflare may wa
 
 ## Verify
 
+Deploy from the current `feature/layer2_implementation` commit, including both
+the branding and login isolation changes. Do not reuse an older `dist` directory
+or a release archive prepared before newer fixes landed: deploying it replaces
+the entire Worker, even when the intended change is only a logo.
+
+After every deployment run `node scripts/verify-cloudflare.mjs`. It uses its own
+cookie jar and disposable synthetic identities to verify new-profile isolation,
+returning-profile recovery and rejection of stale writes, then removes its test
+data. The manual deployment workflow runs this check automatically. Also test
+logout and login in the browser; a health check alone cannot catch this regression.
+
 ```sh
 curl https://india.scheme-sathi.workers.dev/health/ready
 curl https://india.scheme-sathi.workers.dev/api/v1/capabilities

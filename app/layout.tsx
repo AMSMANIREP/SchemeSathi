@@ -18,6 +18,21 @@ const googleSansCode = Google_Sans_Code({
 
 export const metadata: Metadata = {
   title: 'Scheme Sathi — Your benefits companion',
+  icons: {
+    icon: [
+      {
+        url: '/brand/scheme-sathi-icon-32.png',
+        sizes: '32x32',
+        type: 'image/png',
+      },
+      {
+        url: '/brand/scheme-sathi-icon-64.png',
+        sizes: '64x64',
+        type: 'image/png',
+      },
+    ],
+    apple: [{ url: '/brand/scheme-sathi-apple-touch.png', sizes: '180x180' }],
+  },
   description:
     'Describe your situation in your own words and find the Central Government schemes you are likely eligible for, with the exact next steps to prepare.',
 };

@@ -1,8 +1,10 @@
 'use client';
 import { useState } from 'react';
-import { ArrowRight, Compass, LogIn, ShieldCheck } from 'lucide-react';
+import Image from 'next/image';
+import { ArrowRight, LogIn, ShieldCheck } from 'lucide-react';
 import { useApp } from './providers';
 import { LoginDialog } from './login';
+import { Brand } from './brand';
 
 /**
  * The landing surface. Persuade mode, inside the established world: ink on
@@ -34,6 +36,9 @@ export function Landing({ onEnter }: { onEnter: (name: string) => void }) {
       />
       <section className="landing-hero">
         <div className="landing-copy">
+          <div className="brand brand-landing">
+            <Brand companion={t.companion} />
+          </div>
           <h1>{t.landingTitle}</h1>
           <p className="landing-lede">{t.landingLede}</p>
 
@@ -56,7 +61,9 @@ export function Landing({ onEnter }: { onEnter: (name: string) => void }) {
           <div className="pass">
             <div className="pass-head">
               <span className="label">{t.nextSteps}</span>
-              <span className="status status-LIKELY_ELIGIBLE">{t.statusGo}</span>
+              <span className="status status-LIKELY_ELIGIBLE">
+                {t.statusGo}
+              </span>
             </div>
             <div className="pass-body">
               <h2>PM-KISAN</h2>
@@ -111,7 +118,13 @@ export function Landing({ onEnter }: { onEnter: (name: string) => void }) {
       </section>
 
       <footer className="landing-foot">
-        <Compass size={15} />
+        <Image
+          unoptimized
+          src="/brand/scheme-sathi-logo.png"
+          width={24}
+          height={24}
+          alt=""
+        />
         <span className="measure">{t.landingFoot}</span>
         <span className="label data">
           {schemes.length || 50} {t.references}

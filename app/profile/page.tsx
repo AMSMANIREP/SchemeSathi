@@ -18,6 +18,13 @@ import type { Profile as ProfileShape } from '@/lib/types';
  * from here and writes back; the citizen can correct anything at any moment.
  */
 export default function Profile() {
+  const { session } = useApp();
+  // Route caches may keep this page mounted across an identity change. Only
+  // the editor remounts, so an unsaved draft cannot belong to the next login.
+  return <ProfileEditor key={session?.sessionId ?? 'signed-out'} />;
+}
+
+function ProfileEditor() {
   const {
     t,
     session,

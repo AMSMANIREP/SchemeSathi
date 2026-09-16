@@ -281,17 +281,11 @@ h3 {
   text-decoration: none;
 }
 .brand-mark {
-  width: 26px;
-  height: 26px;
-  display: grid;
-  place-items: center;
-  background: var(--ink);
-  color: var(--alert);
-  border-radius: 5px;
-}
-.brand-mark svg {
-  width: 15px;
-  height: 15px;
+  width: 40px;
+  height: 40px;
+  display: block;
+  flex: none;
+  object-fit: contain;
 }
 .brand b {
   font-size: 15px;
@@ -307,6 +301,22 @@ h3 {
   text-transform: uppercase;
   color: var(--steel);
   margin-top: 1px;
+}
+.brand-landing {
+  gap: 16px;
+  margin-bottom: 32px;
+}
+.brand-landing .brand-mark {
+  width: 76px;
+  height: 76px;
+}
+.brand-landing b {
+  font-size: 28px;
+  color: #125e54;
+}
+.brand-landing small {
+  font-size: 10px;
+  letter-spacing: 0.08em;
 }
 .topbar-right {
   margin-left: auto;
