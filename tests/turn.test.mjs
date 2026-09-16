@@ -153,3 +153,168 @@ test('an unreadable answer is acknowledged, not silently repeated', () => {
   assert.ok(retry.text.startsWith('Sorry'), retry.text);
   assert.ok(retry.text.includes(plain.text), 'the question itself is still there');
 });
+
+test('naming a scheme leads with it, however retrieval ranked it', () => {
+  // cooking sorts ahead on verdict; the citizen asked about farming.
+  const plan = planTurn({
+    ...base,
+    candidates: ['gas-one', 'farm-one'],
+    profile: { land: 2, lpg: 'no' },
+    confirmed: ['land', 'lpg'],
+    focus: 'farm-one',
+    questionsAsked: QUESTION_BUDGET,
+  });
+  const cards = plan.blocks.filter((b) => b.kind === 'scheme_card');
+  assert.equal(cards[0].schemeId, 'farm-one', 'the scheme they asked about leads');
+});
+
+test('a focused turn answers about that scheme, not in general', () => {
+  const plan = planTurn({
+    ...base,
+    focus: 'farm-one',
+    profile: { land: 2 },
+    confirmed: ['land'],
+    questionsAsked: QUESTION_BUDGET,
+  });
+  assert.ok(plan.text.startsWith('farm-one'), plan.text);
+  assert.ok(/likely eligible/i.test(plan.text), plan.text);
+  assert.ok(plan.text.includes('A summary for farm-one'), plan.text);
+});
+
+test('a focused turn names what is still missing', () => {
+  const plan = planTurn({
+    ...base,
+    focus: 'farm-one',
+    profile: {},
+    confirmed: [],
+    questionsAsked: QUESTION_BUDGET,
+  });
+  // 'land' is unknown, so the sentence must say so rather than imply a verdict.
+  assert.ok(/still to establish/i.test(plan.text), plan.text);
+  assert.ok(/landholding/i.test(plan.text), plan.text);
+});
+
+test('with no scheme named, the turn stays general', () => {
+  const plan = planTurn({ ...base, questionsAsked: QUESTION_BUDGET });
+  assert.ok(plan.text.startsWith('Here is what'), plan.text);
+});
+
+test('a scheme named this message is the whole answer', () => {
+  const plan = planTurn({
+    ...base,
+    candidates: ['gas-one', 'farm-one'],
+    profile: { land: 2, lpg: 'no' },
+    confirmed: ['land', 'lpg'],
+    focus: 'farm-one',
+    focusNamed: true,
+    questionsAsked: QUESTION_BUDGET,
+  });
+  const cards = plan.blocks.filter((b) => b.kind === 'scheme_card');
+  assert.equal(cards.length, 1, 'one question deserves one answer');
+  assert.equal(cards[0].schemeId, 'farm-one');
+  // And the sources strip follows the cards, not the candidate list.
+  const sources = plan.blocks.find((b) => b.kind === 'sources');
+  assert.deepEqual(sources.items.map((i) => i.schemeId), ['farm-one']);
+});
+
+test('a focus merely carried over still shows the others', () => {
+  const plan = planTurn({
+    ...base,
+    candidates: ['gas-one', 'farm-one'],
+    profile: { land: 2, lpg: 'no' },
+    confirmed: ['land', 'lpg'],
+    focus: 'farm-one',
+    focusNamed: false,
+    questionsAsked: QUESTION_BUDGET,
+  });
+  const cards = plan.blocks.filter((b) => b.kind === 'scheme_card');
+  assert.ok(cards.length > 1, 'they may have moved on; do not narrow for them');
+  assert.equal(cards[0].schemeId, 'farm-one', 'but it still leads');
+});
+
+test('asking about a scheme is never deflected into a question', () => {
+  const plan = planTurn({
+    ...base,
+    focus: 'farm-one',
+    focusNamed: true,
+    profile: {},
+    confirmed: [],
+    questionsAsked: 0, // budget available — it would otherwise ask
+  });
+  assert.equal(plan.askedField, null, 'their question is answered, not deflected');
+  assert.ok(plan.text.startsWith('farm-one'), plan.text);
+  // The gap is still communicated, just not as a deflection.
+  assert.ok(/still to establish/i.test(plan.text), plan.text);
+});
+
+test('a scheme nothing can be said about is not offered as an option', () => {
+  // Undetermined means the rules could not decide. Showing it as a card reads
+  // as a suggestion, which is the confident-looking answer the product avoids.
+  const undecided = scheme('unknown-one', { all: [rule('bpl', 'eq', 'yes')] }, {
+    reviewStatus: 'DRAFT',
+    complete: false,
+  });
+  const plan = planTurn({
+    ...base,
+    schemes: [farming, undecided],
+    candidates: ['farm-one', 'unknown-one'],
+    profile: { land: 2 },
+    confirmed: ['land'],
+    questionsAsked: QUESTION_BUDGET,
+  });
+  const ids = plan.blocks.filter((b) => b.kind === 'scheme_card').map((b) => b.schemeId);
+  assert.deepEqual(ids, ['farm-one']);
+});
+
+test('asking for everything shows the undetermined ones too', () => {
+  const undecided = scheme('unknown-one', { all: [rule('bpl', 'eq', 'yes')] }, {
+    reviewStatus: 'DRAFT',
+    complete: false,
+  });
+  const plan = planTurn({
+    ...base,
+    schemes: [farming, undecided],
+    candidates: ['farm-one', 'unknown-one'],
+    profile: { land: 2 },
+    confirmed: ['land'],
+    showEverything: true,
+    questionsAsked: QUESTION_BUDGET,
+  });
+  const ids = plan.blocks.filter((b) => b.kind === 'scheme_card').map((b) => b.schemeId);
+  assert.ok(ids.includes('unknown-one'), 'narrowing must be opt-out-able');
+});
+
+test('a scheme asked about by name is shown whatever its verdict', () => {
+  // Refusing to answer is worse than answering "we cannot tell".
+  const undecided = scheme('unknown-one', { all: [rule('bpl', 'eq', 'yes')] }, {
+    reviewStatus: 'DRAFT',
+    complete: false,
+  });
+  const plan = planTurn({
+    ...base,
+    schemes: [farming, undecided],
+    candidates: ['farm-one'],
+    focus: 'unknown-one',
+    focusNamed: true,
+    profile: { land: 2 },
+    confirmed: ['land'],
+    questionsAsked: QUESTION_BUDGET,
+  });
+  const ids = plan.blocks.filter((b) => b.kind === 'scheme_card').map((b) => b.schemeId);
+  assert.deepEqual(ids, ['unknown-one']);
+});
+
+test('a request to be shown is answered with cards, not another question', () => {
+  // "I don't know what I need" and "show me everything" both set this. Asking
+  // again is the one reply certain not to help, and it leaves prose naming
+  // schemes above a turn with no cards beneath it.
+  const plan = planTurn({
+    ...base,
+    profile: {},
+    confirmed: [],
+    questionsAsked: 0, // budget available — it would otherwise ask
+    showEverything: true,
+  });
+  assert.equal(plan.checkpoint, 'PRESENTED');
+  assert.ok(plan.blocks.some((b) => b.kind === 'scheme_card'));
+});

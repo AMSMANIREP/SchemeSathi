@@ -1,5 +1,5 @@
-"use client";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+'use client';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import {
   ArrowUp,
   Loader2,
@@ -9,14 +9,14 @@ import {
   Mic,
   Square,
   Volume2,
-} from "lucide-react";
-import { useApp } from "./providers";
-import { Blocks } from "./blocks";
-import { VoiceControls } from "./voice-controls";
-import { voiceCopy } from "@/lib/languages";
-import { handsFreeCopy } from "@/lib/hands-free-copy";
+} from 'lucide-react';
+import { useApp } from './providers';
+import { Blocks } from './blocks';
+import { VoiceControls } from './voice-controls';
+import { voiceCopy } from '@/lib/languages';
+import { handsFreeCopy } from '@/lib/hands-free-copy';
 
-const SEEN_KEY = "schemesathi.introSeen";
+const SEEN_KEY = 'schemesathi.introSeen';
 
 // The intro flag lives in localStorage, which does not exist during SSR.
 // The server snapshot reports "already seen" so the panel never flashes
@@ -57,7 +57,7 @@ function IntroPanel({ onClose }: { onClose: () => void }) {
         {steps.map((s, i) => (
           <div className="intro-step" key={s.title}>
             <span className="intro-n data">
-              {String(i + 1).padStart(2, "0")}
+              {String(i + 1).padStart(2, '0')}
             </span>
             <b>{s.title}</b>
             <p>{s.body}</p>
@@ -87,8 +87,9 @@ export default function Chat() {
     caps,
     language,
     speakReply,
+    stage,
   } = useApp();
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState('');
   const [dismissed, setDismissed] = useState(false);
   const latestTurn = useRef<HTMLDivElement>(null);
 
@@ -101,23 +102,23 @@ export default function Chat() {
   const showIntro = !introSeen && !dismissed && !started;
   const latestAssistantIndex = messages.reduce(
     (index, message, currentIndex) =>
-      message.role === "assistant" ? currentIndex : index,
+      message.role === 'assistant' ? currentIndex : index,
     -1,
   );
 
   useEffect(() => {
     if (started && latestAssistantIndex >= 0)
       latestTurn.current?.scrollIntoView({
-        behavior: "auto",
-        block: "start",
-        inline: "nearest",
+        behavior: 'auto',
+        block: 'start',
+        inline: 'nearest',
       });
   }, [messages.length, started, latestAssistantIndex]);
 
   const dismissIntro = () => {
     setDismissed(true);
     try {
-      localStorage.setItem(SEEN_KEY, "1");
+      localStorage.setItem(SEEN_KEY, '1');
     } catch {
       /* nothing to persist to */
     }
@@ -126,7 +127,7 @@ export default function Chat() {
   const submit = async (text?: string) => {
     const value = text ?? message;
     if (!value.trim() || busy || loading) return;
-    setMessage("");
+    setMessage('');
     await ask(value);
   };
 
@@ -146,12 +147,12 @@ export default function Chat() {
             <div className="transcript" aria-live="polite">
               {messages.map((m, index) => (
                 <div
-                  className={"turn turn-" + m.role}
+                  className={'turn turn-' + m.role}
                   key={m.id}
                   ref={index === latestAssistantIndex ? latestTurn : undefined}
                 >
                   <span className="turn-who label">
-                    {m.role === "user" ? t.youLabel : t.sathiLabel}
+                    {m.role === 'user' ? t.youLabel : t.sathiLabel}
                   </span>
                   <div className="turn-body">
                     {m.text && <p>{m.text}</p>}
@@ -160,7 +161,7 @@ export default function Chat() {
                       onAnswer={(v) => void submit(v)}
                     />
                     {caps.voice &&
-                      m.role === "assistant" &&
+                      m.role === 'assistant' &&
                       m.language === language && (
                         <button
                           className="btn btn-ghost btn-sm"
@@ -178,7 +179,15 @@ export default function Chat() {
                   <span className="turn-who label">{t.sathiLabel}</span>
                   <div className="turn-body thinking">
                     <Loader2 className="spin" size={14} />
-                    {t.thinking}
+                    {stage === 'reading'
+                      ? t.stageReading
+                      : stage === 'searching'
+                        ? t.stageSearching
+                        : stage === 'thinking'
+                          ? t.stageThinking
+                          : stage === 'checking'
+                            ? t.stageChecking
+                            : t.thinking}
                   </div>
                 </div>
               )}
@@ -199,7 +208,7 @@ export default function Chat() {
             rows={started ? 2 : 4}
             onKeyDown={(e) => {
               if (
-                e.key === "Enter" &&
+                e.key === 'Enter' &&
                 !e.shiftKey &&
                 !e.nativeEvent.isComposing
               ) {
@@ -212,29 +221,29 @@ export default function Chat() {
             {caps.voice && (
               <button
                 className={
-                  "micbtn" +
-                  (handsFree.phase === "listening" ? " recording" : "")
+                  'micbtn' +
+                  (handsFree.phase === 'listening' ? ' recording' : '')
                 }
                 onClick={() => {
-                  if (handsFree.suspended || handsFree.phase === "error")
+                  if (handsFree.suspended || handsFree.phase === 'error')
                     handsFree.resume();
                   else handsFree.pause();
                 }}
                 aria-pressed={
-                  !handsFree.suspended && handsFree.phase !== "error"
+                  !handsFree.suspended && handsFree.phase !== 'error'
                 }
                 aria-label={
-                  handsFree.suspended || handsFree.phase === "error"
+                  handsFree.suspended || handsFree.phase === 'error'
                     ? handsFreeCopy[language].resume
                     : handsFreeCopy[language].pause
                 }
               >
-                {handsFree.suspended || handsFree.phase === "error" ? (
+                {handsFree.suspended || handsFree.phase === 'error' ? (
                   <Mic size={16} />
                 ) : (
                   <Square size={15} />
                 )}
-                {handsFree.suspended || handsFree.phase === "error"
+                {handsFree.suspended || handsFree.phase === 'error'
                   ? handsFreeCopy[language].resume
                   : handsFreeCopy[language].pause}
               </button>
@@ -284,7 +293,7 @@ export default function Chat() {
           <span className="label">
             <LockKeyhole
               size={12}
-              style={{ display: "inline", marginRight: 5 }}
+              style={{ display: 'inline', marginRight: 5 }}
             />
             {t.retention}
           </span>

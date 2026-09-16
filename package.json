@@ -13,7 +13,7 @@
     "format": "oxfmt",
     "db:generate": "drizzle-kit generate",
     "typecheck": "tsc --noEmit",
-    "test": "node --experimental-strip-types --test tests/rules.test.mjs tests/retrieval.test.mjs tests/turn.test.mjs tests/steps.test.mjs tests/focus.test.mjs tests/i18n.test.mjs tests/untrusted.test.mjs tests/voice.test.mjs tests/voice-api.test.mjs tests/utterance.test.mjs",
+    "test": "node --experimental-strip-types --test tests/rules.test.mjs tests/retrieval.test.mjs tests/turn.test.mjs tests/steps.test.mjs tests/focus.test.mjs tests/i18n.test.mjs tests/untrusted.test.mjs tests/fuse.test.mjs tests/validate.test.mjs tests/judge.test.mjs tests/voice.test.mjs tests/voice-api.test.mjs tests/utterance.test.mjs",
     "test:api": "node tests/api.test.mjs",
     "test:storage": "node --experimental-strip-types --test tests/storage.test.mjs",
     "test:storage:live": "node tests/storage-live.test.mjs",
@@ -25,29 +25,34 @@
     "author:demo": "node scripts/author-demo-schemes.mjs",
     "validate": "node scripts/validate-release.mjs",
     "deploy:demo": "node scripts/validate-release.mjs --allow-demo && pnpm build && pnpm run db:migrate:cloudflare && wrangler deploy --config wrangler.cloudflare.jsonc",
-    "eval:extraction": "node --experimental-strip-types scripts/eval-extraction.mjs"
+    "eval:extraction": "node --env-file-if-exists=.dev.vars --env-file-if-exists=.env --experimental-strip-types scripts/eval-extraction.mjs",
+    "build:vectors": "node --env-file-if-exists=.dev.vars --env-file-if-exists=.env scripts/build-vectors.mjs"
   },
   "dependencies": {
-    "react": "19.2.6",
-    "react-dom": "19.2.6",
-    "react-server-dom-webpack": "19.2.6",
-    "vinext": "1.0.0-beta.5",
-    "drizzle-orm": "0.45.2",
     "@base-ui/react": "1.7.0",
+    "@langchain/core": "^1.2.10",
+    "@langchain/langgraph": "^1.4.14",
+    "@langchain/openai": "^1.5.12",
     "@shadcn/react": "0.3.0",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "cmdk": "1.1.1",
     "date-fns": "4.1.0",
+    "drizzle-orm": "0.45.2",
     "embla-carousel-react": "8.5.2",
     "input-otp": "1.4.2",
     "lucide-react": "1.31.0",
+    "react": "19.2.6",
     "react-day-picker": "9.8.1",
+    "react-dom": "19.2.6",
     "react-resizable-panels": "4.5.8",
+    "react-server-dom-webpack": "19.2.6",
     "recharts": "3.8.0",
     "shadcn": "4.18.0",
     "tailwind-merge": "3.6.0",
-    "tw-animate-css": "1.4.0"
+    "tw-animate-css": "1.4.0",
+    "vinext": "1.0.0-beta.5",
+    "zod": "^4.6.1"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "1.37.1",
@@ -59,14 +64,14 @@
     "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react": "6.0.2",
     "@vitejs/plugin-rsc": "0.5.26",
+    "drizzle-kit": "0.31.10",
     "oxfmt": "0.61.0",
     "oxlint": "1.76.0",
     "oxlint-tsgolint": "7.0.2001",
     "tailwindcss": "4.2.1",
     "typescript": "5.9.3",
     "vite": "8.0.13",
-    "wrangler": "4.92.0",
-    "drizzle-kit": "0.31.10"
+    "wrangler": "4.92.0"
   },
   "type": "module"
 }

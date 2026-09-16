@@ -1,0 +1,2 @@
+# Retrieval artifacts hash the catalogue bytes; Windows and CI must agree.
+data/schemes.json text eol=lf

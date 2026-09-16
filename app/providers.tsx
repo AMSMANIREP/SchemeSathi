@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import {
   createContext,
   useContext,
@@ -7,12 +7,12 @@ import {
   useRef,
   useCallback,
   useSyncExternalStore,
-} from "react";
-import { copy } from "@/lib/i18n";
-import { usePathname } from "next/navigation";
-import { languageIndex } from "@/lib/languages";
-import { useVoice } from "@/lib/use-voice";
-import { useHandsFree } from "@/lib/use-hands-free";
+} from 'react';
+import { copy } from '@/lib/i18n';
+import { usePathname } from 'next/navigation';
+import { languageIndex } from '@/lib/languages';
+import { useVoice } from '@/lib/use-voice';
+import { useHandsFree } from '@/lib/use-hands-free';
 import type {
   Scheme,
   Profile,
@@ -21,7 +21,7 @@ import type {
   ApplicationRecord,
   MessageRecord,
   Provenance,
-} from "@/lib/types";
+} from '@/lib/types';
 
 export type Session = {
   profile: Profile;
@@ -39,10 +39,10 @@ export type Capabilities = {
   retrieval: boolean;
 };
 
-const HISTORY_KEY = "schemesathi.history";
+const HISTORY_KEY = 'schemesathi.history';
 /** Simulated sign-in for the demo: a display name and a flag, nothing more.
  *  No credential is exchanged and nothing is sent anywhere. */
-const VISITOR_KEY = "schemesathi.visitor";
+const VISITOR_KEY = 'schemesathi.visitor';
 
 /**
  * The simulated sign-in lives in localStorage, which does not exist during
@@ -59,33 +59,33 @@ const visitorListeners = new Set<() => void>();
 const visitorStore = {
   subscribe: (cb: () => void) => {
     visitorListeners.add(cb);
-    window.addEventListener("storage", cb);
+    window.addEventListener('storage', cb);
     return () => {
       visitorListeners.delete(cb);
-      window.removeEventListener("storage", cb);
+      window.removeEventListener('storage', cb);
     };
   },
   snapshot: () => {
     try {
-      return localStorage.getItem(VISITOR_KEY) ?? "";
+      return localStorage.getItem(VISITOR_KEY) ?? '';
     } catch {
-      return "";
+      return '';
     }
   },
-  serverSnapshot: () => "",
+  serverSnapshot: () => '',
 };
 
 const emitVisitor = () => visitorListeners.forEach((cb) => cb());
 
 async function restoreVoicePreference(name: string) {
   const digest = await crypto.subtle.digest(
-    "SHA-256",
-    new TextEncoder().encode(name.trim().normalize("NFKC").toLowerCase()),
+    'SHA-256',
+    new TextEncoder().encode(name.trim().normalize('NFKC').toLowerCase()),
   );
   const profileKey = Array.from(new Uint8Array(digest), (b) =>
-    b.toString(16).padStart(2, "0"),
-  ).join("");
-  return api<Session>("voice/login", "PUT", { profileKey });
+    b.toString(16).padStart(2, '0'),
+  ).join('');
+  return api<Session>('voice/login', 'PUT', { profileKey });
 }
 
 function parseVisitor(raw: string): {
@@ -95,7 +95,7 @@ function parseVisitor(raw: string): {
   if (!raw) return { name: null, onboarded: false };
   try {
     const v = JSON.parse(raw);
-    return { name: v.name ?? "", onboarded: !!v.onboarded };
+    return { name: v.name ?? '', onboarded: !!v.onboarded };
   } catch {
     return { name: null, onboarded: false };
   }
@@ -108,7 +108,7 @@ export type HistoryEntry = { at: number; text: string };
  *  situation must not outlive the private session the product promises. */
 function readHistory(): HistoryEntry[] {
   try {
-    return JSON.parse(sessionStorage.getItem(HISTORY_KEY) || "[]");
+    return JSON.parse(sessionStorage.getItem(HISTORY_KEY) || '[]');
   } catch {
     return [];
   }
@@ -124,26 +124,26 @@ function writeHistory(entries: HistoryEntry[]) {
 
 export async function api<T = Record<string, unknown>>(
   path: string,
-  method = "GET",
+  method = 'GET',
   data?: unknown,
 ) {
-  const r = await fetch("/api/v1/" + path, {
+  const r = await fetch('/api/v1/' + path, {
     method,
-    credentials: "same-origin",
+    credentials: 'same-origin',
     headers: {
-      "Content-Type": "application/json",
-      "X-Requested-With": "SchemeSathi",
+      'Content-Type': 'application/json',
+      'X-Requested-With': 'SchemeSathi',
     },
     ...(data === undefined ? {} : { body: JSON.stringify(data) }),
   });
   const j = (await r.json()) as { error?: string };
-  if (!r.ok) throw new Error(j.error || "Request failed");
+  if (!r.ok) throw new Error(j.error || 'Request failed');
   return j as T;
 }
 
 type Ctx = {
   language: Language;
-  t: (typeof copy)["en"];
+  t: (typeof copy)['en'];
   li: number;
   schemes: Scheme[];
   session: Session | null;
@@ -158,6 +158,8 @@ type Ctx = {
   messages: MessageRecord[];
   conversationId: string | null;
   checkpoint: string;
+  /** What the turn is doing right now, while it is doing it. */
+  stage: string;
   detail: Scheme | null;
   setError: (s: string) => void;
   setNotice: (s: string) => void;
@@ -166,7 +168,7 @@ type Ctx = {
   selectLanguage: (l: Language) => Promise<void>;
   ask: (
     message: string,
-    inputMode?: "text" | "voice",
+    inputMode?: 'text' | 'voice',
     detectedLanguage?: Language,
   ) => Promise<void>;
   speech: ReturnType<typeof useVoice>;
@@ -195,7 +197,7 @@ const AppContext = createContext<Ctx | null>(null);
 
 export function useApp() {
   const c = useContext(AppContext);
-  if (!c) throw new Error("useApp must be used inside AppProvider");
+  if (!c) throw new Error('useApp must be used inside AppProvider');
   return c;
 }
 
@@ -203,7 +205,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const speech = useVoice();
   const { play: playSpeech, stop: stopSpeech } = speech;
   const pathname = usePathname();
-  const [language, setLanguage] = useState<Language>("en");
+  const [language, setLanguage] = useState<Language>('en');
   const [schemes, setSchemes] = useState<Scheme[]>([]);
   const [session, setSession] = useState<Session | null>(null);
   const [caps, setCaps] = useState<Capabilities>({
@@ -214,8 +216,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   });
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
-  const [notice, setNotice] = useState("");
+  const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
   const [decisions, setDecisions] = useState<Record<string, Decision>>({});
   const [applications, setApplications] = useState<ApplicationRecord[]>([]);
   const [detail, setDetail] = useState<Scheme | null>(null);
@@ -232,21 +234,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const { name: visitor, onboarded } = parseVisitor(visitorRaw);
   const [messages, setMessages] = useState<MessageRecord[]>([]);
   const [conversationId, setConversationId] = useState<string | null>(null);
-  const [checkpoint, setCheckpoint] = useState("GATHERING");
+  const [checkpoint, setCheckpoint] = useState('GATHERING');
+  const [stage, setStage] = useState('');
   const initialized = useRef(false);
   const greeted = useRef(false);
 
-  const t = copy[visitor === null || pathname === "/welcome" ? "en" : language];
+  const t = copy[visitor === null || pathname === '/welcome' ? 'en' : language];
   const li = languageIndex(language);
 
   const refreshApps = useCallback(async () => {
-    const r = await api<{ applications: ApplicationRecord[] }>("applications");
+    const r = await api<{ applications: ApplicationRecord[] }>('applications');
     setApplications(r.applications);
   }, []);
 
   const refreshDecisions = useCallback(async () => {
     const r = await api<{ results: { scheme: Scheme; decision: Decision }[] }>(
-      "recommendations",
+      'recommendations',
     );
     setDecisions(
       Object.fromEntries(r.results.map((x) => [x.scheme.id, x.decision])),
@@ -255,25 +258,25 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const load = useCallback(async () => {
     setLoading(true);
-    setError("");
+    setError('');
     try {
       const [c, all] = await Promise.all([
-        api<Capabilities>("capabilities"),
-        api<{ schemes: Scheme[] }>("schemes"),
+        api<Capabilities>('capabilities'),
+        api<{ schemes: Scheme[] }>('schemes'),
       ]);
       setCaps(c);
       setSchemes(all.schemes);
       let s;
       try {
-        s = await api<Session>("sessions");
+        s = await api<Session>('sessions');
       } catch {
-        s = await api<Session>("sessions", "POST", {});
+        s = await api<Session>('sessions', 'POST', {});
       }
       const currentVisitor = parseVisitor(visitorStore.snapshot()).name;
       if (currentVisitor !== null)
         s = await restoreVoicePreference(currentVisitor);
       setSession(s);
-      setLanguage(currentVisitor === null ? "en" : s.language);
+      setLanguage(currentVisitor === null ? 'en' : s.language);
       await refreshApps();
       if (s.profileVersion > 0) await refreshDecisions();
     } catch (e) {
@@ -302,8 +305,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (
       visitor === null ||
-      pathname === "/welcome" ||
-      (!onboarded && pathname !== "/profile") ||
+      pathname === '/welcome' ||
+      (!onboarded && pathname !== '/profile') ||
       loading ||
       !session ||
       !caps.voice ||
@@ -312,7 +315,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       return;
     greeted.current = true;
     void playSpeech({
-      kind: "welcome",
+      kind: 'welcome',
       language: session.language,
       multilingual: false,
     });
@@ -321,12 +324,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     document.documentElement.lang =
-      visitor === null || pathname === "/welcome" ? "en" : language;
+      visitor === null || pathname === '/welcome' ? 'en' : language;
   }, [language, visitor, pathname]);
 
   useEffect(() => {
     if (!notice) return;
-    const timer = setTimeout(() => setNotice(""), 7000);
+    const timer = setTimeout(() => setNotice(''), 7000);
     return () => clearTimeout(timer);
   }, [notice]);
 
@@ -337,14 +340,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     speech.stop();
     setBusy(true);
     try {
-      await api("privacy/consent", "PUT", {
+      await api('privacy/consent', 'PUT', {
         enabled: session.memoryConsent,
         language: l,
       });
       if (epoch !== turnEpoch.current) return;
       setLanguage(l);
       setSession({ ...session, language: l, languageSelected: true });
-      if (caps.voice) void speech.play({ kind: "selected", language: l });
+      if (caps.voice) void speech.play({ kind: 'selected', language: l });
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -354,7 +357,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const ensureConversation = useCallback(async () => {
     if (conversationId) return conversationId;
-    const c = await api<{ id: string }>("conversations", "POST", {});
+    const c = await api<{ id: string }>('conversations', 'POST', {});
     setConversationId(c.id);
     return c.id;
   }, [conversationId]);
@@ -365,13 +368,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     cancelRecording();
     setMessages([]);
     setConversationId(null);
-    setCheckpoint("GATHERING");
+    setCheckpoint('GATHERING');
+    setBusy(false);
+    setStage('');
     handsFree.resume();
   };
 
   const ask = async (
     message: string,
-    inputMode: "text" | "voice" = "text",
+    inputMode: 'text' | 'voice' = 'text',
     detectedLanguage?: Language,
   ) => {
     const text = message.trim();
@@ -388,8 +393,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     // Show the citizen's own words immediately; the turn round-trips after.
     const pending: MessageRecord = {
-      id: "pending-" + Date.now(),
-      role: "user",
+      id: 'pending-' + Date.now(),
+      role: 'user',
       text,
       inputMode,
       blocks: [],
@@ -397,60 +402,143 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     };
     setMessages((m) => [...m, pending]);
     setBusy(true);
-    setError("");
+    setStage('');
+    setError('');
+    const streamId = 'streaming-' + Date.now();
     try {
       const id = await ensureConversation();
       if (epoch !== turnEpoch.current) return;
-      const r = await api<{
-        userMessage: MessageRecord;
-        message: MessageRecord;
-        checkpoint: string;
-        language: Language;
-      }>("conversations/" + id + "/messages", "POST", {
-        message: text,
-        inputMode,
-        language: detectedLanguage,
+      const r = await fetch('/api/v1/conversations/' + id + '/messages', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'SchemeSathi',
+          // Streaming is opt-in; without this the same endpoint returns JSON.
+          Accept: 'text/event-stream',
+        },
+        body: JSON.stringify({
+          message: text,
+          inputMode,
+          language: detectedLanguage,
+        }),
       });
-      if (epoch !== turnEpoch.current) return;
-      setMessages((m) => [
-        ...m.filter((x) => x.id !== pending.id),
-        r.userMessage,
-        r.message,
-      ]);
-      setCheckpoint(r.checkpoint);
-      const s = await api<Session>("sessions");
-      if (epoch !== turnEpoch.current) return;
-      setSession(s);
-      setLanguage(s.language);
-      if (caps.voice && r.message.language === s.language)
-        void speech.play({
-          kind: "message",
-          language: s.language,
-          messageId: r.message.id,
-          conversationId: id,
-        });
-      if (s.profileVersion > 0) await refreshDecisions();
+      if (epoch !== turnEpoch.current) {
+        await r.body?.cancel();
+        return;
+      }
+      if (!r.ok || !r.body) {
+        const failure = (await r.json().catch(() => ({}))) as {
+          error?: string;
+        };
+        throw new Error(failure.error || 'Request failed');
+      }
+
+      const reader = r.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let event = '';
+      let reply: MessageRecord | undefined;
+
+      let streaming = true;
+      while (streaming) {
+        const chunk = await reader.read();
+        if (epoch !== turnEpoch.current) {
+          await reader.cancel();
+          return;
+        }
+        if (chunk.done) {
+          streaming = false;
+          break;
+        }
+        buffer += decoder.decode(chunk.value, { stream: true });
+
+        // SSE frames are separated by a blank line; anything after the last
+        // one is a partial frame and waits for the next chunk.
+        const frames = buffer.split('\n\n');
+        buffer = frames.pop() ?? '';
+
+        for (const frame of frames) {
+          for (const line of frame.split('\n')) {
+            if (line.startsWith('event: ')) event = line.slice(7).trim();
+            else if (line.startsWith('data: ')) {
+              const data = JSON.parse(line.slice(6));
+              if (event === 'status') setStage(data.stage);
+              else if (event === 'user')
+                setMessages((m) => [
+                  ...m.filter((x) => x.id !== pending.id),
+                  data as MessageRecord,
+                ]);
+              else if (event === 'delta') {
+                setStage('');
+                setMessages((m) => {
+                  const rest = m.filter((x) => x.id !== streamId);
+                  return [
+                    ...rest,
+                    {
+                      id: streamId,
+                      role: 'assistant',
+                      text: data.text,
+                      inputMode: 'text',
+                      blocks: [],
+                      createdAt: new Date().toISOString(),
+                    },
+                  ];
+                });
+              } else if (event === 'message') {
+                reply = data as MessageRecord;
+                setMessages((m) => [
+                  ...m.filter((x) => x.id !== streamId),
+                  data as MessageRecord,
+                ]);
+              } else if (event === 'done') {
+                setCheckpoint(data.checkpoint);
+                const fresh = await api<Session>('sessions');
+                if (epoch !== turnEpoch.current) {
+                  await reader.cancel();
+                  return;
+                }
+                setSession(fresh);
+                setLanguage(fresh.language);
+                if (caps.voice && reply?.language === fresh.language)
+                  void speech.play({
+                    kind: 'message',
+                    language: fresh.language,
+                    messageId: reply.id,
+                    conversationId: id,
+                  });
+                if (fresh.profileVersion > 0) await refreshDecisions();
+              } else if (event === 'failed') throw new Error(data.error);
+            }
+          }
+        }
+      }
     } catch (e) {
       if (epoch !== turnEpoch.current) return;
-      setMessages((m) => m.filter((x) => x.id !== pending.id));
+      setMessages((m) =>
+        m.filter((x) => x.id !== pending.id && x.id !== streamId),
+      );
       setError((e as Error).message);
     } finally {
-      setBusy(false);
+      if (epoch === turnEpoch.current) {
+        setBusy(false);
+        setStage('');
+      }
     }
   };
 
   /** The /profile route's save. Everything reviewed here counts as entered. */
   const saveProfile = async (profile: Profile) => {
     setBusy(true);
-    setError("");
+    setError('');
     try {
-      const current = await api<Session>("sessions");
+      const current = await api<Session>('sessions');
       const r = await api<{ profileVersion: number }>(
-        "profile/confirm",
-        "PUT",
+        'profile/confirm',
+        'PUT',
         { profile, version: current.profileVersion, confirmed: true },
       );
-      setSession(await api<Session>("sessions"));
+      setSession(await api<Session>('sessions'));
       if (r.profileVersion > 0) await refreshDecisions();
       setNotice(t.profileReady);
     } catch (e) {
@@ -463,12 +551,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const saveScheme = async (s: Scheme) => {
     setBusy(true);
     try {
-      await api("applications", "POST", {
+      await api('applications', 'POST', {
         schemeId: s.id,
         conversationId,
       });
       const r = await api<{ applications: ApplicationRecord[] }>(
-        "applications",
+        'applications',
       );
       setApplications(r.applications);
       setNotice(t.saved);
@@ -480,13 +568,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setMessages((m) => [
           ...m,
           {
-            id: "receipt-" + saved.id,
-            role: "assistant",
-            text: "",
-            inputMode: "text",
+            id: 'receipt-' + saved.id,
+            role: 'assistant',
+            text: '',
+            inputMode: 'text',
             blocks: [
               {
-                kind: "saved_receipt",
+                kind: 'saved_receipt',
                 applicationId: saved.id,
                 schemeId: s.id,
               },
@@ -504,7 +592,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const updateApplication = async (a: ApplicationRecord) => {
     setBusy(true);
     try {
-      await api("applications/" + a.id, "PATCH", a);
+      await api('applications/' + a.id, 'PATCH', a);
       await refreshApps();
       setNotice(t.updated);
     } catch (e) {
@@ -516,7 +604,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const removeApplication = async (id: string) => {
     try {
-      await api("applications/" + id, "DELETE");
+      await api('applications/' + id, 'DELETE');
       await refreshApps();
     } catch (e) {
       setError((e as Error).message);
@@ -529,20 +617,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     cancelRecording();
     setBusy(true);
     try {
-      await api("me/data", "DELETE");
+      await api('me/data', 'DELETE');
       setApplications([]);
       setDecisions({});
       setMessages([]);
       setConversationId(null);
-      setCheckpoint("GATHERING");
+      setCheckpoint('GATHERING');
       persistVisitor(null, false);
-      setLanguage("en");
+      setLanguage('en');
       greeted.current = false;
       setWelcomeReady(false);
       setSession(null);
       setHistory([]);
       writeHistory([]);
-      const s = await api<Session>("sessions", "POST", { language });
+      const s = await api<Session>('sessions', 'POST', { language });
       setSession(s);
       setNotice(t.deleted);
     } catch (e) {
@@ -555,7 +643,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const sendFeedback = async (rating: string, comment: string) => {
     setBusy(true);
     try {
-      await api("feedback", "POST", { rating: +rating, comment });
+      await api('feedback', 'POST', { rating: +rating, comment });
       setNotice(t.feedbackSaved);
     } catch (e) {
       setError((e as Error).message);
@@ -584,13 +672,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     speech.unlock();
     cancelRecording();
     setBusy(true);
-    setError("");
+    setError('');
     try {
       let current: Session;
       try {
-        current = await api<Session>("sessions");
+        current = await api<Session>('sessions');
       } catch {
-        current = await api<Session>("sessions", "POST", { language: "en" });
+        current = await api<Session>('sessions', 'POST', { language: 'en' });
       }
       const s = await restoreVoicePreference(name);
       setSession(s || current);
@@ -613,14 +701,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     cancelRecording();
     greeted.current = false;
     setWelcomeReady(false);
-    setLanguage("en");
-    setError("");
-    setNotice("");
+    setLanguage('en');
+    setError('');
+    setNotice('');
+    setBusy(false);
+    setStage('');
     setMessages([]);
     setConversationId(null);
     persistVisitor(null, false);
   };
-  const completeOnboarding = () => persistVisitor(visitor ?? "", true);
+  const completeOnboarding = () => persistVisitor(visitor ?? '', true);
 
   const clearHistory = () => {
     setHistory([]);
@@ -629,7 +719,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const setMemoryConsent = async (v: boolean) => {
     try {
-      await api("privacy/consent", "PUT", { enabled: v, language });
+      await api('privacy/consent', 'PUT', { enabled: v, language });
       setSession((s) => (s ? { ...s, memoryConsent: v } : s));
     } catch (e) {
       setError((e as Error).message);
@@ -640,14 +730,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     enabled:
       visitor !== null &&
       onboarded &&
-      pathname === "/" &&
+      pathname === '/' &&
       !loading &&
       !!session &&
       caps.voice &&
       welcomeReady,
-    paused: busy || speech.status !== "idle",
+    paused: busy || speech.status !== 'idle',
     language,
-    onTranscript: (text, detected) => ask(text, "voice", detected),
+    onTranscript: (text, detected) => ask(text, 'voice', detected),
   });
   useEffect(() => {
     stopListening.current = handsFree.stop;
@@ -663,7 +753,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         session,
         caps,
         loading,
-        busy: busy || handsFree.phase === "transcribing",
+        busy: busy || handsFree.phase === 'transcribing',
         error,
         notice,
         decisions,
@@ -681,6 +771,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         messages,
         conversationId,
         checkpoint,
+        stage,
         saveScheme,
         updateApplication,
         removeApplication,
@@ -695,7 +786,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           cancelRecording();
           void speech.play(
             {
-              kind: "message",
+              kind: 'message',
               language,
               messageId: message.id,
               conversationId,

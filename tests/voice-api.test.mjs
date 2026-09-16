@@ -130,7 +130,13 @@ test('real routes preserve chat flow, ownership and selected voice language', as
     const { handle } = await import('../lib/server.ts');
     const client = () => {
       let cookie = '';
-      return async (path, method = 'GET', data, expected = 200) => {
+      return async (
+        path,
+        method = 'GET',
+        data,
+        expected = 200,
+        stream = false,
+      ) => {
         const headers = {
           'X-Requested-With': 'SchemeSathi',
           Cookie: cookie,
@@ -138,6 +144,7 @@ test('real routes preserve chat flow, ownership and selected voice language', as
         };
         if (!(data instanceof FormData))
           headers['Content-Type'] = 'application/json';
+        if (stream) headers.Accept = 'text/event-stream';
         const response = await handle(
           new Request('https://sathi.test/api/v1/' + path, {
             method,
@@ -152,6 +159,27 @@ test('real routes preserve chat flow, ownership and selected voice language', as
         );
         if (response.headers.has('set-cookie'))
           cookie = response.headers.get('set-cookie').split(';')[0];
+        if (stream) {
+          assert.equal(response.status, expected);
+          assert.match(
+            response.headers.get('content-type'),
+            /^text\/event-stream/,
+          );
+          return (await response.text())
+            .trim()
+            .split('\n\n')
+            .map((frame) => {
+              const lines = frame.split('\n');
+              return {
+                event: lines
+                  .find((line) => line.startsWith('event: '))
+                  .slice(7),
+                data: JSON.parse(
+                  lines.find((line) => line.startsWith('data: ')).slice(6),
+                ),
+              };
+            });
+        }
         const result = response.headers
           .get('content-type')
           ?.startsWith('audio/')
@@ -267,13 +295,7 @@ test('real routes preserve chat flow, ownership and selected voice language', as
     );
     assert.equal(next.message.language, 'ml');
     assert.match(next.message.text, /[\u0d00-\u0d7f]/);
-    await a(
-      'voice/synthesize',
-      'POST',
-      { ...audio, language: 'ml' },
-      409,
-      'old text is not spoken as another language',
-    );
+    await a('voice/synthesize', 'POST', { ...audio, language: 'ml' }, 409);
     const newcomer = client();
     await newcomer('sessions', 'POST', {}, 201);
     const detected = await newcomer('voice/transcribe', 'POST', form);
@@ -296,6 +318,56 @@ test('real routes preserve chat flow, ownership and selected voice language', as
     );
     assert.equal(sent.message.language, 'ml');
     assert.equal(sent.userMessage.inputMode, 'voice');
+
+    // The UI now streams turns. Language-only turns and ordinary spoken turns
+    // must retain the same persisted replies and TTS ownership as JSON turns.
+    for (const [language, command, narrative, script] of [
+      ['ta', 'தமிழில் பேசுங்கள்', 'எனக்கு எழுபத்திரண்டு வயசு.', /[\u0b80-\u0bff]/],
+      ['ml', 'Malayalam', 'ഞാൻ ഒരു കർഷകനാണ്', /[\u0d00-\u0d7f]/],
+    ]) {
+      const streaming = client();
+      await streaming('sessions', 'POST', {}, 201);
+      const conversation = await streaming('conversations', 'POST', {}, 201);
+      for (const message of [command, narrative]) {
+        const events = await streaming(
+          'conversations/' + conversation.id + '/messages',
+          'POST',
+          { message, inputMode: 'voice', language },
+          200,
+          true,
+        );
+        assert.equal(
+          events.some((event) => event.event === 'failed'),
+          false,
+        );
+        const reply = events.find((event) => event.event === 'message').data;
+        const user = events.find((event) => event.event === 'user').data;
+        assert.equal(user.inputMode, 'voice');
+        assert.equal(user.language, language);
+        assert.equal(reply.language, language);
+        assert.match(reply.text, script);
+        assert.equal(events.at(-1).event, 'done');
+        assert.equal(events.at(-1).data.language, language);
+        assert.equal(
+          events.filter((event) => event.event === 'delta').at(-1).data.text,
+          reply.text,
+        );
+        const persisted = await streaming(
+          'conversations/' + conversation.id + '/messages',
+        );
+        assert.deepEqual(
+          persisted.messages.find((m) => m.id === reply.id).blocks,
+          reply.blocks,
+        );
+        await streaming('voice/synthesize', 'POST', {
+          kind: 'message',
+          conversationId: conversation.id,
+          messageId: reply.id,
+          language,
+        });
+        assert.equal(spoken.at(-1).language_code, language);
+      }
+    }
     globalThis.__voiceTestEnv.ELEVENLABS_API_KEY = '';
     assert.equal((await a('capabilities')).voice, false);
     await a('voice/synthesize', 'POST', { kind: 'welcome' }, 503);

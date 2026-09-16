@@ -1,6 +1,15 @@
 import { body, db, HttpError, json, limit } from '../http';
-import { planTurn } from '../agent/turn';
-import { detectFocus, isDecline } from '../agent/focus.ts';
+import type { SessionCtx } from '../session';
+import { planTurn, nextQuestion } from '../agent/turn';
+import {
+  detectFocus,
+  isDecline,
+  isUnsure,
+  wantsEverything,
+} from '../agent/focus.ts';
+import { runAgent } from '../agent/loop';
+import { validateProse, schemesMentioned } from '../agent/validate.ts';
+import { judgeProse } from '../agent/judge';
 import { extract } from './chat';
 import { retrieve } from '../retrieval';
 import { fields, redact, validateProfile } from '../rules';
@@ -104,273 +113,75 @@ export const conversations: SessionRoute = async ({
     }
 
     if (method === 'POST') {
-      await limit('turn:' + s.id, 30);
-      const b = await body(req);
-      if (
-        typeof b.message !== 'string' ||
-        b.message.length > 1800 ||
-        !b.message.trim()
-      )
-        throw new HttpError(
-          400,
-          'Please enter a message of up to 1,800 characters.',
+      const conversation2 = conversation;
+      // Streaming is opt-in by Accept header, so the JSON contract the API
+      // tests and any non-streaming client rely on is untouched.
+      const wantsStream = (req.headers.get('accept') || '').includes(
+        'text/event-stream',
+      );
+      if (!wantsStream) {
+        const payload = await runTurn(
+          { req, s, trace } as SessionCtx,
+          conversation2,
+          () => {},
         );
-      const inputMode = b.inputMode === 'voice' ? 'voice' : 'text';
-      const text = redact(b.message.trim());
-      const now = new Date().toISOString();
-      const selected = !!s.language_selected || s.language !== 'en';
-      const initial =
-        !selected && inputMode === 'voice' && isLanguage(b.language)
-          ? b.language
-          : s.language;
-      s.language = sessionLanguage(text, initial, selected);
-      await db().batch([
-        ...languageStatements(s, s.language),
-        db()
-          .prepare('UPDATE conversations SET language=? WHERE id=?')
-          .bind(s.language, conversation.id),
-      ]);
-
-      // A language instruction is not a profile answer and must not consume
-      // the question budget or turn "Tamil" into an occupation/location.
-      if (languageCommand(text)) {
-        const userMessage = {
-          id: crypto.randomUUID(),
-          role: 'user' as const,
-          text,
-          inputMode,
-          language: s.language,
-          blocks: [],
-          createdAt: now,
-        };
-        const assistant = {
-          id: crypto.randomUUID(),
-          role: 'assistant' as const,
-          text: voiceCopy[s.language].selected,
-          inputMode: 'text' as const,
-          language: s.language,
-          blocks: [],
-          createdAt: now,
-        };
-        await db().batch(
-          [userMessage, assistant].map((m) =>
-            db()
-              .prepare(
-                'INSERT INTO messages(id,conversation_id,role,text,input_mode,language,blocks,created_at) VALUES(?,?,?,?,?,?,?,?)',
-              )
-              .bind(
-                m.id,
-                conversation.id,
-                m.role,
-                m.text,
-                m.inputMode,
-                s.language,
-                '[]',
-                now,
-              ),
-          ),
-        );
-        return json(
-          {
-            userMessage,
-            message: assistant,
-            checkpoint: conversation.checkpoint,
-            profileVersion: s.version,
-            language: s.language,
-            traceId: trace,
-          },
-          201,
-        );
+        return json(payload, 201);
       }
 
-      const userMessage = {
-        id: crypto.randomUUID(),
-        conversationId: conversation.id,
-        role: 'user' as const,
-        text,
-        inputMode,
-        language: s.language,
-        blocks: [],
-        createdAt: now,
-      };
-      await db()
-        .prepare(
-          'INSERT INTO messages(id,conversation_id,role,text,input_mode,language,blocks,created_at) VALUES(?,?,?,?,?,?,?,?)',
-        )
-        .bind(
-          userMessage.id,
-          conversation.id,
-          'user',
-          text,
-          inputMode,
-          s.language,
-          '[]',
-          now,
-        )
-        .run();
+      const { readable, writable } = new TransformStream();
+      const writer = writable.getWriter();
+      const encode = new TextEncoder();
+      const send = (event: string, data: unknown) =>
+        writer.write(
+          encode.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`),
+        );
 
-      const turn = (conversation.turns as number) + 1;
-      const offered = conversation.checkpoint === 'SAVE_OFFERED';
-      const declining = offered && isDecline(text);
-
-      // "No thanks" answers the save offer, not the profile. Reading it as a
-      // field value would record a refusal as a fact about the citizen.
-      const askedField = declining
-        ? ''
-        : (conversation.asked_field as string) || '';
-      const profile = JSON.parse(s.profile) as Profile;
-      const provenance = JSON.parse(s.provenance) as Record<string, Provenance>;
-      const changed: { field: string; provenance: Provenance }[] = [];
-      let merged: Profile = { ...profile };
-
-      const answered = askedField ? coerce(askedField, text) : null;
-      if (answered !== null) {
-        merged = validateProfile({ ...merged, [askedField]: answered });
-        provenance[askedField] = 'answered';
-        changed.push({ field: askedField, provenance: 'answered' });
-      } else {
-        const found = await extract(text, s.language);
-        for (const [field, value] of Object.entries(found.profile)) {
-          if (value === null || provenance[field] === 'answered') continue;
-          // One unusable value must not fail the whole turn — the citizen
-          // said something, and the agent should reply, not error.
-          try {
-            merged = validateProfile({ ...merged, [field]: value });
-            provenance[field] = 'inferred';
-            changed.push({ field, provenance: 'inferred' });
-          } catch {
-            continue;
+      void (async () => {
+        try {
+          const payload = await runTurn(
+            { req, s, trace } as SessionCtx,
+            conversation2,
+            (stage) => void send('status', { stage }),
+          );
+          await send('user', payload.userMessage);
+          // The text is revealed a few words at a time rather than streamed
+          // from the model. Model tokens cannot be shown before validation,
+          // and roughly one reply in three is currently rejected and replaced
+          // by the deterministic sentence — text appearing and then vanishing
+          // would be worse than text arriving a moment later. The wait this
+          // removes is the tool round trips, which the status events cover.
+          const words = payload.message.text.split(/(\s+)/);
+          let sent = '';
+          for (let i = 0; i < words.length; i += 3) {
+            sent += words.slice(i, i + 3).join('');
+            await send('delta', { text: sent });
           }
-        }
-      }
-
-      const confirmed = Object.keys(merged).filter(
-        (k) =>
-          merged[k] !== null && provenance[k] && provenance[k] !== 'inferred',
-      );
-
-      const live = await schemes();
-      const saved = await applicationRepository().list(s.id);
-
-      // Retrieve against the opening description plus this message. A bare
-      // answer like "44" matches nothing on its own, and the citizen should
-      // not lose the thread of what they came in saying.
-      const query = [conversation.title as string, text]
-        .filter(Boolean)
-        .join(' ');
-      const candidates = retrieve(query, live).map((c) => c.schemeId);
-
-      const previous = await db()
-        .prepare(
-          "SELECT blocks FROM messages WHERE conversation_id=? AND role='assistant' ORDER BY created_at DESC, rowid DESC LIMIT 1",
-        )
-        .bind(conversation.id)
-        .first<{ blocks: string }>();
-      const lastPresented = (
-        JSON.parse(previous?.blocks || '[]') as {
-          kind: string;
-          schemeId?: string;
-        }[]
-      )
-        .filter((b) => b.kind === 'scheme_card' && b.schemeId)
-        .map((b) => b.schemeId as string);
-
-      const focus = declining
-        ? null
-        : detectFocus({
-            schemes: live,
-            lastPresented,
-            previousFocus: (conversation.focus_scheme_id as string) || null,
-            text,
+          await send('message', payload.message);
+          await send('done', {
+            checkpoint: payload.checkpoint,
+            profileVersion: payload.profileVersion,
+            language: payload.language,
           });
+        } catch (error) {
+          await send('failed', {
+            error:
+              error instanceof HttpError
+                ? error.message
+                : 'The service is temporarily unavailable. Please try again.',
+          });
+        } finally {
+          await writer.close();
+        }
+      })();
 
-      const plan = planTurn({
-        schemes: live,
-        candidates,
-        focus,
-        declinedSchemeId: declining
-          ? (conversation.focus_scheme_id as string) || null
-          : (conversation.declined_scheme_id as string) || null,
-        declinedAtTurn: declining
-          ? turn
-          : (conversation.declined_at_turn as number),
-        turn,
-        profile: merged,
-        confirmed,
-        changed,
-        savedSchemeIds: saved.map((r) => r.schemeId),
-        unreadAnswer: !!askedField && answered === null,
-        questionsAsked: conversation.questions_asked as number,
-        language: s.language,
-      });
-
-      const assistant = {
-        id: crypto.randomUUID(),
-        conversationId: conversation.id,
-        role: 'assistant' as const,
-        text: plan.text,
-        inputMode: 'text' as const,
-        language: s.language,
-        blocks: plan.blocks,
-        createdAt: new Date().toISOString(),
-      };
-
-      await db().batch([
-        db()
-          .prepare(
-            'INSERT INTO messages(id,conversation_id,role,text,input_mode,language,blocks,created_at) VALUES(?,?,?,?,?,?,?,?)',
-          )
-          .bind(
-            assistant.id,
-            conversation.id,
-            'assistant',
-            plan.text,
-            'text',
-            s.language,
-            JSON.stringify(plan.blocks),
-            assistant.createdAt,
-          ),
-        db()
-          .prepare(
-            "UPDATE conversations SET checkpoint=?,questions_asked=?,asked_field=?,focus_scheme_id=?,turns=?,declined_scheme_id=?,declined_at_turn=?,title=CASE WHEN title='' THEN ? ELSE title END,updated_at=? WHERE id=?",
-          )
-          .bind(
-            plan.checkpoint,
-            plan.questionsAsked,
-            plan.askedField || '',
-            plan.offeredSchemeId ?? focus,
-            turn,
-            declining
-              ? (conversation.focus_scheme_id as string) || null
-              : (conversation.declined_scheme_id as string) || null,
-            declining ? turn : (conversation.declined_at_turn as number),
-            text.slice(0, 60),
-            assistant.createdAt,
-            conversation.id,
-          ),
-        db()
-          .prepare(
-            'UPDATE sessions SET profile=?,confirmed=?,provenance=?,version=version+1 WHERE id=?',
-          )
-          .bind(
-            JSON.stringify(merged),
-            JSON.stringify(confirmed),
-            JSON.stringify(provenance),
-            s.id,
-          ),
-      ]);
-
-      return json(
-        {
-          userMessage,
-          message: assistant,
-          checkpoint: plan.checkpoint,
-          profileVersion: s.version + 1,
-          traceId: trace,
-          language: s.language,
+      return new Response(readable, {
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-store',
+          Connection: 'keep-alive',
+          'X-Content-Type-Options': 'nosniff',
         },
-        201,
-      );
+      });
     }
   }
 
@@ -432,4 +243,485 @@ function ok(field: string, value: string | number) {
   } catch {
     return null;
   }
+}
+
+async function runTurn(
+  { req, s, trace }: SessionCtx,
+  conversation: Row,
+  onStatus: (stage: string) => void,
+) {
+  await limit('turn:' + s.id, 30);
+  const b = await body(req);
+  if (
+    typeof b.message !== 'string' ||
+    b.message.length > 1800 ||
+    !b.message.trim()
+  )
+    throw new HttpError(
+      400,
+      'Please enter a message of up to 1,800 characters.',
+    );
+  const inputMode = b.inputMode === 'voice' ? 'voice' : 'text';
+  const text = redact(b.message.trim());
+  const now = new Date().toISOString();
+  const selected = !!s.language_selected || s.language !== 'en';
+  const initial =
+    !selected && inputMode === 'voice' && isLanguage(b.language)
+      ? b.language
+      : s.language;
+  s.language = sessionLanguage(text, initial, selected);
+  await db().batch([
+    ...languageStatements(s, s.language),
+    db()
+      .prepare('UPDATE conversations SET language=? WHERE id=?')
+      .bind(s.language, conversation.id),
+  ]);
+
+  // A language instruction is not a profile answer and must not consume
+  // the question budget or turn "Tamil" into an occupation/location.
+  if (languageCommand(text)) {
+    const userMessage = {
+      id: crypto.randomUUID(),
+      role: 'user' as const,
+      text,
+      inputMode,
+      language: s.language,
+      blocks: [],
+      createdAt: now,
+    };
+    const assistant = {
+      id: crypto.randomUUID(),
+      role: 'assistant' as const,
+      text: voiceCopy[s.language].selected,
+      inputMode: 'text' as const,
+      language: s.language,
+      blocks: [],
+      createdAt: now,
+    };
+    await db().batch(
+      [userMessage, assistant].map((m) =>
+        db()
+          .prepare(
+            'INSERT INTO messages(id,conversation_id,role,text,input_mode,language,blocks,created_at) VALUES(?,?,?,?,?,?,?,?)',
+          )
+          .bind(
+            m.id,
+            conversation.id,
+            m.role,
+            m.text,
+            m.inputMode,
+            s.language,
+            '[]',
+            now,
+          ),
+      ),
+    );
+    return {
+      userMessage,
+      message: assistant,
+      checkpoint: conversation.checkpoint,
+      profileVersion: s.version,
+      language: s.language,
+      traceId: trace,
+    };
+  }
+
+  const userMessage = {
+    id: crypto.randomUUID(),
+    conversationId: conversation.id,
+    role: 'user' as const,
+    text,
+    inputMode,
+    language: s.language,
+    blocks: [],
+    createdAt: now,
+  };
+  await db()
+    .prepare(
+      'INSERT INTO messages(id,conversation_id,role,text,input_mode,language,blocks,created_at) VALUES(?,?,?,?,?,?,?,?)',
+    )
+    .bind(
+      userMessage.id,
+      conversation.id,
+      'user',
+      text,
+      inputMode,
+      s.language,
+      '[]',
+      now,
+    )
+    .run();
+
+  const turn = (conversation.turns as number) + 1;
+  const offered = conversation.checkpoint === 'SAVE_OFFERED';
+  const declining = offered && isDecline(text);
+
+  // "No thanks" answers the save offer, not the profile. Reading it as a
+  // field value would record a refusal as a fact about the citizen.
+  const askedField = declining
+    ? ''
+    : (conversation.asked_field as string) || '';
+  const profile = JSON.parse(s.profile) as Profile;
+  const provenance = JSON.parse(s.provenance) as Record<string, Provenance>;
+  const changed: { field: string; provenance: Provenance }[] = [];
+  let merged: Profile = { ...profile };
+
+  const answered = askedField ? coerce(askedField, text) : null;
+  if (answered !== null) {
+    merged = validateProfile({ ...merged, [askedField]: answered });
+    provenance[askedField] = 'answered';
+    changed.push({ field: askedField, provenance: 'answered' });
+  } else {
+    onStatus('reading');
+    const found = await extract(text, s.language);
+    for (const [field, value] of Object.entries(found.profile)) {
+      if (value === null) continue;
+      // Never let a model's reading overwrite something the citizen
+      // stated themselves. Downgrading an entered or answered field to
+      // "inferred" drops it out of `confirmed`, which silently changes a
+      // verdict — the citizen's own entry outranks an extraction.
+      const held = provenance[field];
+      if (held === 'answered' || held === 'entered') continue;
+      // One unusable value must not fail the whole turn — the citizen
+      // said something, and the agent should reply, not error.
+      try {
+        merged = validateProfile({ ...merged, [field]: value });
+        provenance[field] = 'inferred';
+        changed.push({ field, provenance: 'inferred' });
+      } catch {
+        continue;
+      }
+    }
+  }
+
+  const confirmed = Object.keys(merged).filter(
+    (k) => merged[k] !== null && provenance[k] && provenance[k] !== 'inferred',
+  );
+
+  const live = await schemes();
+  const saved = await applicationRepository().list(s.id);
+
+  // Retrieve against the opening description plus this message. A bare
+  // answer like "44" matches nothing on its own, and the citizen should
+  // not lose the thread of what they came in saying.
+  const query = [conversation.title as string, text].filter(Boolean).join(' ');
+
+  const previous = await db()
+    .prepare(
+      "SELECT blocks FROM messages WHERE conversation_id=? AND role='assistant' ORDER BY created_at DESC, rowid DESC LIMIT 1",
+    )
+    .bind(conversation.id)
+    .first<{ blocks: string }>();
+  const lastPresented = (
+    JSON.parse(previous?.blocks || '[]') as {
+      kind: string;
+      schemeId?: string;
+    }[]
+  )
+    .filter((b) => b.kind === 'scheme_card' && b.schemeId)
+    .map((b) => b.schemeId as string);
+
+  const detected = declining
+    ? { schemeId: null, named: false }
+    : detectFocus({
+        schemes: live,
+        lastPresented,
+        previousFocus: (conversation.focus_scheme_id as string) || null,
+        text,
+      });
+  const focus = detected.schemeId;
+
+  // The planner decides first, then the model speaks — never the reverse.
+  //
+  // A question is left to the planner: it asks about exactly one field and
+  // ships the chips that answer it, whereas a model asked to phrase the
+  // same thing rambles across three and contradicts the chips beneath it.
+  // The model is worth having when there is something to explain, so it is
+  // called only then, and told which programmes are on screen so its words
+  // and the cards cannot disagree.
+  // The model decides whether there is enough to go on before anything
+  // touches the index. A vague opening — "money is tight" — should start a
+  // conversation, not a search: naming a programme off one sentence is a
+  // guess wearing the clothes of an answer. So the agent runs first, and
+  // the schemes it actually looked up become the candidates. With no model
+  // configured the deterministic path retrieves for itself, as before.
+  let spoken: Awaited<ReturnType<typeof runAgent>> = null;
+  try {
+    const recent = await db()
+      .prepare(
+        'SELECT role,text FROM messages WHERE conversation_id=? ORDER BY created_at DESC, rowid DESC LIMIT 7',
+      )
+      .bind(conversation.id)
+      .all<{ role: string; text: string }>();
+    onStatus('thinking');
+    spoken = await runAgent({
+      schemes: live,
+      profile: merged,
+      confirmed,
+      language: s.language,
+      history: recent.results
+        .reverse()
+        .slice(0, -1)
+        .map((m) => ({ role: m.role as 'user' | 'assistant', text: m.text })),
+      message: text,
+    });
+  } catch (error) {
+    console.log(
+      JSON.stringify({
+        traceId: trace,
+        event: 'agent_failed',
+        cause: error instanceof Error ? error.message : String(error),
+      }),
+    );
+  }
+
+  const unsure = isUnsure(text);
+
+  let candidates: string[];
+  if (spoken) {
+    candidates = spoken.seen;
+  } else {
+    onStatus('searching');
+    candidates = (await retrieve(query, live)).map((c) => c.schemeId);
+  }
+
+  // "I don't know what I need" is the one case where asking again is the
+  // least useful thing we can do. If the model asked instead of searching,
+  // search on whatever is already known — the opening description and the
+  // confirmed facts — so they get something concrete to react to.
+  if (unsure && !candidates.length) {
+    onStatus('searching');
+    const known = Object.entries(merged)
+      .filter(([, v]) => v !== null && v !== undefined)
+      .map(([k, v]) => `${k} ${v}`)
+      .join(' ');
+    const fallbackQuery = [conversation.title as string, known]
+      .filter(Boolean)
+      .join(' ');
+    if (fallbackQuery.trim())
+      candidates = (await retrieve(fallbackQuery, live)).map((c) => c.schemeId);
+  }
+
+  const plan = planTurn({
+    schemes: live,
+    candidates,
+    focus,
+    focusNamed: detected.named,
+    // Not knowing what you need is a reason to be shown what exists.
+    showEverything: wantsEverything(text) || unsure,
+    declinedSchemeId: declining
+      ? (conversation.focus_scheme_id as string) || null
+      : (conversation.declined_scheme_id as string) || null,
+    declinedAtTurn: declining
+      ? turn
+      : (conversation.declined_at_turn as number),
+    turn,
+    profile: merged,
+    confirmed,
+    changed,
+    savedSchemeIds: saved.map((r) => r.schemeId),
+    unreadAnswer: !!askedField && answered === null,
+    questionsAsked: conversation.questions_asked as number,
+    language: s.language,
+  });
+
+  const modelAsked = spoken?.asking ?? null;
+  // True when the model's own words are shown in place of the planner's.
+  const modelSpoke = !!spoken?.text;
+
+  // Validation happens here rather than at generation, because it needs
+  // the verdicts the planner just computed. Prose that overreaches is
+  // replaced by the deterministic sentence, and prose that asks about a
+  // different field than the chips beneath it is set aside entirely.
+  let assistantText = plan.text;
+  if (spoken?.text) {
+    const verdict = validateProse(spoken.text, {
+      onScreen: plan.blocks
+        .filter((b) => b.kind === 'scheme_card')
+        .map((b) => (b as { schemeId: string }).schemeId),
+      seen: spoken.seen,
+      schemes: live,
+      decisions: plan.decisions,
+    });
+    // The model reliably asks good questions and just as reliably declines
+    // to call ask_about for them, so its words were being thrown away.
+    // A question only contradicts the buttons if buttons are shown, so
+    // when it speaks without the tool we keep its wording and show none —
+    // and drop the planner's field with them, because coercing the next
+    // reply against a field the citizen was never asked about is how "2
+    // acres" becomes an age of 2.
+    const wouldContradict = false;
+    if (!verdict.ok)
+      console.log(
+        JSON.stringify({
+          traceId: trace,
+          event: 'prose_rejected',
+          reason: verdict.reason,
+        }),
+      );
+    else if (wouldContradict)
+      console.log(
+        JSON.stringify({
+          traceId: trace,
+          event: 'prose_unused',
+          reason: 'the planner is asking and the model did not',
+        }),
+      );
+    else {
+      // The regex checks passed. Now read it beside the catalogue text,
+      // which is the only way to catch elaboration that sounds right.
+      let judged: Awaited<ReturnType<typeof judgeProse>> = { ok: true };
+      try {
+        onStatus('checking');
+        judged = await judgeProse(
+          spoken.text,
+          live,
+          schemesMentioned(spoken.text, live),
+        );
+      } catch (error) {
+        // A judge that cannot answer must not cost the citizen their
+        // reply; the checkable claims were already ruled out.
+        console.log(
+          JSON.stringify({
+            traceId: trace,
+            event: 'judge_unavailable',
+            cause: error instanceof Error ? error.message : String(error),
+          }),
+        );
+      }
+      if (judged.ok) assistantText = spoken.text;
+      else
+        console.log(
+          JSON.stringify({
+            traceId: trace,
+            event: 'prose_rejected',
+            reason: judged.reason,
+          }),
+        );
+    }
+  }
+
+  // A question the model asked replaces the planner's: the wording is its
+  // own, the chips and the field are ours, and the answer is coerced
+  // against that field exactly as before. The planner's own question is
+  // the fallback for when no model is configured.
+  const blocks =
+    modelAsked || (modelSpoke && plan.checkpoint === 'ASKED')
+      ? [
+          ...plan.blocks.filter(
+            (b) => b.kind === 'profile_updated' || b.kind === 'notice',
+          ),
+          // Chips only when the model actually asked through the tool.
+          ...(modelAsked && modelAsked.options.length
+            ? [
+                {
+                  kind: 'answer_chips' as const,
+                  field: modelAsked.field,
+                  options: modelAsked.options,
+                },
+              ]
+            : []),
+        ]
+      : plan.blocks;
+  const askedFieldOut = modelAsked
+    ? modelAsked.field
+    : modelSpoke && plan.checkpoint === 'ASKED'
+      ? '' // its question, our field: never coerce against the mismatch
+      : plan.askedField;
+
+  // Every turn ends with a way forward. A reply that states what it heard
+  // and stops leaves the citizen to guess what to type next, which is the
+  // opposite of the conversation this is meant to be. If nothing in the
+  // turn already asks — no question from the model, no save offered — the
+  // planner's own next question is appended, with the chips that answer
+  // it, so the wording and the buttons always agree.
+  let finalText = assistantText;
+  let finalBlocks = blocks;
+  let finalAskedField = askedFieldOut;
+
+  const alreadyAsks = !!modelAsked || assistantText.trim().endsWith('?');
+  const offeringSave = plan.checkpoint === 'SAVE_OFFERED';
+
+  if (!alreadyAsks && !offeringSave) {
+    const q = nextQuestion(live, merged, confirmed, candidates, s.language);
+    if (q?.text) {
+      finalText = `${assistantText.trim()} ${q.text}`.trim();
+      finalAskedField = q.field;
+      finalBlocks = q.options.length
+        ? [
+            ...blocks.filter((b) => b.kind !== 'answer_chips'),
+            {
+              kind: 'answer_chips' as const,
+              field: q.field,
+              options: q.options,
+            },
+          ]
+        : blocks;
+    }
+  }
+
+  const assistant = {
+    id: crypto.randomUUID(),
+    conversationId: conversation.id,
+    role: 'assistant' as const,
+    text: finalText,
+    inputMode: 'text' as const,
+    language: s.language,
+    blocks: finalBlocks,
+    createdAt: new Date().toISOString(),
+  };
+
+  await db().batch([
+    db()
+      .prepare(
+        'INSERT INTO messages(id,conversation_id,role,text,input_mode,language,blocks,created_at) VALUES(?,?,?,?,?,?,?,?)',
+      )
+      .bind(
+        assistant.id,
+        conversation.id,
+        'assistant',
+        finalText,
+        'text',
+        s.language,
+        JSON.stringify(finalBlocks),
+        assistant.createdAt,
+      ),
+    db()
+      .prepare(
+        "UPDATE conversations SET checkpoint=?,questions_asked=?,asked_field=?,focus_scheme_id=?,turns=?,declined_scheme_id=?,declined_at_turn=?,title=CASE WHEN title='' THEN ? ELSE title END,updated_at=? WHERE id=?",
+      )
+      .bind(
+        plan.checkpoint,
+        plan.questionsAsked,
+        finalAskedField || '',
+        plan.offeredSchemeId ?? focus,
+        turn,
+        declining
+          ? (conversation.focus_scheme_id as string) || null
+          : (conversation.declined_scheme_id as string) || null,
+        declining ? turn : (conversation.declined_at_turn as number),
+        text.slice(0, 60),
+        assistant.createdAt,
+        conversation.id,
+      ),
+    db()
+      .prepare(
+        'UPDATE sessions SET profile=?,confirmed=?,provenance=?,version=version+1 WHERE id=?',
+      )
+      .bind(
+        JSON.stringify(merged),
+        JSON.stringify(confirmed),
+        JSON.stringify(provenance),
+        s.id,
+      ),
+  ]);
+
+  return {
+    userMessage,
+    message: assistant,
+    checkpoint: plan.checkpoint,
+    profileVersion: s.version + 1,
+    traceId: trace,
+    language: s.language,
+  };
 }

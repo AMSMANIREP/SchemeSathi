@@ -1,4 +1,4 @@
-import { body, db, hash, HttpError, json, limit, settings } from '../http';
+import { body, conf, db, hash, HttpError, json, limit } from '../http';
 import {
   defaultVoiceId,
   synthesizeSpeech,
@@ -59,9 +59,8 @@ export const voice: SessionRoute = async ({ req, p, method, s }) => {
     'voice-ip:' + (await hash(req.headers.get('cf-connecting-ip') || 'local')),
     60,
   );
-  const e = settings();
-  if (!e.ELEVENLABS_API_KEY)
-    throw new HttpError(503, voiceCopy[s.language].unavailable);
+  const apiKey = conf('ELEVENLABS_API_KEY');
+  if (!apiKey) throw new HttpError(503, voiceCopy[s.language].unavailable);
 
   if (p === 'voice/transcribe') {
     const form = await audioForm(req);
@@ -77,7 +76,7 @@ export const voice: SessionRoute = async ({ req, p, method, s }) => {
         'Please upload a nonempty audio recording under 5 MB.',
       );
     try {
-      const result = await transcribeSpeech(e.ELEVENLABS_API_KEY, file);
+      const result = await transcribeSpeech(apiKey, file);
       const text = redact(result.text).trim().slice(0, 1800);
       if (!text) throw new HttpError(422, voiceCopy[s.language].empty);
       const selected = !!s.language_selected || s.language !== 'en';
@@ -152,8 +151,8 @@ export const voice: SessionRoute = async ({ req, p, method, s }) => {
   if (!text.trim()) throw new HttpError(400, 'No reply to speak.');
   try {
     const r = await synthesizeSpeech(
-      e.ELEVENLABS_API_KEY,
-      e.ELEVENLABS_VOICE_ID || defaultVoiceId,
+      apiKey,
+      conf('ELEVENLABS_VOICE_ID') || defaultVoiceId,
       redact(text),
       multilingual ? undefined : s.language,
     );

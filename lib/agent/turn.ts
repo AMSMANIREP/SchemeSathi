@@ -1,6 +1,7 @@
 import { evaluateScheme } from '../rules.ts';
 import { hasQuestion, leverage, questionFor } from '../questions.ts';
 import { shouldOfferSave } from './focus.ts';
+import { copy, statusNames } from '../i18n.ts';
 import { languageIndex } from '../languages.ts';
 import type {
   Block,
@@ -12,9 +13,32 @@ import type {
   Scheme,
 } from '../types';
 
+/**
+ * The single most useful thing still unknown, phrased.
+ *
+ * Exposed so a turn that would otherwise end in a statement can close with a
+ * question instead. A reply that names what someone said and stops is not a
+ * conversation; it leaves them to work out what to type next.
+ */
+export function nextQuestion(
+  schemes: Scheme[],
+  profile: Profile,
+  confirmed: string[],
+  candidates: string[],
+  language: Language,
+) {
+  const relevant = schemes.filter((s) => candidates.includes(s.id));
+  const pick =
+    leverage(relevant, profile, confirmed).find((x) => hasQuestion(x.field)) ||
+    leverage(schemes, profile, confirmed).find((x) => hasQuestion(x.field));
+  return pick ? questionFor(pick.field, language) : null;
+}
+
 /** Interrogation is not conversation. Two questions, then show something. */
 export const QUESTION_BUDGET = 2;
 const MAX_CARDS = 4;
+/** Fewer when nobody asked for a list: an answer, not a search result. */
+const PROACTIVE_CARDS = 3;
 
 export type TurnInput = {
   schemes: Scheme[];
@@ -27,6 +51,10 @@ export type TurnInput = {
   savedSchemeIds: string[];
   /** The scheme this conversation is actually about, if one has emerged. */
   focus?: string | null;
+  /** True when this message named that scheme, rather than inheriting it. */
+  focusNamed?: boolean;
+  /** The citizen asked to see the full list, so show it unfiltered. */
+  showEverything?: boolean;
   declinedSchemeId?: string | null;
   declinedAtTurn?: number;
   turn?: number;
@@ -44,7 +72,27 @@ export type TurnPlan = {
   askedField: string | null;
   /** Set when this turn offered to save, so the server can record the offer. */
   offeredSchemeId: string | null;
+  /** Verdicts this turn computed, so generated prose can be checked on them. */
+  decisions: Map<string, Decision>;
 };
+
+/**
+ * A sentence about one scheme, assembled from the decision rather than
+ * written. It names the verdict in the citizen's language and the facts still
+ * missing, so asking about a programme returns something about that programme
+ * instead of a generic re-listing.
+ */
+function aboutScheme(scheme: Scheme, decision: Decision, language: Language) {
+  const t = copy[language];
+  const verdict = statusNames[decision.status][li(language)];
+  const missing = decision.missingFields.map((f) =>
+    String(t[f as keyof typeof t] ?? f),
+  );
+  const head = `${scheme.shortName} — ${verdict.toLowerCase()}. ${scheme.summary}`;
+  return missing.length
+    ? `${head} ${t.stillUnknown}: ${missing.join(', ')}.`
+    : head;
+}
 
 const RANK: Record<Decision['status'], number> = {
   LIKELY_ELIGIBLE: 0,
@@ -100,6 +148,8 @@ export function planTurn(input: TurnInput): TurnPlan {
     changed,
     savedSchemeIds,
     focus,
+    focusNamed,
+    showEverything,
     unreadAnswer,
     questionsAsked,
     language,
@@ -123,7 +173,20 @@ export function planTurn(input: TurnInput): TurnPlan {
   // Ask only while an answer could still move something, and only within the
   // budget. Otherwise show what we have — a citizen who has answered twice
   // deserves to see something.
-  if (!conclusive && questionsAsked < QUESTION_BUDGET) {
+  //
+  // A direct question about a named scheme is never answered with a question
+  // of our own. What is missing is said in the reply instead, so they learn
+  // the gap without having their question deflected.
+  // Someone who has just said "show me" or "I don't know" is asking to be
+  // shown. Answering that with another question is the one response certain
+  // not to help, and it leaves prose naming schemes above a turn with no
+  // cards beneath it.
+  if (
+    !showEverything &&
+    !focusNamed &&
+    !conclusive &&
+    questionsAsked < QUESTION_BUDGET
+  ) {
     // Ask about what the citizen just raised. Scoring the whole catalogue
     // first would ask a farmer their age simply because 'age' sorts earlier.
     const relevant = schemes.filter((s) => candidates.includes(s.id));
@@ -147,17 +210,37 @@ export function planTurn(input: TurnInput): TurnPlan {
         questionsAsked: questionsAsked + 1,
         askedField: next.field,
         offeredSchemeId: null,
+        decisions,
       };
     }
   }
 
-  const shown = [...candidates]
-    .sort(
-      (a, b) =>
-        RANK[decisions.get(a)!.status] - RANK[decisions.get(b)!.status] ||
-        candidates.indexOf(a) - candidates.indexOf(b),
-    )
-    .slice(0, MAX_CARDS);
+  const ranked = [...candidates].sort(
+    (a, b) =>
+      RANK[decisions.get(a)!.status] - RANK[decisions.get(b)!.status] ||
+      candidates.indexOf(a) - candidates.indexOf(b),
+  );
+
+  // A scheme the citizen named in this message is the whole answer. They
+  // asked one question; surrounding it with three others is a re-listing, and
+  // it muddies a save offer that refers to exactly one of them. A focus that
+  // only carried over from an earlier turn leads but does not narrow, because
+  // they may have moved on.
+  const asked = focus && schemes.some((s) => s.id === focus) ? focus : null;
+  // A card for a scheme the rules cannot decide tells the citizen nothing and
+  // reads as an option. Proactively, only show what something can be said
+  // about; a scheme they asked about by name is shown whatever the verdict,
+  // because refusing to answer is worse than answering "we cannot tell".
+  const decided = ranked.filter(
+    (id) => decisions.get(id)?.status !== 'UNABLE_TO_DETERMINE',
+  );
+  const offered = showEverything ? ranked : decided;
+
+  const shown = asked
+    ? focusNamed
+      ? [asked]
+      : [asked, ...offered.filter((id) => id !== asked)].slice(0, MAX_CARDS)
+    : offered.slice(0, showEverything ? MAX_CARDS : PROACTIVE_CARDS);
 
   for (const id of shown) {
     const scheme = schemes.find((s) => s.id === id)!;
@@ -215,18 +298,23 @@ export function planTurn(input: TurnInput): TurnPlan {
     }
   }
 
+  const opening = asked
+    ? aboutScheme(
+        schemes.find((s) => s.id === asked)!,
+        decisions.get(asked)!,
+        language,
+      )
+    : shown.length
+      ? said.presenting[n]
+      : said.nothing[n];
+
   return {
-    text: shown.length
-      ? offeredSchemeId
-        ? said.presenting[n] + ' ' + said.offerSave[n]
-        : said.presenting[n]
-      : offeredSchemeId
-        ? said.offerSave[n]
-        : said.nothing[n],
+    text: offeredSchemeId ? opening + ' ' + said.offerSave[n] : opening,
     blocks,
     checkpoint,
     questionsAsked,
     askedField: null,
     offeredSchemeId,
+    decisions,
   };
 }

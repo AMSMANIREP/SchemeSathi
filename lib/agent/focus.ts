@@ -13,6 +13,16 @@ export type FocusInput = {
   text: string;
 };
 
+export type Focus = {
+  schemeId: string | null;
+  /**
+   * True only when this message named the scheme. A focus that merely carried
+   * over from an earlier turn is weaker: it keeps the thread, but it must not
+   * narrow the answer, because the citizen may have moved on.
+   */
+  named: boolean;
+};
+
 /**
  * Which scheme the conversation is actually about.
  *
@@ -22,20 +32,88 @@ export type FocusInput = {
  * citizen has not chosen anything yet, and manufacturing a choice they did
  * not make is how an advocate turns into a funnel.
  */
-export function detectFocus(input: FocusInput): string | null {
+const wordsOf = (s: Scheme) =>
+  [s.shortName, s.name, s.id.replace(/-/g, ' ')]
+    .join(' ')
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter((w) => w.length >= 4);
+
+/**
+ * Ordinary words that happen to appear in programme names.
+ *
+ * Uniqueness alone is not enough to tell a name from a word. "Farm" appears in
+ * exactly one scheme title — Farm Mechanization — and so did "health", in Soil
+ * Health Card. Matching on them meant "I farm two acres" and "my health is
+ * bad" were read as naming those programmes, and the reply narrowed to a
+ * scheme the citizen had never mentioned.
+ *
+ * Corpus frequency cannot separate these: "farm" and "ujjwala" each appear in
+ * one scheme's text. The real difference is that one is a word of the language
+ * and the other is a name, so that is what is written down. This list is
+ * English vocabulary, not a per-scheme list — it changes when the language
+ * does, not when the catalogue does.
+ */
+const ORDINARY = new Set(
+  `account achievers agricultural agriculture aids appliances assistance
+   assistive award benefit card categories central citizens class college
+   credit devices disability disabled education eligible employment
+   enterprises family farm fitting food fund generation guarantee health
+   higher housing infrastructure insurance livelihoods micro ministers
+   national other overseas pension persons prime processing programme
+   promotion purchase savings scholarship scholarships sector senior skill
+   stand street training university urban vendors widow young yojana`
+    .split(/\s+/)
+    .filter(Boolean),
+);
+
+/**
+ * Words that identify exactly one scheme.
+ *
+ * Computed from the catalogue, so it stays correct as schemes are added, then
+ * filtered against the vocabulary above. "Ujjwala" names one programme;
+ * "yojana" names many, and "farm" is simply a word.
+ */
+function distinctiveWords(schemes: Scheme[]) {
+  const owners = new Map<string, Set<string>>();
+  for (const s of schemes)
+    for (const w of wordsOf(s)) {
+      const set = owners.get(w) ?? new Set<string>();
+      set.add(s.id);
+      owners.set(w, set);
+    }
+  const unique = new Map<string, string>();
+  for (const [word, ids] of owners)
+    if (ids.size === 1 && !ORDINARY.has(word)) unique.set(word, [...ids][0]);
+  return unique;
+}
+
+export function detectFocus(input: FocusInput): Focus {
   const text = input.text.toLowerCase();
 
+  // A full name is the strongest signal.
   const named = input.schemes.find((s) => {
     const forms = [s.shortName, s.name, s.id.replace(/-/g, ' ')]
       .map((f) => f.toLowerCase())
       .filter((f) => f.length > 3);
     return forms.some((f) => text.includes(f));
   });
-  if (named) return named.id;
+  if (named) return { schemeId: named.id, named: true };
 
-  if (input.lastPresented.length === 1) return input.lastPresented[0];
+  // Otherwise a word that belongs to only one scheme. People say "Ujjwala",
+  // not "Ujjwala Yojana", and asking about a programme by the name they know
+  // should narrow the answer just the same.
+  const unique = distinctiveWords(input.schemes);
+  for (const word of text.split(/[^a-z0-9]+/))
+    if (word.length >= 4) {
+      const id = unique.get(word);
+      if (id) return { schemeId: id, named: true };
+    }
 
-  return input.previousFocus;
+  if (input.lastPresented.length === 1)
+    return { schemeId: input.lastPresented[0], named: false };
+
+  return { schemeId: input.previousFocus, named: false };
 }
 
 export type SaveSignalInput = {
@@ -81,6 +159,38 @@ export function shouldOfferSave(i: SaveSignalInput): boolean {
   )
     return false;
   return true;
+}
+
+/**
+ * Recognises a request to see the full list.
+ *
+ * Narrowing is only kind if the citizen can opt out of it. Someone who wants
+ * to browse should get everything, including the programmes nothing can be
+ * said about yet.
+ */
+export function wantsEverything(text: string) {
+  const t = text.trim().toLowerCase();
+  return (
+    /\b(everything|all (the )?(schemes|programmes|options)|show me all|what else|anything else|other (schemes|options))\b/.test(t) ||
+    /(सब|सारी|और क्या|बाकी)/.test(t) ||
+    /(ಎಲ್ಲಾ|ಎಲ್ಲ|ಬೇರೆ ಏನು)/.test(t)
+  );
+}
+
+/**
+ * Recognises "I don't know what I need".
+ *
+ * Someone who cannot name what they want should be shown what exists rather
+ * than asked to be more specific, which is the one reply guaranteed not to
+ * help them.
+ */
+export function isUnsure(text: string) {
+  const t = text.trim().toLowerCase();
+  return (
+    /\b(not sure|no idea|don'?t know|dont know|do not know|unsure|anything|whatever)\b/.test(t) ||
+    /(पता नहीं|मालूम नहीं|कुछ भी)/.test(t) ||
+    /(ಗೊತ್ತಿಲ್ಲ|ತಿಳಿದಿಲ್ಲ|ಏನಾದರೂ)/.test(t)
+  );
 }
 
 /**

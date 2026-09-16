@@ -4,6 +4,7 @@ import {
   detectFocus,
   shouldOfferSave,
   isDecline,
+  isUnsure,
   DECLINE_COOLDOWN,
 } from '../lib/agent/focus.ts';
 
@@ -33,39 +34,39 @@ const base = {
   turn: 5,
 };
 
-test('naming a scheme focuses it', () => {
+test('naming a scheme focuses it, and marks it as named', () => {
   const focus = detectFocus({
     schemes,
     lastPresented: ['pmuy'],
     previousFocus: null,
     text: 'tell me more about PM-KISAN',
   });
-  assert.equal(focus, 'pm-kisan');
+  assert.deepEqual(focus, { schemeId: 'pm-kisan', named: true });
 });
 
-test('a single presented card becomes the focus', () => {
-  assert.equal(
+test('a single presented card becomes the focus, but is not "named"', () => {
+  assert.deepEqual(
     detectFocus({ schemes, lastPresented: ['pmuy'], previousFocus: null, text: 'go on' }),
-    'pmuy',
+    { schemeId: 'pmuy', named: false },
   );
 });
 
 test('four presented cards are not a focus — a choice was not made', () => {
-  assert.equal(
+  assert.deepEqual(
     detectFocus({
       schemes,
       lastPresented: ['pm-kisan', 'pmuy', 'a', 'b'],
       previousFocus: null,
       text: 'ok',
     }),
-    null,
+    { schemeId: null, named: false },
   );
 });
 
-test('focus carries forward when this turn names nothing', () => {
-  assert.equal(
+test('focus carries forward when this turn names nothing, unnamed', () => {
+  assert.deepEqual(
     detectFocus({ schemes, lastPresented: [], previousFocus: 'pmuy', text: 'and then?' }),
-    'pmuy',
+    { schemeId: 'pmuy', named: false },
   );
 });
 
@@ -148,4 +149,60 @@ test('a merely possible verdict with nothing established is not offered', () => 
     ],
   };
   assert.equal(shouldOfferSave({ ...base, decision: somethingKnown }), true);
+});
+
+test('a scheme is recognised by the name people actually say', () => {
+  const catalogue = [
+    { id: 'pmuy', shortName: 'Ujjwala Yojana', name: 'Pradhan Mantri Ujjwala Yojana' },
+    { id: 'pmmvy', shortName: 'Matru Vandana Yojana', name: 'PM Matru Vandana Yojana' },
+    { id: 'ignoaps', shortName: 'National Old Age Pension', name: 'National Old Age Pension' },
+  ];
+  const focus = (text) =>
+    detectFocus({ schemes: catalogue, lastPresented: [], previousFocus: null, text });
+
+  // Nobody says the full name.
+  assert.deepEqual(focus('Tell me more about Ujjwala'), { schemeId: 'pmuy', named: true });
+  assert.deepEqual(focus('what about matru vandana'), { schemeId: 'pmmvy', named: true });
+});
+
+test('a word shared across schemes identifies none of them', () => {
+  const catalogue = [
+    { id: 'pmuy', shortName: 'Ujjwala Yojana', name: 'Pradhan Mantri Ujjwala Yojana' },
+    { id: 'pmmvy', shortName: 'Matru Vandana Yojana', name: 'Pradhan Mantri Matru Vandana Yojana' },
+    { id: 'pmay', shortName: 'Awaas Yojana', name: 'Pradhan Mantri Awaas Yojana' },
+  ];
+  const focus = (text) =>
+    detectFocus({ schemes: catalogue, lastPresented: [], previousFocus: null, text });
+
+  // "yojana" and "pradhan" belong to several; matching on them would narrow
+  // the answer to an arbitrary scheme the citizen never named.
+  assert.equal(focus('I want a yojana').schemeId, null);
+  assert.equal(focus('pradhan mantri something').schemeId, null);
+});
+
+test('an ordinary word is not a scheme name, even when only one scheme uses it', () => {
+  // "Farm Mechanization" and "Soil Health Card" each own the words "farm" and
+  // "health" uniquely, so uniqueness alone read "I farm two acres" as naming a
+  // programme and narrowed the whole reply to it.
+  const catalogue = [
+    { id: 'smam', shortName: 'Farm Mechanization', name: 'Farm Mechanization' },
+    { id: 'soil-health', shortName: 'Soil Health Card', name: 'Soil Health Card' },
+    { id: 'pmuy', shortName: 'Ujjwala Yojana', name: 'Pradhan Mantri Ujjwala Yojana' },
+  ];
+  const focus = (text) =>
+    detectFocus({ schemes: catalogue, lastPresented: [], previousFocus: null, text })
+      .schemeId;
+
+  assert.equal(focus('I farm two acres in Kolar'), null);
+  assert.equal(focus('my health is bad these days'), null);
+  // A real name still resolves.
+  assert.equal(focus('tell me about Ujjwala'), 'pmuy');
+});
+
+test('not knowing what you need is recognised, in all three languages', () => {
+  for (const s of ['I am not sure', "I don't know what I need", 'no idea', 'पता नहीं', 'ಗೊತ್ತಿಲ್ಲ'])
+    assert.ok(isUnsure(s), s);
+  // But a definite statement is not uncertainty.
+  for (const s of ['I need a gas connection', 'I know I want PM-KISAN'])
+    assert.ok(!isUnsure(s), s);
 });

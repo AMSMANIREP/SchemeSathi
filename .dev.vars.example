@@ -1,0 +1,52 @@
+# Local development secrets for the Worker.
+#
+# Copy this to `.dev.vars` (NOT `.env`) and restart the dev server.
+#
+# The app reads configuration from Cloudflare Worker bindings via
+# `import { env } from 'cloudflare:workers'`, and the Cloudflare Vite plugin
+# populates those from `.dev.vars` in local dev. A `.env` file does NOT reach
+# the app: the plugin only reads CLOUDFLARE_-prefixed variables from it.
+#
+# For a deployed Worker these are secrets, not files:
+#   wrangler secret put LLM_API_KEY --config wrangler.cloudflare.jsonc
+
+# --- Chat provider. Either set works; LLM_* wins when both are present. ---
+# LLM_* accepts any OpenAI-compatible endpoint (Nebius, Together, Groq,
+# OpenRouter, a local server). Base URL with or without /v1.
+LLM_BASE_URL=
+LLM_API_KEY=
+LLM_MODEL=
+
+# Azure OpenAI, still supported for existing deployments.
+AZURE_OPENAI_ENDPOINT=
+AZURE_OPENAI_API_KEY=
+AZURE_OPENAI_CHAT_DEPLOYMENT=
+
+# --- Dense retrieval (optional; lexical search works without it). ---
+# Without these, Hindi and Kannada queries match nothing: the lexical
+# tokenizer keeps [a-z0-9] only, so a non-Latin query produces no terms.
+# The embedding model must not change without re-running `pnpm build:vectors`
+# — query vectors from one model and document vectors from another produce
+# confident nonsense.
+EMBEDDING_MODEL=Qwen/Qwen3-Embedding-8B
+PINECONE_API_KEY=
+# The index host from the Pinecone console, e.g. https://name-abc123.svc....pinecone.io
+# Create the index with the embedding model's dimension count (4096 for the
+# model above) and the cosine metric.
+PINECONE_INDEX_HOST=
+
+# --- Voice. The voice ID is optional; the default voice supports all five languages. ---
+ELEVENLABS_API_KEY=
+ELEVENLABS_VOICE_ID=JBFqnCBsd6RMkjVDRZzb
+
+# --- Optional ---
+# Separately deployed Python parity service; disagreement forces abstention.
+RULE_SERVICE_URL=
+RULE_SERVICE_API_KEY=
+# D1-only is the default; dual also mirrors application data to PostgreSQL.
+DATA_STORAGE_MODE=d1
+POSTGRES_SERVICE_URL=
+POSTGRES_SERVICE_API_KEY=
+STORAGE_SYNC_KEY=
+# Guards the /admin/reviews endpoint.
+REVIEWER_TOKEN=
