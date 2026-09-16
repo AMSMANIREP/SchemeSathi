@@ -12,10 +12,18 @@ import { applications } from './api/applications';
 import { reports } from './api/reports';
 import { privacy } from './api/privacy';
 import { voice } from './api/voice';
+import { voiceLogin } from './api/voice-login';
 import { admin } from './api/admin';
+import { storageSync } from './api/storage';
+import { storageMode, storageMirror, syncAfterRequest } from './storage';
 
 /** Reachable without a session cookie. */
-const publicRoutes: Route[] = [health, schemeRoutes, createSession];
+const publicRoutes: Route[] = [
+  health,
+  storageSync,
+  schemeRoutes,
+  createSession,
+];
 
 /** Everything past this point runs against a live session. */
 const sessionRoutes: SessionRoute[] = [
@@ -29,14 +37,17 @@ const sessionRoutes: SessionRoute[] = [
   applications,
   reports,
   privacy,
+  voiceLogin,
   voice,
   admin,
 ];
 
-export async function handle(req: Request, path: string[]) {
+async function handleRequest(req: Request, path: string[]) {
   const trace = crypto.randomUUID();
   try {
     origin(req);
+    if (path[0] !== 'health' && storageMode() === 'dual')
+      await storageMirror().enable();
     const ctx: Ctx = {
       req,
       path,
@@ -97,4 +108,18 @@ export async function handle(req: Request, path: string[]) {
       status,
     );
   }
+}
+
+export async function handle(req: Request, path: string[]) {
+  const response = await handleRequest(req, path);
+  // Retry on normal traffic as well as through the independent sync worker.
+  // Health checks and rejected requests do not trigger remote data writes.
+  if (
+    response.ok &&
+    path[0] !== 'health' &&
+    path[0] !== 'storage' &&
+    storageMode() === 'dual'
+  )
+    return syncAfterRequest(response);
+  return response;
 }

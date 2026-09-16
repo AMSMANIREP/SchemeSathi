@@ -45,12 +45,17 @@ Node 24 and pnpm 11:
 pnpm install --frozen-lockfile
 pnpm build
 pnpm exec wrangler d1 execute site-creator-d1 --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0000_old_power_pack.sql
-pnpm dev --host 127.0.0.1
+pnpm dev --hostname localhost --port 3000
 ```
 
 Migrations run once per new local database. Deployment packaging applies Drizzle migrations through Sites; never put DDL in request handlers.
 
-```sh
+Leave the development server running in this terminal. Wait until it prints
+`Local: http://localhost:3000/`, then run the checks in a **second PowerShell terminal**.
+Set the test URL explicitly to replace any value left over from earlier runs:
+
+```powershell
+$env:TEST_BASE_URL = 'http://localhost:3000'
 pnpm typecheck
 pnpm lint
 pnpm test
@@ -59,19 +64,126 @@ pnpm test:api
 
 The API test needs the local server running. It creates synthetic sessions and deletes them when done. `TEST_BASE_URL` can select a test environment. Do not run mutating tests on a populated production account.
 
-Python backend, local catalogue mode (no PostgreSQL):
+Use `localhost` in the test URL to match the server above. On Windows,
+`localhost` can bind to IPv6 `::1`, so `127.0.0.1` may refuse connections even
+while the server is running. Vinext uses `--hostname`, not `--host`. To bind
+explicitly to IPv4, use `--hostname 127.0.0.1` and set `TEST_BASE_URL` to
+`http://127.0.0.1:3000`.
 
-```sh
-python -m venv backend/.venv
-# Activate the virtual environment using your shell's standard command.
-pip install -r backend/requirements.lock
-cd backend
-# Set SERVICE_API_KEY to a random secret; set STORAGE_MODE=catalogue for local evaluation.
-uvicorn sathi.app:app --host 127.0.0.1 --port 8000 --no-access-log
-python -m pytest -q
+`ECONNREFUSED` means no server is accepting connections at the requested
+address; running `node tests/api.test.mjs` does not start one. If `pnpm dev`
+reports an existing server but that URL refuses connections, stop the stalled
+dev server with **Ctrl+C in its original terminal**, restart it, and wait for
+the Local URL before rerunning the tests.
+
+The server port and `TEST_BASE_URL` port must match. Setting `TEST_BASE_URL`
+only changes where tests send requests; it does not start or reconfigure the
+server. If you deliberately start the server on a different port, use the
+Local URL it prints as `TEST_BASE_URL`.
+
+Python backend, local catalogue mode (no PostgreSQL). In PowerShell, run from
+the project root. Call the virtual environment's Python directly; activation
+and execution-policy changes are unnecessary. Create the environment once:
+
+The environment is stored in `backend\.venv`. The relative interpreter path
+depends on your terminal's current directory (`Get-Location`):
+
+| Current directory | Python command |
+| --- | --- |
+| `SchemeSathi` (project root) | `.\backend\.venv\Scripts\python.exe` |
+| `SchemeSathi\backend` | `.\.venv\Scripts\python.exe` |
+
+All commands below assume the project root. If the terminal is inside
+`backend`, run `Set-Location ..` first. An error saying the executable is
+"not recognized" can mean the relative path points to the wrong directory.
+
+```powershell
+python -m venv backend\.venv
+.\backend\.venv\Scripts\python.exe -m pip install -r backend\requirements.lock
 ```
 
-For PostgreSQL, set `DATABASE_URL` and `STORAGE_MODE=postgres`, run `python migrate.py` using a migration role, then start the service. Alternatively set `POSTGRES_PASSWORD` and `SERVICE_API_KEY` and run `docker compose up --build` from the project root. Use URL-safe passwords in the supplied Compose connection string or supply an encoded DATABASE_URL. Docker/PostgreSQL execution has not been tested in this environment.
+If the Windows launcher reports `No suitable Python runtime found`, run
+`py --list` to see installed versions. A command such as `py -3.12` requires
+that specific version. If Python 3.13 is listed, create the environment with
+`py -3.13 -m venv backend\.venv`, then use its `Scripts\python.exe` as above.
+You can also bypass the launcher by calling the installed interpreter's full
+path with PowerShell's `&` operator.
+
+Start the Python service in its own terminal:
+
+```powershell
+if (-not (Test-Path .\.env.backend-local-key)) {
+  .\backend\.venv\Scripts\python.exe -c "from pathlib import Path; import secrets; Path('.env.backend-local-key').write_text(secrets.token_urlsafe(32), encoding='utf-8')"
+}
+$env:SERVICE_API_KEY = (Get-Content -Raw .\.env.backend-local-key).Trim()
+$env:STORAGE_MODE = 'catalogue'
+.\backend\.venv\Scripts\python.exe -m uvicorn sathi.app:app --app-dir backend --host 127.0.0.1 --port 8000 --no-access-log
+```
+
+Leave this terminal running and wait for `Application startup complete` and
+`Uvicorn running on http://127.0.0.1:8000`. The development key is stored in
+`.env.backend-local-key`, which Git ignores, so another terminal can use the
+same key. PowerShell variables set in one terminal are not shared with another.
+
+To call the Python API, open a second PowerShell terminal at the project root:
+
+```powershell
+Invoke-RestMethod -Uri 'http://127.0.0.1:8000/health/ready'
+$serviceKey = (Get-Content -Raw .\.env.backend-local-key).Trim()
+$body = @{
+  sessionId = [guid]::NewGuid().ToString()
+  profile = @{ age = 40 }
+  confirmed = @('age')
+  profileVersion = 1
+} | ConvertTo-Json -Depth 5
+$request = @{
+  Uri = 'http://127.0.0.1:8000/v1/evaluate'
+  Method = 'Post'
+  Headers = @{ Authorization = "Bearer $serviceKey" }
+  ContentType = 'application/json'
+  Body = $body
+}
+$result = Invoke-RestMethod @request
+$result | ConvertTo-Json -Depth 10
+```
+
+If the health request reports a refused connection, check the service terminal
+for startup errors; changing the request body or key will not fix a missing
+listener. Port 8000 serves the Python API; port 3000 serves the web app.
+
+Run backend tests from the project root in another terminal. These tests do
+not require a running service:
+
+```powershell
+.\backend\.venv\Scripts\python.exe -m pytest -c backend\pytest.ini backend\tests -q
+```
+
+On macOS/Linux, the interpreter is `backend/.venv/bin/python` instead of
+`backend\.venv\Scripts\python.exe`; set environment variables using `export`.
+
+For PostgreSQL, set `DATABASE_URL` and `STORAGE_MODE=postgres`, run `python migrate.py` using a migration role, then start the service. Alternatively set `POSTGRES_PASSWORD` and `SERVICE_API_KEY` and run `docker compose up --build` from the project root. Use URL-safe passwords in the supplied Compose connection string or supply an encoded DATABASE_URL.
+
+Docker Compose now keeps D1 as the web API's primary database and mirrors saved
+applications and user profiles into PostgreSQL, including updates and deletes.
+The `storage-sync` service retries queued changes after outages. See
+[PostgreSQL persistence and migration](docs/postgres-storage.md) for configuration,
+failure behavior, verification, and the remaining steps for a PostgreSQL-only app.
+
+Stop the standalone Uvicorn service before starting Docker Compose: both use
+`127.0.0.1:8000`. Only one can listen on that address at a time. With Compose
+running, `/health/ready` should report `storage: postgres`.
+
+For Docker Compose, keep `POSTGRES_PASSWORD` and `SERVICE_API_KEY` in the
+project-root `.env` file to reuse them across terminals. Compose reads that
+file automatically; it is ignored by Git. Keep the PostgreSQL password
+consistent with an existing database volume. Shell environment variables
+override `.env`, so clear stale overrides if Compose uses unexpected values:
+
+```powershell
+Remove-Item Env:POSTGRES_PASSWORD, Env:SERVICE_API_KEY -ErrorAction SilentlyContinue
+docker compose config --quiet
+docker compose up --build
+```
 
 ## API
 

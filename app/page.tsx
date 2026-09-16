@@ -8,9 +8,13 @@ import {
   X,
   Mic,
   Square,
+  Volume2,
 } from 'lucide-react';
 import { useApp } from './providers';
 import { Blocks } from './blocks';
+import { VoiceControls } from './voice-controls';
+import { voiceCopy } from '@/lib/languages';
+import { handsFreeCopy } from '@/lib/hands-free-copy';
 
 const SEEN_KEY = 'schemesathi.introSeen';
 
@@ -52,7 +56,9 @@ function IntroPanel({ onClose }: { onClose: () => void }) {
       <div className="intro-steps">
         {steps.map((s, i) => (
           <div className="intro-step" key={s.title}>
-            <span className="intro-n data">{String(i + 1).padStart(2, '0')}</span>
+            <span className="intro-n data">
+              {String(i + 1).padStart(2, '0')}
+            </span>
             <b>{s.title}</b>
             <p>{s.body}</p>
           </div>
@@ -77,14 +83,15 @@ export default function Chat() {
     loading,
     messages,
     newConversation,
-    record,
-    recording,
+    handsFree,
     caps,
+    language,
+    speakReply,
     stage,
   } = useApp();
   const [message, setMessage] = useState('');
   const [dismissed, setDismissed] = useState(false);
-  const end = useRef<HTMLDivElement>(null);
+  const latestTurn = useRef<HTMLDivElement>(null);
 
   const introSeen = useSyncExternalStore(
     introStore.subscribe,
@@ -93,10 +100,20 @@ export default function Chat() {
   );
   const started = messages.length > 0;
   const showIntro = !introSeen && !dismissed && !started;
+  const latestAssistantIndex = messages.reduce(
+    (index, message, currentIndex) =>
+      message.role === 'assistant' ? currentIndex : index,
+    -1,
+  );
 
   useEffect(() => {
-    if (started) end.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages.length, started]);
+    if (started && latestAssistantIndex >= 0)
+      latestTurn.current?.scrollIntoView({
+        behavior: 'auto',
+        block: 'start',
+        inline: 'nearest',
+      });
+  }, [messages.length, started, latestAssistantIndex]);
 
   const dismissIntro = () => {
     setDismissed(true);
@@ -109,7 +126,7 @@ export default function Chat() {
 
   const submit = async (text?: string) => {
     const value = text ?? message;
-    if (!value.trim()) return;
+    if (!value.trim() || busy || loading) return;
     setMessage('');
     await ask(value);
   };
@@ -126,49 +143,75 @@ export default function Chat() {
         )}
 
         {started && (
-          <div className="transcript" aria-live="polite">
-            {messages.map((m) => (
-              <div className={'turn turn-' + m.role} key={m.id}>
-                <span className="turn-who label">
-                  {m.role === 'user' ? t.youLabel : t.sathiLabel}
-                </span>
-                <div className="turn-body">
-                  {m.text && <p>{m.text}</p>}
-                  <Blocks blocks={m.blocks} onAnswer={(v) => void submit(v)} />
+          <>
+            <div className="transcript" aria-live="polite">
+              {messages.map((m, index) => (
+                <div
+                  className={'turn turn-' + m.role}
+                  key={m.id}
+                  ref={index === latestAssistantIndex ? latestTurn : undefined}
+                >
+                  <span className="turn-who label">
+                    {m.role === 'user' ? t.youLabel : t.sathiLabel}
+                  </span>
+                  <div className="turn-body">
+                    {m.text && <p>{m.text}</p>}
+                    <Blocks
+                      blocks={m.blocks}
+                      onAnswer={(v) => void submit(v)}
+                    />
+                    {caps.voice &&
+                      m.role === 'assistant' &&
+                      m.language === language && (
+                        <button
+                          className="btn btn-ghost btn-sm"
+                          disabled={busy}
+                          onClick={() => speakReply(m)}
+                        >
+                          <Volume2 size={14} /> {voiceCopy[language].replay}
+                        </button>
+                      )}
+                  </div>
                 </div>
-              </div>
-            ))}
-            {busy && (
-              <div className="turn turn-assistant">
-                <span className="turn-who label">{t.sathiLabel}</span>
-                <div className="turn-body thinking">
-                  <Loader2 className="spin" size={14} />
-                  {stage === 'reading'
-                    ? t.stageReading
-                    : stage === 'searching'
-                      ? t.stageSearching
-                      : stage === 'thinking'
-                        ? t.stageThinking
-                        : stage === 'checking'
-                          ? t.stageChecking
-                          : t.thinking}
+              ))}
+              {busy && (
+                <div className="turn turn-assistant">
+                  <span className="turn-who label">{t.sathiLabel}</span>
+                  <div className="turn-body thinking">
+                    <Loader2 className="spin" size={14} />
+                    {stage === 'reading'
+                      ? t.stageReading
+                      : stage === 'searching'
+                        ? t.stageSearching
+                        : stage === 'thinking'
+                          ? t.stageThinking
+                          : stage === 'checking'
+                            ? t.stageChecking
+                            : t.thinking}
+                  </div>
                 </div>
-              </div>
-            )}
-            <div ref={end} />
-          </div>
+              )}
+            </div>
+            <div className="chat-scroll-spacer" aria-hidden="true" />
+          </>
         )}
 
         <div className="composer">
           <textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
+            onFocus={() => handsFree.setTyping(true)}
+            onBlur={() => handsFree.setTyping(false)}
             placeholder={started ? t.askAnything : t.prompt}
             maxLength={1800}
             aria-label={t.ask}
             rows={started ? 2 : 4}
             onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
+              if (
+                e.key === 'Enter' &&
+                !e.shiftKey &&
+                !e.nativeEvent.isComposing
+              ) {
                 e.preventDefault();
                 void submit();
               }
@@ -177,14 +220,32 @@ export default function Chat() {
           <div className="composer-bar">
             {caps.voice && (
               <button
-                className={'micbtn' + (recording ? ' recording' : '')}
-                onClick={() => void record(setMessage)}
-                disabled={busy && !recording}
-                aria-pressed={recording}
-                aria-label={recording ? t.stop : t.record}
+                className={
+                  'micbtn' +
+                  (handsFree.phase === 'listening' ? ' recording' : '')
+                }
+                onClick={() => {
+                  if (handsFree.suspended || handsFree.phase === 'error')
+                    handsFree.resume();
+                  else handsFree.pause();
+                }}
+                aria-pressed={
+                  !handsFree.suspended && handsFree.phase !== 'error'
+                }
+                aria-label={
+                  handsFree.suspended || handsFree.phase === 'error'
+                    ? handsFreeCopy[language].resume
+                    : handsFreeCopy[language].pause
+                }
               >
-                {recording ? <Square size={15} /> : <Mic size={16} />}
-                {recording ? t.stop : t.record}
+                {handsFree.suspended || handsFree.phase === 'error' ? (
+                  <Mic size={16} />
+                ) : (
+                  <Square size={15} />
+                )}
+                {handsFree.suspended || handsFree.phase === 'error'
+                  ? handsFreeCopy[language].resume
+                  : handsFreeCopy[language].pause}
               </button>
             )}
             {started && (
@@ -204,7 +265,7 @@ export default function Chat() {
               disabled={busy || loading || !message.trim()}
               aria-label={t.send}
             >
-              {busy && !recording ? (
+              {busy ? (
                 <Loader2 className="spin" size={15} />
               ) : (
                 <ArrowUp size={15} />
@@ -212,6 +273,8 @@ export default function Chat() {
             </button>
           </div>
         </div>
+
+        <VoiceControls />
 
         {!started && (
           <div className="examples">
@@ -228,7 +291,10 @@ export default function Chat() {
 
         <div className="chat-foot">
           <span className="label">
-            <LockKeyhole size={12} style={{ display: 'inline', marginRight: 5 }} />
+            <LockKeyhole
+              size={12}
+              style={{ display: 'inline', marginRight: 5 }}
+            />
             {t.retention}
           </span>
         </div>

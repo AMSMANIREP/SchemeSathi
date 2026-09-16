@@ -28,6 +28,8 @@ export type Session = {
   provenance: string;
   version: number;
   language: Language;
+  language_selected: number;
+  voice_profile?: string | null;
   consent: number;
   expires_at: number;
 };
@@ -74,6 +76,7 @@ export function state(s: Session) {
     provenance: JSON.parse(s.provenance || '{}'),
     profileVersion: s.version,
     language: s.language,
+    languageSelected: !!s.language_selected || s.language !== 'en',
     memoryConsent: !!s.consent,
     expiresAt: s.expires_at,
   };

@@ -36,6 +36,27 @@
       "when": 1789118274825,
       "tag": "0004_brown_gladiator",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1789130303407,
+      "tag": "0005_polite_lorna_dane",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1789134983391,
+      "tag": "0006_worried_moonstone",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1789158432645,
+      "tag": "0007_storage_mirror",
+      "breakpoints": true
     }
   ]
 }

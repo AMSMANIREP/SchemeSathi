@@ -1,10 +1,16 @@
 import { body, db, external, HttpError, json, limit } from '../http';
 import { llm } from '../llm';
-import { extractionRequest, parseExtraction, patternExtract } from '../extract.ts';
+import {
+  extractionRequest,
+  parseExtraction,
+  patternExtract,
+} from '../extract.ts';
 import { guidance } from '../guidance';
 import { redact } from '../rules';
 import type { SessionRoute } from '../session';
+import { languageStatements } from '../voice-preference';
 import type { Language, Profile } from '../types';
+import { sessionLanguage, languageCommand, voiceCopy } from '../languages';
 
 /**
  * Pulls explicitly stated profile facts out of free text. Falls back to a
@@ -23,7 +29,10 @@ export async function extract(
         headers: config.headers,
         body: JSON.stringify(extractionRequest(config.model, text, language)),
       });
-      return { profile: parseExtraction(await r.json()), mode: config.provider };
+      return {
+        profile: parseExtraction(await r.json()),
+        mode: config.provider,
+      };
     } catch (error) {
       // A slow or unavailable provider must not end the turn. The citizen
       // still gets a reply, the deterministic extractor still reads what it
@@ -51,14 +60,27 @@ export const chat: SessionRoute = async ({ req, p, method, s, trace }) => {
     b.message.length > 1800 ||
     !b.message.trim()
   )
-    throw new HttpError(400, 'Please enter a message of up to 1,800 characters.');
-  const result = await extract(redact(b.message), s.language);
+    throw new HttpError(
+      400,
+      'Please enter a message of up to 1,800 characters.',
+    );
+  s.language = sessionLanguage(
+    b.message,
+    s.language,
+    !!s.language_selected || s.language !== 'en',
+  );
+  await db().batch(languageStatements(s, s.language));
+  const command = languageCommand(b.message);
+  const result = command
+    ? { profile: {}, mode: 'guided_form' }
+    : await extract(redact(b.message), s.language);
   await db()
     .prepare('UPDATE sessions SET checkpoint=? WHERE id=?')
     .bind('AWAITING_CONFIRMATION', s.id)
     .run();
   return json({
-    message: guidance[s.language],
+    message: command ? voiceCopy[s.language].selected : guidance[s.language],
+    language: s.language,
     proposedProfile: result.profile,
     mode: result.mode,
     needsConfirmation: true,

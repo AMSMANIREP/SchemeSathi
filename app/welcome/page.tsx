@@ -12,11 +12,12 @@ export default function Welcome() {
   const { signIn } = useApp();
   const router = useRouter();
   return (
-    <Landing
-      onEnter={(name) => {
-        signIn(name);
-        router.push('/profile');
-      }}
-    />
+    <>
+      <Landing
+        onEnter={async (name) => {
+          if (await signIn(name)) router.push('/profile');
+        }}
+      />
+    </>
   );
 }

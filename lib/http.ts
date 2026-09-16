@@ -3,8 +3,13 @@ import { env } from 'cloudflare:workers';
 export type Settings = {
   HOSTING_PROVIDER?: string;
   DB: D1Database;
+  DATA_STORAGE_MODE?: 'd1' | 'dual';
+  POSTGRES_SERVICE_URL?: string;
+  POSTGRES_SERVICE_API_KEY?: string;
+  STORAGE_SYNC_KEY?: string;
   RULE_SERVICE_URL?: string;
   RULE_SERVICE_API_KEY?: string;
+  SERVICE_API_KEY?: string;
   // Provider-neutral chat configuration; takes precedence over AZURE_OPENAI_*.
   LLM_BASE_URL?: string;
   LLM_API_KEY?: string;
@@ -144,7 +149,9 @@ const FULL_ATTEMPT_MS = 45000;
 
 export async function external(url: string, init: RequestInit) {
   const replayable =
-    typeof init.body === 'string' || init.body === undefined || init.body === null;
+    typeof init.body === 'string' ||
+    init.body === undefined ||
+    init.body === null;
 
   if (replayable) {
     try {

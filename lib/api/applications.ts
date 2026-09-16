@@ -1,7 +1,9 @@
-import { body, db, HttpError, json } from '../http';
+import { body, HttpError, json } from '../http';
 import { evaluateScheme, redact } from '../rules';
 import { schemes } from '../schemes';
 import type { SessionRoute } from '../session';
+import { applicationRepository } from '../storage';
+import { importLegacyApplications } from '../storage/legacy';
 
 const statuses = [
   'Interested',
@@ -13,22 +15,37 @@ const statuses = [
   'Closed',
 ];
 
-export const applications: SessionRoute = async ({ req, p, path, method, s }) => {
+export const applications: SessionRoute = async ({
+  req,
+  p,
+  path,
+  method,
+  s,
+}) => {
+  if (
+    p !== 'applications' &&
+    !(path[0] === 'applications' && path.length === 2)
+  )
+    return null;
+  if (!['GET', 'POST', 'PATCH', 'DELETE'].includes(method)) return null;
+  // Preserve tracker rows written only to PostgreSQL by older Docker releases.
+  await importLegacyApplications(s.id);
+  const repository = applicationRepository();
+
   if (p === 'applications' && method === 'GET') {
-    const r = await db()
-      .prepare('SELECT * FROM applications WHERE owner=? ORDER BY updated_at DESC')
-      .bind(s.id)
-      .all<Record<string, unknown>>();
+    const records = await repository.list(s.id);
     return json({
-      applications: r.results.map((a) => ({
-        id: a.id,
-        schemeId: a.scheme_id,
-        status: a.status,
-        reference: a.reference,
-        notes: a.notes,
-        checklist: JSON.parse(a.checklist as string),
-        updatedAt: a.updated_at,
-      })),
+      applications: records.map(
+        ({ id, schemeId, status, reference, notes, checklist, updatedAt }) => ({
+          id,
+          schemeId,
+          status,
+          reference,
+          notes,
+          checklist,
+          updatedAt,
+        }),
+      ),
     });
   }
 
@@ -36,86 +53,69 @@ export const applications: SessionRoute = async ({ req, p, path, method, s }) =>
     const b = await body(req);
     const scheme = (await schemes()).find((x) => x.id === b.schemeId);
     if (!scheme) throw new HttpError(400, 'Unknown scheme.');
-    // Freeze the verdict at save time. The report is built from this, so a
-    // later profile edit cannot silently rewrite a document already printed.
     const decision = evaluateScheme(
       scheme,
       JSON.parse(s.profile),
       JSON.parse(s.confirmed),
     );
-    await db()
-      .prepare(
-        'INSERT INTO applications(id,owner,scheme_id,decision_snapshot,scheme_version,conversation_id,updated_at) VALUES(?,?,?,?,?,?,?) ON CONFLICT(owner,scheme_id) DO NOTHING',
-      )
-      .bind(
-        crypto.randomUUID(),
-        s.id,
-        b.schemeId,
-        JSON.stringify(decision),
-        scheme.version,
+    await repository.create({
+      id: crypto.randomUUID(),
+      owner: s.id,
+      schemeId: scheme.id,
+      status: 'Interested',
+      reference: '',
+      notes: '',
+      checklist: [],
+      decisionSnapshot: decision,
+      schemeVersion: scheme.version,
+      conversationId:
         typeof b.conversationId === 'string' ? b.conversationId : null,
-        new Date().toISOString(),
-      )
-      .run();
+      updatedAt: new Date().toISOString(),
+    });
     return json({ saved: true }, 201);
   }
 
-  if (p.startsWith('applications/') && ['PATCH', 'DELETE'].includes(method)) {
-    const existing = await db()
-      .prepare('SELECT id,scheme_id FROM applications WHERE id=? AND owner=?')
-      .bind(path[1], s.id)
-      .first<{ id: string; scheme_id: string }>();
+  if (path.length === 2 && ['PATCH', 'DELETE'].includes(method)) {
+    const existing = await repository.find(s.id, path[1]);
     if (!existing) throw new HttpError(404, 'Application record not found.');
-
     if (method === 'DELETE') {
-      await db()
-        .prepare('DELETE FROM applications WHERE id=? AND owner=?')
-        .bind(path[1], s.id)
-        .run();
+      await repository.delete(s.id, path[1]);
       return json({ deleted: true });
     }
-
-    const b = await body(req);
-    if (!statuses.includes(b.status)) throw new HttpError(400, 'Invalid status.');
+    const patch = await body(req);
+    if (typeof patch.status !== 'string' || !statuses.includes(patch.status))
+      throw new HttpError(400, 'Invalid status.');
     if (
-      typeof b.notes !== 'string' ||
-      b.notes.length > 600 ||
-      typeof b.reference !== 'string' ||
-      b.reference.length > 80 ||
-      !Array.isArray(b.checklist) ||
-      b.checklist.length > 20 ||
-      b.checklist.some((v: unknown) => typeof v !== 'string' || v.length > 400)
+      typeof patch.notes !== 'string' ||
+      patch.notes.length > 600 ||
+      typeof patch.reference !== 'string' ||
+      patch.reference.length > 80 ||
+      !Array.isArray(patch.checklist) ||
+      patch.checklist.length > 20 ||
+      patch.checklist.some(
+        (v: unknown) => typeof v !== 'string' || v.length > 400,
+      )
     )
       throw new HttpError(400, 'Invalid record values.');
-    // The checklist stores each document's `item` text, unchanged by the
-    // structured-catalogue migration, so rows saved before it stay valid.
     const allowed = (
-      (await schemes()).find((x) => x.id === existing.scheme_id)?.documents || []
+      (await schemes()).find((x) => x.id === existing.schemeId)?.documents || []
     ).map((d) => d.item);
     if (
-      b.checklist.some((x: string) => !allowed.includes(x)) ||
-      new Set(b.checklist).size !== b.checklist.length
+      patch.checklist.some((x: string) => !allowed.includes(x)) ||
+      new Set(patch.checklist).size !== patch.checklist.length
     )
       throw new HttpError(400, 'Choose checklist items from this scheme.');
-    const reference = b.reference
-      ? '•••• ' + b.reference.replace(/[^a-zA-Z0-9]/g, '').slice(-4)
-      : '';
-    await db()
-      .prepare(
-        'UPDATE applications SET status=?,reference=?,notes=?,checklist=?,updated_at=? WHERE id=? AND owner=?',
-      )
-      .bind(
-        b.status,
-        reference,
-        redact(b.notes),
-        JSON.stringify(b.checklist),
-        new Date().toISOString(),
-        path[1],
-        s.id,
-      )
-      .run();
+    await repository.update(s.id, {
+      ...existing,
+      status: patch.status,
+      notes: redact(patch.notes),
+      checklist: patch.checklist,
+      reference: patch.reference
+        ? '•••• ' + patch.reference.replace(/[^a-zA-Z0-9]/g, '').slice(-4)
+        : '',
+      updatedAt: new Date().toISOString(),
+    });
     return json({ saved: true });
   }
-
   return null;
 };

@@ -1,6 +1,7 @@
 import { conf, db, json, settings, type Route } from '../http';
 import { retrievalMode } from '../retrieval';
 import { llm } from '../llm';
+import { storageMode } from '../storage';
 
 export const health: Route = async ({ p, trace }) => {
   if (p === 'health/live')
@@ -16,9 +17,12 @@ export const health: Route = async ({ p, trace }) => {
     const mode = retrievalMode();
     return json({
       hosting: e.HOSTING_PROVIDER || 'Sites',
-      storage: 'D1',
+      storage: storageMode() === 'dual' ? 'D1 + PostgreSQL' : 'D1',
       ai: !!llm(),
-      voice: !!(conf('ELEVENLABS_API_KEY') && conf('ELEVENLABS_VOICE_ID')),
+      voice: !!conf('ELEVENLABS_API_KEY'),
+      speechToText: !!conf('ELEVENLABS_API_KEY'),
+      textToSpeech: !!conf('ELEVENLABS_API_KEY'),
+      voiceLanguages: ['en', 'hi', 'kn', 'ta', 'ml'],
       // Lexical retrieval is a build artifact, so it is always present.
       // The dense layer is what a binding turns on.
       retrieval: true,

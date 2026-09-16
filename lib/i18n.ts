@@ -1,5 +1,12 @@
 import type { Language } from './types';
-export const copy = {
+import {
+  tamil,
+  malayalam,
+  regionalCategories,
+  regionalStatuses,
+} from './regional-copy.ts';
+import { regionalChat } from './regional-chat.ts';
+const baseCopy = {
   en: {
     companion: 'Your benefits companion',
     explore: 'Explore schemes',
@@ -50,7 +57,8 @@ export const copy = {
     segVersion: 'Version',
     segReview: 'Review',
     historyTitle: 'What you have asked',
-    historyEmpty: 'Nothing yet. What you type here will be listed for this session.',
+    historyEmpty:
+      'Nothing yet. What you type here will be listed for this session.',
     historyScope: 'This session only',
     historyClear: 'Clear',
     askIntro:
@@ -111,6 +119,7 @@ export const copy = {
       'Add a scheme to prepare a checklist and keep track of your own progress.',
     status: 'Your status',
     reference: 'Reference last 4 characters only',
+    referenceLength: 'Enter exactly 4 characters, or leave this field blank.',
     notes: 'Notes — do not include sensitive identifiers',
     update: 'Save changes',
     remove: 'Remove',
@@ -184,7 +193,8 @@ export const copy = {
     notConfirmed: 'Not confirmed',
     profileLede:
       'What we know about you. It all comes from you, you can change any of it, and it is never shared.',
-    profileNothing: 'Nothing here yet. Start a conversation, or fill this in yourself.',
+    profileNothing:
+      'Nothing here yet. Start a conversation, or fill this in yourself.',
     officialSources: 'Official sources',
     fromConversation: 'From your conversation',
     whyYou: 'Why this applies to you',
@@ -206,12 +216,13 @@ export const copy = {
     login: 'Log in',
     loginTitle: 'Log in to Scheme Sathi',
     loginNote:
-      'This is a demonstration sign-in. Nothing is checked, nothing is sent, and no password is stored — type anything to continue.',
+      'This is a demonstration sign-in. No password is checked or stored. Your language preference is saved for this browser session.',
     email: 'Email',
     password: 'Password',
     signOut: 'Log out',
     signInName: 'What should we call you?',
-    signInNote: 'No password. No phone number. Nothing leaves this browser.',
+    signInNote:
+      'Demo sign-in. No password stored. Voice is processed by ElevenLabs.',
     greeting: 'Welcome',
     profileFirst: 'First, tell us a little about yourself',
     profileFirstNote:
@@ -340,6 +351,7 @@ export const copy = {
     noAppsText: 'तैयारी और अपनी प्रगति दर्ज करने के लिए योजना जोड़ें।',
     status: 'आपकी स्थिति',
     reference: 'संदर्भ के केवल अंतिम 4 अक्षर',
+    referenceLength: 'ठीक 4 अक्षर दर्ज करें, या इस फ़ील्ड को खाली छोड़ दें।',
     notes: 'नोट — संवेदनशील पहचान संख्या न लिखें',
     update: 'बदलाव सहेजें',
     remove: 'हटाएँ',
@@ -436,7 +448,8 @@ export const copy = {
     password: 'पासवर्ड',
     signOut: 'लॉग आउट',
     signInName: 'हम आपको किस नाम से बुलाएँ?',
-    signInNote: 'कोई पासवर्ड नहीं। कोई फ़ोन नंबर नहीं। कुछ भी इस ब्राउज़र से बाहर नहीं जाता।',
+    signInNote:
+      'कोई पासवर्ड नहीं। कोई फ़ोन नंबर नहीं। कुछ भी इस ब्राउज़र से बाहर नहीं जाता।',
     greeting: 'स्वागत है',
     profileFirst: 'पहले, अपने बारे में थोड़ा बताइए',
     profileFirstNote:
@@ -489,8 +502,7 @@ export const copy = {
     ex3: 'ನಾನು ಮನೆಯಿಂದಲೇ ಸಣ್ಣ ಹೊಲಿಗೆ ಅಂಗಡಿ ನಡೆಸುತ್ತೇನೆ ಮತ್ತು ಎರಡನೇ ಯಂತ್ರ ಖರೀದಿಸಲು ಬಯಸುತ್ತೇನೆ.',
     introTitle: 'ನೀವು ನಿಮ್ಮ ಜೀವನ ಹೇಳಿ. ನಿಮಗೆ ಸಲ್ಲಬೇಕಾದದ್ದನ್ನು ನಾವು ಹುಡುಕುತ್ತೇವೆ.',
     introS1t: 'ನಿಮ್ಮ ಪರಿಸ್ಥಿತಿಯನ್ನು ನಿಮ್ಮದೇ ಮಾತುಗಳಲ್ಲಿ ಹೇಳಿ',
-    introS1b:
-      'ಯೋಜನೆಯ ಹೆಸರುಗಳಿಲ್ಲ, ಅರ್ಜಿಗಳಿಲ್ಲ, ಸರ್ಕಾರಿ ಪದಗಳಿಲ್ಲ. ನೆರೆಯವರಿಗೆ ಹೇಳುವಂತೆಯೇ ಬರೆಯಿರಿ.',
+    introS1b: 'ಯೋಜನೆಯ ಹೆಸರುಗಳಿಲ್ಲ, ಅರ್ಜಿಗಳಿಲ್ಲ, ಸರ್ಕಾರಿ ಪದಗಳಿಲ್ಲ. ನೆರೆಯವರಿಗೆ ಹೇಳುವಂತೆಯೇ ಬರೆಯಿರಿ.',
     introS2t: 'ನಾವು ಅರ್ಥಮಾಡಿಕೊಂಡದ್ದನ್ನು ನೀವು ದೃಢಪಡಿಸುತ್ತೀರಿ',
     introS2b:
       'ನೀವು ವಿವರಗಳನ್ನು ಪರಿಶೀಲಿಸಿ ಸರಿ ಎಂದು ಹೇಳುವವರೆಗೆ ಯಾವ ನಿರ್ಧಾರವೂ ಆಗುವುದಿಲ್ಲ. ಯಾವುದೇ ವಿವರವನ್ನು ನೀವು ಬದಲಾಯಿಸಬಹುದು.',
@@ -566,6 +578,7 @@ export const copy = {
     noAppsText: 'ಸಿದ್ಧತೆ ಮತ್ತು ನಿಮ್ಮ ಪ್ರಗತಿಯನ್ನು ದಾಖಲಿಸಲು ಯೋಜನೆ ಸೇರಿಸಿ.',
     status: 'ನಿಮ್ಮ ಸ್ಥಿತಿ',
     reference: 'ಉಲ್ಲೇಖದ ಕೊನೆಯ 4 ಅಕ್ಷರಗಳು ಮಾತ್ರ',
+    referenceLength: 'ನಿಖರವಾಗಿ 4 ಅಕ್ಷರಗಳನ್ನು ನಮೂದಿಸಿ, ಅಥವಾ ಈ ಜಾಗವನ್ನು ಖಾಲಿ ಬಿಡಿ.',
     notes: 'ಟಿಪ್ಪಣಿ — ಸೂಕ್ಷ್ಮ ಗುರುತು ಸಂಖ್ಯೆಗಳನ್ನು ಸೇರಿಸಬೇಡಿ',
     update: 'ಬದಲಾವಣೆ ಉಳಿಸಿ',
     remove: 'ತೆಗೆದುಹಾಕಿ',
@@ -686,7 +699,16 @@ export const copy = {
     statusUnknown: 'ನಿರ್ಧರಿಸಲಾಗದು',
   },
 };
-export const categoryNames: Record<string, [string, string]> = {
+const localized = (regional: Record<string, string>) =>
+  Object.fromEntries(
+    Object.keys(baseCopy.en).map((k) => [k, regional[k]]),
+  ) as typeof baseCopy.en;
+export const copy = {
+  ...baseCopy,
+  ta: localized({ ...tamil, ...regionalChat.ta }),
+  ml: localized({ ...malayalam, ...regionalChat.ml }),
+};
+export const categoryNames: Record<string, string[]> = {
   'All schemes': ['सभी योजनाएँ', 'ಎಲ್ಲಾ ಯೋಜನೆಗಳು'],
   Agriculture: ['कृषि', 'ಕೃಷಿ'],
   Health: ['स्वास्थ्य', 'ಆರೋಗ್ಯ'],
@@ -700,11 +722,15 @@ export const categoryNames: Record<string, [string, string]> = {
   'Food & essentials': ['खाद्य और आवश्यकताएँ', 'ಆಹಾರ ಮತ್ತು ಅಗತ್ಯಗಳು'],
 };
 export function categoryText(category: string, language: Language) {
+  if (language === 'ta' || language === 'ml')
+    return (
+      regionalCategories[category]?.[language === 'ta' ? 0 : 1] || category
+    );
   return language === 'en'
     ? category
     : categoryNames[category]?.[language === 'hi' ? 0 : 1] || category;
 }
-export const statusNames: Record<string, [string, string, string]> = {
+export const statusNames: Record<string, string[]> = {
   LIKELY_ELIGIBLE: ['Likely eligible', 'संभवतः पात्र', 'ಅರ್ಹತೆ ಇರುವ ಸಾಧ್ಯತೆ'],
   POSSIBLY_ELIGIBLE: ['Possibly eligible', 'पात्रता की संभावना', 'ಅರ್ಹತೆ ಇರಬಹುದು'],
   LIKELY_NOT_ELIGIBLE: [
@@ -713,8 +739,10 @@ export const statusNames: Record<string, [string, string, string]> = {
     'ಅರ್ಹತೆ ಇಲ್ಲದ ಸಾಧ್ಯತೆ',
   ],
   UNABLE_TO_DETERMINE: [
-    'Unable to determine',
+    'Cannot determine',
     'निर्धारित नहीं कर सकते',
     'ನಿರ್ಧರಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ',
   ],
 };
+for (const [status, names] of Object.entries(regionalStatuses))
+  statusNames[status].push(...names);

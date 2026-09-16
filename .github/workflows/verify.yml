@@ -14,6 +14,8 @@ jobs:
         with:
           version: '11'
       - run: pnpm install --frozen-lockfile
+      - name: Check committed catalogue and retrieval index
+        run: node scripts/validate-release.mjs --allow-demo
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm build

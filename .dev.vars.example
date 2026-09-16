@@ -35,13 +35,18 @@ PINECONE_API_KEY=
 # model above) and the cosine metric.
 PINECONE_INDEX_HOST=
 
-# --- Voice. Both are required before voice appears in the interface. ---
+# --- Voice. The voice ID is optional; the default voice supports all five languages. ---
 ELEVENLABS_API_KEY=
-ELEVENLABS_VOICE_ID=
+ELEVENLABS_VOICE_ID=JBFqnCBsd6RMkjVDRZzb
 
 # --- Optional ---
 # Separately deployed Python parity service; disagreement forces abstention.
 RULE_SERVICE_URL=
 RULE_SERVICE_API_KEY=
+# D1-only is the default; dual also mirrors application data to PostgreSQL.
+DATA_STORAGE_MODE=d1
+POSTGRES_SERVICE_URL=
+POSTGRES_SERVICE_API_KEY=
+STORAGE_SYNC_KEY=
 # Guards the /admin/reviews endpoint.
 REVIEWER_TOKEN=

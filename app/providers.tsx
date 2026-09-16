@@ -9,6 +9,10 @@ import {
   useSyncExternalStore,
 } from 'react';
 import { copy } from '@/lib/i18n';
+import { usePathname } from 'next/navigation';
+import { languageIndex } from '@/lib/languages';
+import { useVoice } from '@/lib/use-voice';
+import { useHandsFree } from '@/lib/use-hands-free';
 import type {
   Scheme,
   Profile,
@@ -25,6 +29,7 @@ export type Session = {
   provenance: Record<string, Provenance>;
   profileVersion: number;
   language: Language;
+  languageSelected: boolean;
   memoryConsent: boolean;
 };
 export type Capabilities = {
@@ -72,7 +77,21 @@ const visitorStore = {
 
 const emitVisitor = () => visitorListeners.forEach((cb) => cb());
 
-function parseVisitor(raw: string): { name: string | null; onboarded: boolean } {
+async function restoreVoicePreference(name: string) {
+  const digest = await crypto.subtle.digest(
+    'SHA-256',
+    new TextEncoder().encode(name.trim().normalize('NFKC').toLowerCase()),
+  );
+  const profileKey = Array.from(new Uint8Array(digest), (b) =>
+    b.toString(16).padStart(2, '0'),
+  ).join('');
+  return api<Session>('voice/login', 'PUT', { profileKey });
+}
+
+function parseVisitor(raw: string): {
+  name: string | null;
+  onboarded: boolean;
+} {
   if (!raw) return { name: null, onboarded: false };
   try {
     const v = JSON.parse(raw);
@@ -147,7 +166,13 @@ type Ctx = {
   setDetail: (s: Scheme | null) => void;
   load: () => Promise<void>;
   selectLanguage: (l: Language) => Promise<void>;
-  ask: (message: string) => Promise<void>;
+  ask: (
+    message: string,
+    inputMode?: 'text' | 'voice',
+    detectedLanguage?: Language,
+  ) => Promise<void>;
+  speech: ReturnType<typeof useVoice>;
+  speakReply: (message: MessageRecord) => void;
   saveProfile: (profile: Profile) => Promise<void>;
   newConversation: () => Promise<void>;
   saveScheme: (s: Scheme) => Promise<void>;
@@ -157,13 +182,12 @@ type Ctx = {
   sendFeedback: (rating: string, comment: string) => Promise<void>;
   setMemoryConsent: (v: boolean) => Promise<void>;
   refreshApps: () => Promise<void>;
-  recording: boolean;
-  record: (onText: (text: string) => void) => Promise<void>;
+  handsFree: ReturnType<typeof useHandsFree>;
   history: HistoryEntry[];
   clearHistory: () => void;
   visitor: string | null;
   signedIn: boolean;
-  signIn: (name: string) => void;
+  signIn: (name: string) => Promise<boolean>;
   signOut: () => void;
   onboarded: boolean;
   completeOnboarding: () => void;
@@ -178,6 +202,9 @@ export function useApp() {
 }
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
+  const speech = useVoice();
+  const { play: playSpeech, stop: stopSpeech } = speech;
+  const pathname = usePathname();
   const [language, setLanguage] = useState<Language>('en');
   const [schemes, setSchemes] = useState<Scheme[]>([]);
   const [session, setSession] = useState<Session | null>(null);
@@ -194,7 +221,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [decisions, setDecisions] = useState<Record<string, Decision>>({});
   const [applications, setApplications] = useState<ApplicationRecord[]>([]);
   const [detail, setDetail] = useState<Scheme | null>(null);
-  const [recording, setRecording] = useState(false);
+  const stopListening = useRef<() => void>(() => {});
+  const [welcomeReady, setWelcomeReady] = useState(false);
+  const loginPending = useRef(false);
+  const turnEpoch = useRef(0);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const visitorRaw = useSyncExternalStore(
     visitorStore.subscribe,
@@ -207,11 +237,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [checkpoint, setCheckpoint] = useState('GATHERING');
   const [stage, setStage] = useState('');
   const initialized = useRef(false);
-  const recorder = useRef<MediaRecorder | null>(null);
-  const stream = useRef<MediaStream | null>(null);
+  const greeted = useRef(false);
 
-  const t = copy[language];
-  const li = language === 'en' ? 0 : language === 'hi' ? 1 : 2;
+  const t = copy[visitor === null || pathname === '/welcome' ? 'en' : language];
+  const li = languageIndex(language);
 
   const refreshApps = useCallback(async () => {
     const r = await api<{ applications: ApplicationRecord[] }>('applications');
@@ -241,10 +270,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       try {
         s = await api<Session>('sessions');
       } catch {
-        s = await api<Session>('sessions', 'POST', { language: 'en' });
+        s = await api<Session>('sessions', 'POST', {});
       }
+      const currentVisitor = parseVisitor(visitorStore.snapshot()).name;
+      if (currentVisitor !== null)
+        s = await restoreVoicePreference(currentVisitor);
       setSession(s);
-      setLanguage(s.language);
+      setLanguage(currentVisitor === null ? 'en' : s.language);
       await refreshApps();
       if (s.profileVersion > 0) await refreshDecisions();
     } catch (e) {
@@ -261,16 +293,39 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     void load();
   }, [load]);
 
-  useEffect(
-    () => () => {
-      stream.current?.getTracks().forEach((tr) => tr.stop());
-    },
-    [],
-  );
+  const cancelRecording = useCallback(() => stopListening.current(), []);
+  useEffect(() => cancelRecording, [cancelRecording]);
+  useEffect(() => {
+    return () => {
+      cancelRecording();
+      stopSpeech();
+    };
+  }, [pathname, cancelRecording, stopSpeech]);
 
   useEffect(() => {
-    document.documentElement.lang = language;
-  }, [language]);
+    if (
+      visitor === null ||
+      pathname === '/welcome' ||
+      (!onboarded && pathname !== '/profile') ||
+      loading ||
+      !session ||
+      !caps.voice ||
+      greeted.current
+    )
+      return;
+    greeted.current = true;
+    void playSpeech({
+      kind: 'welcome',
+      language: session.language,
+      multilingual: false,
+    });
+    setWelcomeReady(true);
+  }, [visitor, onboarded, pathname, loading, session, caps.voice, playSpeech]);
+
+  useEffect(() => {
+    document.documentElement.lang =
+      visitor === null || pathname === '/welcome' ? 'en' : language;
+  }, [language, visitor, pathname]);
 
   useEffect(() => {
     if (!notice) return;
@@ -279,16 +334,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [notice]);
 
   const selectLanguage = async (l: Language) => {
-    setLanguage(l);
-    if (!session) return;
+    if (!session || busy) return;
+    const epoch = turnEpoch.current;
+    cancelRecording();
+    speech.stop();
+    setBusy(true);
     try {
       await api('privacy/consent', 'PUT', {
         enabled: session.memoryConsent,
         language: l,
       });
-      setSession({ ...session, language: l });
+      if (epoch !== turnEpoch.current) return;
+      setLanguage(l);
+      setSession({ ...session, language: l, languageSelected: true });
+      if (caps.voice) void speech.play({ kind: 'selected', language: l });
     } catch (e) {
       setError((e as Error).message);
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -300,14 +363,27 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [conversationId]);
 
   const newConversation = async () => {
+    turnEpoch.current++;
+    speech.stop();
+    cancelRecording();
     setMessages([]);
     setConversationId(null);
     setCheckpoint('GATHERING');
+    setBusy(false);
+    setStage('');
+    handsFree.resume();
   };
 
-  const ask = async (message: string) => {
+  const ask = async (
+    message: string,
+    inputMode: 'text' | 'voice' = 'text',
+    detectedLanguage?: Language,
+  ) => {
     const text = message.trim();
     if (!text || busy) return;
+    const epoch = turnEpoch.current;
+    cancelRecording();
+    speech.stop();
     const entries = [
       { at: Date.now(), text },
       ...history.filter((h) => h.text !== text),
@@ -320,7 +396,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       id: 'pending-' + Date.now(),
       role: 'user',
       text,
-      inputMode: 'text',
+      inputMode,
       blocks: [],
       createdAt: new Date().toISOString(),
     };
@@ -328,8 +404,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setBusy(true);
     setStage('');
     setError('');
+    const streamId = 'streaming-' + Date.now();
     try {
       const id = await ensureConversation();
+      if (epoch !== turnEpoch.current) return;
       const r = await fetch('/api/v1/conversations/' + id + '/messages', {
         method: 'POST',
         credentials: 'same-origin',
@@ -339,10 +417,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           // Streaming is opt-in; without this the same endpoint returns JSON.
           Accept: 'text/event-stream',
         },
-        body: JSON.stringify({ message: text }),
+        body: JSON.stringify({
+          message: text,
+          inputMode,
+          language: detectedLanguage,
+        }),
       });
+      if (epoch !== turnEpoch.current) {
+        await r.body?.cancel();
+        return;
+      }
       if (!r.ok || !r.body) {
-        const failure = (await r.json().catch(() => ({}))) as { error?: string };
+        const failure = (await r.json().catch(() => ({}))) as {
+          error?: string;
+        };
         throw new Error(failure.error || 'Request failed');
       }
 
@@ -350,11 +438,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const decoder = new TextDecoder();
       let buffer = '';
       let event = '';
-      const streamId = 'streaming-' + Date.now();
+      let reply: MessageRecord | undefined;
 
       let streaming = true;
       while (streaming) {
         const chunk = await reader.read();
+        if (epoch !== turnEpoch.current) {
+          await reader.cancel();
+          return;
+        }
         if (chunk.done) {
           streaming = false;
           break;
@@ -393,15 +485,28 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                     },
                   ];
                 });
-              } else if (event === 'message')
+              } else if (event === 'message') {
+                reply = data as MessageRecord;
                 setMessages((m) => [
                   ...m.filter((x) => x.id !== streamId),
                   data as MessageRecord,
                 ]);
-              else if (event === 'done') {
+              } else if (event === 'done') {
                 setCheckpoint(data.checkpoint);
                 const fresh = await api<Session>('sessions');
+                if (epoch !== turnEpoch.current) {
+                  await reader.cancel();
+                  return;
+                }
                 setSession(fresh);
+                setLanguage(fresh.language);
+                if (caps.voice && reply?.language === fresh.language)
+                  void speech.play({
+                    kind: 'message',
+                    language: fresh.language,
+                    messageId: reply.id,
+                    conversationId: id,
+                  });
                 if (fresh.profileVersion > 0) await refreshDecisions();
               } else if (event === 'failed') throw new Error(data.error);
             }
@@ -409,11 +514,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
       }
     } catch (e) {
-      setMessages((m) => m.filter((x) => !x.id.startsWith('pending-') && !x.id.startsWith('streaming-')));
+      if (epoch !== turnEpoch.current) return;
+      setMessages((m) =>
+        m.filter((x) => x.id !== pending.id && x.id !== streamId),
+      );
       setError((e as Error).message);
     } finally {
-      setBusy(false);
-      setStage('');
+      if (epoch === turnEpoch.current) {
+        setBusy(false);
+        setStage('');
+      }
     }
   };
 
@@ -445,7 +555,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         schemeId: s.id,
         conversationId,
       });
-      const r = await api<{ applications: ApplicationRecord[] }>('applications');
+      const r = await api<{ applications: ApplicationRecord[] }>(
+        'applications',
+      );
       setApplications(r.applications);
       setNotice(t.saved);
 
@@ -500,6 +612,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const forget = async () => {
+    turnEpoch.current++;
+    speech.stop();
+    cancelRecording();
     setBusy(true);
     try {
       await api('me/data', 'DELETE');
@@ -509,6 +624,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setConversationId(null);
       setCheckpoint('GATHERING');
       persistVisitor(null, false);
+      setLanguage('en');
+      greeted.current = false;
+      setWelcomeReady(false);
       setSession(null);
       setHistory([]);
       writeHistory([]);
@@ -538,73 +656,65 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     try {
       if (name === null) localStorage.removeItem(VISITOR_KEY);
       else
-        localStorage.setItem(VISITOR_KEY, JSON.stringify({ name, onboarded: done }));
+        localStorage.setItem(
+          VISITOR_KEY,
+          JSON.stringify({ name, onboarded: done }),
+        );
     } catch {
       /* storage unavailable: the session still works, it just forgets */
     }
     emitVisitor();
   };
 
-  const signIn = (name: string) => persistVisitor(name, false);
-  const signOut = () => persistVisitor(null, false);
+  const signIn = async (name: string) => {
+    if (loginPending.current) return false;
+    loginPending.current = true;
+    speech.unlock();
+    cancelRecording();
+    setBusy(true);
+    setError('');
+    try {
+      let current: Session;
+      try {
+        current = await api<Session>('sessions');
+      } catch {
+        current = await api<Session>('sessions', 'POST', { language: 'en' });
+      }
+      const s = await restoreVoicePreference(name);
+      setSession(s || current);
+      setLanguage((s || current).language);
+      greeted.current = false;
+      setWelcomeReady(false);
+      persistVisitor(name, false);
+      return true;
+    } catch (e) {
+      setError((e as Error).message);
+      return false;
+    } finally {
+      loginPending.current = false;
+      setBusy(false);
+    }
+  };
+  const signOut = () => {
+    turnEpoch.current++;
+    speech.stop();
+    cancelRecording();
+    greeted.current = false;
+    setWelcomeReady(false);
+    setLanguage('en');
+    setError('');
+    setNotice('');
+    setBusy(false);
+    setStage('');
+    setMessages([]);
+    setConversationId(null);
+    persistVisitor(null, false);
+  };
   const completeOnboarding = () => persistVisitor(visitor ?? '', true);
 
   const clearHistory = () => {
     setHistory([]);
     writeHistory([]);
-  };
-
-  const record = async (onText: (text: string) => void) => {
-    if (recording) {
-      recorder.current?.stop();
-      setRecording(false);
-      return;
-    }
-    if (!caps.voice) {
-      setNotice(t.voiceOff);
-      return;
-    }
-    try {
-      const media = await navigator.mediaDevices.getUserMedia({ audio: true });
-      stream.current = media;
-      const mr = new MediaRecorder(media);
-      recorder.current = mr;
-      const chunks: Blob[] = [];
-      mr.ondataavailable = (e) => chunks.push(e.data);
-      mr.onstop = async () => {
-        media.getTracks().forEach((tr) => tr.stop());
-        setRecording(false);
-        setBusy(true);
-        try {
-          const form = new FormData();
-          form.append(
-            'file',
-            new Blob(chunks, { type: mr.mimeType }),
-            'voice.webm',
-          );
-          const r = await fetch('/api/v1/voice/transcribe', {
-            method: 'POST',
-            headers: { 'X-Requested-With': 'SchemeSathi' },
-            body: form,
-          });
-          const b = (await r.json()) as { error: string; text: string };
-          if (!r.ok) throw new Error(b.error);
-          onText(b.text);
-        } catch (e) {
-          setError((e as Error).message);
-        } finally {
-          setBusy(false);
-        }
-      };
-      mr.start();
-      setRecording(true);
-      // hard stop so a forgotten recording cannot run on indefinitely
-      setTimeout(() => {
-        if (mr.state === 'recording') mr.stop();
-      }, 20000);
-    } catch (e) {
-      setError((e as Error).message);
-    }
   };
 
   const setMemoryConsent = async (v: boolean) => {
@@ -616,6 +726,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const handsFree = useHandsFree({
+    enabled:
+      visitor !== null &&
+      onboarded &&
+      pathname === '/' &&
+      !loading &&
+      !!session &&
+      caps.voice &&
+      welcomeReady,
+    paused: busy || speech.status !== 'idle',
+    language,
+    onTranscript: (text, detected) => ask(text, 'voice', detected),
+  });
+  useEffect(() => {
+    stopListening.current = handsFree.stop;
+  }, [handsFree.stop]);
+
   return (
     <AppContext.Provider
       value={{
@@ -626,7 +753,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         session,
         caps,
         loading,
-        busy,
+        busy: busy || handsFree.phase === 'transcribing',
         error,
         notice,
         decisions,
@@ -652,8 +779,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         sendFeedback,
         setMemoryConsent,
         refreshApps,
-        recording,
-        record,
+        handsFree,
+        speech,
+        speakReply: (message) => {
+          if (!conversationId || message.language !== language) return;
+          cancelRecording();
+          void speech.play(
+            {
+              kind: 'message',
+              language,
+              messageId: message.id,
+              conversationId,
+            },
+            true,
+          );
+        },
         history,
         clearHistory,
         visitor,

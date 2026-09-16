@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import {
   ArrowUpRight,
   Check,
@@ -6,26 +6,32 @@ import {
   ShieldCheck,
   Printer,
   Bookmark,
-} from 'lucide-react';
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectTrigger,
   SelectValue,
   SelectContent,
   SelectItem,
-} from '@/components/ui/select';
-import { categoryText, statusNames } from '@/lib/i18n';
-import { useApp } from './providers';
+} from "@/components/ui/select";
+import { categoryText, statusNames } from "@/lib/i18n";
+import { useApp } from "./providers";
 
-export function StatusTag({ status, label }: { status: string; label: string }) {
-  return <span className={'status status-' + status}>{label}</span>;
+export function StatusTag({
+  status,
+  label,
+}: {
+  status: string;
+  label: string;
+}) {
+  return <span className={"status status-" + status}>{label}</span>;
 }
 
 /** Select that renders the chosen option's label rather than its raw value. */
@@ -34,20 +40,23 @@ export function Pick({
   onChange,
   options,
   label,
+  disabled = false,
 }: {
   value: string;
   onChange: (s: string) => void;
   options: { value: string; label: string }[];
   label: string;
+  disabled?: boolean;
 }) {
   return (
     <Select
-      value={value || '__unknown'}
-      onValueChange={(v) => onChange(v === '__unknown' ? '' : String(v || ''))}
+      disabled={disabled}
+      value={value || "__unknown"}
+      onValueChange={(v) => onChange(v === "__unknown" ? "" : String(v || ""))}
     >
       <SelectTrigger className="pick" aria-label={label}>
         <SelectValue>
-          {options.find((x) => x.value === (value || '__unknown'))?.label ||
+          {options.find((x) => x.value === (value || "__unknown"))?.label ||
             value ||
             label}
         </SelectValue>
@@ -76,7 +85,7 @@ export function SchemeDialog() {
     busy,
   } = useApp();
   const decision = detail ? decisions[detail.id] : null;
-  const status = decision?.status || 'UNABLE_TO_DETERMINE';
+  const status = decision?.status || "UNABLE_TO_DETERMINE";
   const saved = detail
     ? applications.some((a) => a.schemeId === detail.id)
     : false;
@@ -101,7 +110,7 @@ export function SchemeDialog() {
             <div className="pass">
               <div className="pass-head">
                 <span className="label">{t.reason}</span>
-                <span style={{ marginLeft: 'auto' }}>
+                <span style={{ marginLeft: "auto" }}>
                   <StatusTag status={status} label={statusNames[status][li]} />
                 </span>
               </div>
@@ -136,13 +145,13 @@ export function SchemeDialog() {
                 {decision?.reasons.length ? (
                   decision.reasons.map((r) => (
                     <div className="rulerow" key={r.id}>
-                      <span className={'rulemark ' + r.result}>
-                        {r.result === 'PASS' ? (
+                      <span className={"rulemark " + r.result}>
+                        {r.result === "PASS" ? (
                           <Check size={12} />
-                        ) : r.result === 'FAIL' ? (
-                          '×'
+                        ) : r.result === "FAIL" ? (
+                          "×"
                         ) : (
-                          '?'
+                          "?"
                         )}
                       </span>
                       <span>{r.label}</span>
@@ -189,7 +198,7 @@ export function SchemeDialog() {
                           <span className="stepfacts">
                             {[step.where, step.who, step.typicalWait]
                               .filter(Boolean)
-                              .join(' · ')}
+                              .join(" · ")}
                           </span>
                         )}
                       </span>
@@ -211,7 +220,7 @@ export function SchemeDialog() {
 
             <div
               className="no-print"
-              style={{ display: 'flex', gap: 10, paddingTop: 4 }}
+              style={{ display: "flex", gap: 10, paddingTop: 4 }}
             >
               <button
                 className="btn"

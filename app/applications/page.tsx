@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Loader2,
@@ -47,6 +47,7 @@ export default function Applications() {
     setDetail,
   } = useApp();
   const [editing, setEditing] = useState<ApplicationRecord | null>(null);
+  const referenceInput = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
   if (loading)
@@ -192,7 +193,12 @@ export default function Applications() {
                   >
                     <button
                       className="btn btn-ghost btn-sm"
-                      onClick={() => setEditing({ ...a })}
+                      onClick={() =>
+                        setEditing({
+                          ...a,
+                          reference: a.reference.replace(/^(?:••••|\.{4}) /, ''),
+                        })
+                      }
                     >
                       {t.update}
                     </button>
@@ -267,11 +273,18 @@ export default function Applications() {
                 <label className="field" style={{ marginBottom: 14 }}>
                   <span>{t.reference}</span>
                   <input
+                    ref={referenceInput}
                     value={editing.reference}
+                    minLength={4}
                     maxLength={4}
-                    onChange={(e) =>
-                      setEditing({ ...editing, reference: e.target.value })
+                    pattern=".{4}"
+                    onInvalid={(e) =>
+                      e.currentTarget.setCustomValidity(t.referenceLength)
                     }
+                    onChange={(e) => {
+                      e.currentTarget.setCustomValidity('');
+                      setEditing({ ...editing, reference: e.target.value });
+                    }}
                   />
                 </label>
 
@@ -293,6 +306,7 @@ export default function Applications() {
                   className="btn"
                   disabled={busy}
                   onClick={async () => {
+                    if (!referenceInput.current?.reportValidity()) return;
                     await updateApplication(editing);
                     setEditing(null);
                   }}

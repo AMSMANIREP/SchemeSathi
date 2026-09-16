@@ -4,6 +4,8 @@ import { evaluateScheme } from '../rules';
 import { schemes } from '../schemes';
 import type { SessionRoute } from '../session';
 import type { Decision, Profile, Provenance } from '../types';
+import { applicationRepository } from '../storage';
+import { importLegacyApplications } from '../storage/legacy';
 
 type Row = Record<string, unknown>;
 
@@ -11,15 +13,11 @@ export const reports: SessionRoute = async ({ p, path, method, s }) => {
   if (!p.startsWith('applications/') || path[2] !== 'report') return null;
   if (method !== 'GET' && method !== 'POST') return null;
 
-  const application = await db()
-    .prepare('SELECT * FROM applications WHERE id=? AND owner=?')
-    .bind(path[1], s.id)
-    .first<Row>();
+  await importLegacyApplications(s.id);
+  const application = await applicationRepository().find(s.id, path[1]);
   if (!application) throw new HttpError(404, 'Application record not found.');
 
-  const scheme = (await schemes()).find(
-    (x) => x.id === application.scheme_id,
-  );
+  const scheme = (await schemes()).find((x) => x.id === application.schemeId);
   if (!scheme) throw new HttpError(404, 'Scheme not found.');
 
   const profile = JSON.parse(s.profile) as Profile;
@@ -28,9 +26,7 @@ export const reports: SessionRoute = async ({ p, path, method, s }) => {
 
   // The snapshot taken at save time is authoritative. Falling back to a live
   // evaluation only covers records saved before snapshots existed.
-  const snapshot = JSON.parse(
-    (application.decision_snapshot as string) || '{}',
-  ) as Partial<Decision>;
+  const snapshot = application.decisionSnapshot as Partial<Decision>;
   const decision: Decision = snapshot.schemeId
     ? (snapshot as Decision)
     : evaluateScheme(scheme, profile, confirmed);
@@ -69,8 +65,8 @@ export const reports: SessionRoute = async ({ p, path, method, s }) => {
     profile,
     confirmed,
     provenance,
-    checklist: JSON.parse(application.checklist as string),
-    conversationId: (application.conversation_id as string) || null,
+    checklist: application.checklist,
+    conversationId: application.conversationId,
     // The recap is the one model-written slot. Without a chat deployment the
     // report is deterministic and simply has no recap paragraph.
     recap: null,

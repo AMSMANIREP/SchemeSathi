@@ -1,4 +1,6 @@
 import { body, db, hash, json, limit, type Route } from '../http';
+import { isLanguage } from '../languages';
+import { storageMode } from '../storage';
 import {
   SESSION_TTL,
   sessionCookie,
@@ -27,19 +29,34 @@ export const createSession: Route = async ({ req, p, method }) => {
   ]);
   const token = crypto.randomUUID() + crypto.randomUUID();
   const id = crypto.randomUUID();
-  const language = ['en', 'hi', 'kn'].includes(b.language) ? b.language : 'en';
+  const selected = isLanguage(b.language);
+  const language = selected ? b.language : 'en';
   await db()
     .prepare(
-      'INSERT INTO sessions(id,token_hash,language,created_at,expires_at) VALUES(?,?,?,?,?)',
+      'INSERT INTO sessions(id,token_hash,language,language_selected,created_at,expires_at) VALUES(?,?,?,?,?,?)',
     )
-    .bind(id, await hash(token), language, Date.now(), Date.now() + SESSION_TTL)
+    .bind(
+      id,
+      await hash(token),
+      language,
+      selected ? 1 : 0,
+      Date.now(),
+      Date.now() + SESSION_TTL,
+    )
     .run();
+  // This brand-new UUID cannot have records from the old PostgreSQL-only flow.
+  if (storageMode() === 'dual')
+    await db()
+      .prepare('INSERT INTO storage_legacy_imports(owner) VALUES(?)')
+      .bind(id)
+      .run();
   return json(
     {
       profile: {},
       confirmed: [],
       profileVersion: 0,
       language,
+      languageSelected: selected,
       memoryConsent: false,
     },
     201,

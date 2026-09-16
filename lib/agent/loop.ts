@@ -1,4 +1,9 @@
-import { HumanMessage, SystemMessage, ToolMessage, type BaseMessage } from '@langchain/core/messages';
+import {
+  HumanMessage,
+  SystemMessage,
+  ToolMessage,
+  type BaseMessage,
+} from '@langchain/core/messages';
 import { chatModel } from './client';
 import { buildTools, type ToolContext } from './tools';
 import type { Language, Profile, Scheme } from '../types';
@@ -29,6 +34,8 @@ const LANGUAGE = {
   en: 'English',
   hi: 'Hindi',
   kn: 'Kannada',
+  ta: 'Tamil',
+  ml: 'Malayalam',
 } as const;
 
 function systemPrompt(language: Language) {
@@ -98,11 +105,13 @@ export async function runAgent(input: AgentInput): Promise<AgentResult | null> {
 
   const messages: BaseMessage[] = [
     new SystemMessage(systemPrompt(input.language)),
-    ...input.history.slice(-6).map((m) =>
-      m.role === 'user'
-        ? new HumanMessage(m.text)
-        : new HumanMessage(`(you previously said: ${m.text})`),
-    ),
+    ...input.history
+      .slice(-6)
+      .map((m) =>
+        m.role === 'user'
+          ? new HumanMessage(m.text)
+          : new HumanMessage(`(you previously said: ${m.text})`),
+      ),
     new HumanMessage(input.message),
   ];
 
@@ -112,7 +121,8 @@ export async function runAgent(input: AgentInput): Promise<AgentResult | null> {
 
     const calls = reply.tool_calls ?? [];
     if (!calls.length) {
-      const text = typeof reply.content === 'string' ? reply.content.trim() : '';
+      const text =
+        typeof reply.content === 'string' ? reply.content.trim() : '';
       return text ? { text, seen: [...ctx.seen], asking: ctx.asking } : null;
     }
 
@@ -128,7 +138,10 @@ export async function runAgent(input: AgentInput): Promise<AgentResult | null> {
         }
       }
       messages.push(
-        new ToolMessage({ content: output, tool_call_id: call.id ?? call.name }),
+        new ToolMessage({
+          content: output,
+          tool_call_id: call.id ?? call.name,
+        }),
       );
     }
   }
