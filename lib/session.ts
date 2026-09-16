@@ -71,6 +71,7 @@ export async function touch(s: Session, req: Request) {
 
 export function state(s: Session) {
   return {
+    sessionId: s.id,
     profile: JSON.parse(s.profile),
     confirmed: JSON.parse(s.confirmed),
     provenance: JSON.parse(s.provenance || '{}'),

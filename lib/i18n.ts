@@ -216,7 +216,7 @@ const baseCopy = {
     login: 'Log in',
     loginTitle: 'Log in to Scheme Sathi',
     loginNote:
-      'This is a demonstration sign-in. No password is checked or stored. Your language preference is saved for this browser session.',
+      'Demo sign-in: each email keeps a separate profile in this browser for up to 30 days. Passwords are not checked or stored. This does not create a verified account.',
     email: 'Email',
     password: 'Password',
     signOut: 'Log out',

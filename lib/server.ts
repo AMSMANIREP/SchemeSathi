@@ -13,6 +13,7 @@ import { reports } from './api/reports';
 import { privacy } from './api/privacy';
 import { voice } from './api/voice';
 import { voiceLogin } from './api/voice-login';
+import { demoLogin } from './api/demo-login';
 import { admin } from './api/admin';
 import { storageSync } from './api/storage';
 import { storageMode, storageMirror, syncAfterRequest } from './storage';
@@ -23,6 +24,7 @@ const publicRoutes: Route[] = [
   storageSync,
   schemeRoutes,
   createSession,
+  demoLogin,
 ];
 
 /** Everything past this point runs against a live session. */
@@ -62,6 +64,13 @@ async function handleRequest(req: Request, path: string[]) {
     }
 
     const s = await session(req);
+    const expectedSession = req.headers.get('x-schemesathi-session');
+    if (expectedSession && expectedSession !== s.id)
+      throw new HttpError(
+        409,
+        'The active demo profile changed. Reload before continuing.',
+        'SESSION_CHANGED',
+      );
     const refreshed = await touch(s, req);
     for (const route of sessionRoutes) {
       const r = await route({ ...ctx, s });

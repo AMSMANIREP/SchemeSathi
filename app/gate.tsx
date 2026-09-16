@@ -16,9 +16,9 @@ import { useApp } from './providers';
  * structure* from it would guarantee a hydration mismatch; deciding a
  * *navigation* from it after mount does not.
  *
- * The sign-in is simulated for the demo — a display name in this browser, no
- * credential. A hashed display-name key stores voice preferences within the browser session. It gates presentation only; every API
- * route still runs on the anonymous session cookie exactly as before.
+ * Demo sign-in selects an isolated session for a full email within this
+ * browser. It is not password authentication; API ownership is enforced by
+ * the HttpOnly session cookie, not this presentation gate.
  */
 export function Gate({ children }: { children: React.ReactNode }) {
   const { t, loading, signedIn, onboarded } = useApp();
@@ -31,7 +31,9 @@ export function Gate({ children }: { children: React.ReactNode }) {
     !loading && signedIn && !onboarded && pathname !== '/profile';
 
   useEffect(() => {
-    if (needsWelcome) router.replace('/welcome');
+    // End the old client workspace at logout as well as the server session.
+    // A document navigation also clears pending route/component caches.
+    if (needsWelcome) window.location.replace('/welcome');
     else if (needsOnboarding) router.replace('/profile');
     else if (signedIn && onWelcome) router.replace('/');
   }, [needsWelcome, needsOnboarding, signedIn, onWelcome, router]);

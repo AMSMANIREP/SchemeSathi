@@ -52,7 +52,9 @@ export const createSession: Route = async ({ req, p, method }) => {
       .run();
   return json(
     {
+      sessionId: id,
       profile: {},
+      provenance: {},
       confirmed: [],
       profileVersion: 0,
       language,

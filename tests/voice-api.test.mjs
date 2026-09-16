@@ -6,6 +6,20 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { sessionLanguage } from '../lib/languages.ts';
 import { questionFor } from '../lib/questions.ts';
+import { demoProfileKey } from '../lib/demo-identity.ts';
+
+test('demo identity uses the full normalized email, not its display name', async () => {
+  assert.equal(
+    await demoProfileKey(' Raman@Example.com '),
+    await demoProfileKey('raman@example.com'),
+  );
+  assert.notEqual(
+    await demoProfileKey('raman@example.com'),
+    await demoProfileKey('raman@example.org'),
+  );
+  await assert.rejects(demoProfileKey(''), /valid email/);
+  await assert.rejects(demoProfileKey('raman'), /valid email/);
+});
 
 test('session language stays fixed through short or mixed-language replies', () => {
   assert.equal(sessionLanguage('தமிழில் பேசுங்கள்', 'en', false), 'ta');
@@ -128,19 +142,23 @@ test('real routes preserve chat flow, ownership and selected voice language', as
   };
   try {
     const { handle } = await import('../lib/server.ts');
-    const client = () => {
-      let cookie = '';
-      return async (
+    const client = (initialCookies = {}) => {
+      const cookies = new Map(Object.entries(initialCookies));
+      const call = async (
         path,
         method = 'GET',
         data,
         expected = 200,
         stream = false,
+        extraHeaders = {},
       ) => {
         const headers = {
           'X-Requested-With': 'SchemeSathi',
-          Cookie: cookie,
+          Cookie: [...cookies]
+            .map(([key, value]) => key + '=' + value)
+            .join('; '),
           Origin: 'https://sathi.test',
+          ...extraHeaders,
         };
         if (!(data instanceof FormData))
           headers['Content-Type'] = 'application/json';
@@ -157,8 +175,11 @@ test('real routes preserve chat flow, ownership and selected voice language', as
           }),
           path.split('/'),
         );
-        if (response.headers.has('set-cookie'))
-          cookie = response.headers.get('set-cookie').split(';')[0];
+        for (const setCookie of response.headers.getSetCookie()) {
+          const [key, value] = setCookie.split(';')[0].split('=');
+          if (/Max-Age=0(?:;|$)/.test(setCookie)) cookies.delete(key);
+          else cookies.set(key, value);
+        }
         if (stream) {
           assert.equal(response.status, expected);
           assert.match(
@@ -192,6 +213,8 @@ test('real routes preserve chat flow, ownership and selected voice language', as
         );
         return result;
       };
+      call.cookies = () => Object.fromEntries(cookies);
+      return call;
     };
     const a = client(),
       b = client();
@@ -764,6 +787,126 @@ test('real routes preserve chat flow, ownership and selected voice language', as
       context.asking,
       null,
       'the question budget is enforced for the model',
+    );
+
+    // All ownership-bearing data must switch together, including two emails
+    // with the same display name. No provider calls are needed for login.
+    const demo = client();
+    const alice = await demoProfileKey('raman@example.com');
+    const bob = await demoProfileKey('raman@example.org');
+    await demo('sessions', 'POST', {}, 201);
+    await demo('profile/confirm', 'PUT', {
+      profile: { age: 90 },
+      version: 0,
+      confirmed: true,
+    });
+    await demo('demo/login', 'PUT', { profileKey: 'invalid' }, 400);
+    const first = await demo('demo/login', 'PUT', { profileKey: alice });
+    assert.deepEqual(
+      first.profile,
+      {},
+      'legacy shared profile must not attach to a new identity',
+    );
+    assert.match(first.sessionId, /^[a-f0-9-]{36}$/);
+    await demo('profile/confirm', 'PUT', {
+      profile: { age: 72, occupation: 'farmer' },
+      version: 0,
+      confirmed: true,
+    });
+    await demo('privacy/consent', 'PUT', { enabled: true, language: 'ta' });
+    const privateConversation = await demo('conversations', 'POST', {}, 201);
+    await demo('applications', 'POST', { schemeId: 'adip' }, 201);
+    const privateApplication = (await demo('applications')).applications[0];
+    const oldAliceCookies = demo.cookies();
+    await demo('demo/logout', 'POST', {});
+    await demo('sessions', 'GET', undefined, 401);
+    await client(oldAliceCookies)('sessions', 'GET', undefined, 401);
+
+    const second = await demo('demo/login', 'PUT', { profileKey: bob });
+    assert.notEqual(first.sessionId, second.sessionId);
+    assert.deepEqual(second.profile, {});
+    assert.deepEqual(second.confirmed, []);
+    assert.deepEqual(second.provenance, {});
+    assert.equal(second.language, 'en');
+    assert.equal(second.memoryConsent, false);
+    assert.deepEqual((await demo('applications')).applications, []);
+    assert.deepEqual((await demo('conversations')).conversations, []);
+    await demo(
+      'conversations/' + privateConversation.id + '/messages',
+      'GET',
+      undefined,
+      404,
+    );
+    await demo(
+      'applications/' + privateApplication.id,
+      'PATCH',
+      { status: 'Interested' },
+      404,
+    );
+    await demo('profile/confirm', 'PUT', {
+      profile: { age: 32, occupation: 'salaried' },
+      version: 0,
+      confirmed: true,
+    });
+    const oldBobCookies = demo.cookies();
+
+    const restored = await demo('demo/login', 'PUT', { profileKey: alice });
+    assert.equal(restored.sessionId, first.sessionId);
+    assert.deepEqual(restored.profile, { age: 72, occupation: 'farmer' });
+    assert.equal(restored.language, 'ta');
+    assert.equal(restored.memoryConsent, true);
+    assert.equal(
+      (await demo('applications')).applications[0].id,
+      privateApplication.id,
+    );
+    assert.equal(
+      (await demo('conversations')).conversations[0].id,
+      privateConversation.id,
+    );
+    await client(oldBobCookies)('sessions', 'GET', undefined, 401);
+    const staleTab = await demo(
+      'profile/answer',
+      'POST',
+      { field: 'age', value: 32 },
+      409,
+      false,
+      { 'X-SchemeSathi-Session': second.sessionId },
+    );
+    assert.equal(staleTab.code, 'SESSION_CHANGED');
+    assert.equal((await demo('sessions')).profile.age, 72);
+
+    const otherBrowser = client();
+    const separate = await otherBrowser('demo/login', 'PUT', {
+      profileKey: alice,
+    });
+    assert.notEqual(separate.sessionId, restored.sessionId);
+    assert.deepEqual(separate.profile, {});
+    await otherBrowser(
+      'conversations/' + privateConversation.id + '/messages',
+      'GET',
+      undefined,
+      404,
+    );
+
+    await demo('me/data', 'DELETE');
+    const deleted = await demo('demo/login', 'PUT', { profileKey: alice });
+    assert.deepEqual(deleted.profile, {});
+    assert.deepEqual((await demo('applications')).applications, []);
+    assert.deepEqual((await demo('conversations')).conversations, []);
+    const bobAgain = await demo('demo/login', 'PUT', { profileKey: bob });
+    assert.equal(
+      bobAgain.profile.age,
+      32,
+      'deleting one identity leaves the other intact',
+    );
+    sqlite
+      .prepare('UPDATE sessions SET expires_at=? WHERE id=?')
+      .run(1, bobAgain.sessionId);
+    const expired = await demo('demo/login', 'PUT', { profileKey: bob });
+    assert.deepEqual(
+      expired.profile,
+      {},
+      'expired demo profiles are not resurrected',
     );
   } finally {
     globalThis.fetch = originalFetch;

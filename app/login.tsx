@@ -15,8 +15,8 @@ import { useApp } from './providers';
  *
  * Nothing here authenticates: no credential is stored,
  * and the password is never read out of the field or kept in state. Only a
- * display name — derived from whatever is typed in the first field — is
- * remembered, in this browser. The dialog says so plainly, because a login
+ * display name and a hash of the full email select an isolated demo profile
+ * in this browser. The dialog says so plainly, because a login
  * form that looks real and checks nothing should admit which one it is.
  */
 export function LoginDialog({
@@ -26,16 +26,14 @@ export function LoginDialog({
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
-  onSignIn: (displayName: string) => void;
+  onSignIn: (email: string) => void;
 }) {
   const { t, busy, loading, error } = useApp();
   const [identifier, setIdentifier] = useState('');
 
   const submit = (e: { preventDefault: () => void }) => {
     e.preventDefault();
-    // Use the part before "@" as something to greet them with, nothing more.
-    const name = identifier.trim().split('@')[0].slice(0, 40);
-    onSignIn(name);
+    onSignIn(identifier);
   };
 
   return (
@@ -51,6 +49,8 @@ export function LoginDialog({
             <span>{t.email}</span>
             <input
               type="email"
+              required
+              maxLength={254}
               value={identifier}
               onChange={(e) => setIdentifier(e.target.value)}
               autoComplete="username"

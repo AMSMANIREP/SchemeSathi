@@ -13,6 +13,7 @@ import { usePathname } from 'next/navigation';
 import { languageIndex } from '@/lib/languages';
 import { useVoice } from '@/lib/use-voice';
 import { useHandsFree } from '@/lib/use-hands-free';
+import { demoProfileKey, normalizeDemoEmail } from '@/lib/demo-identity';
 import type {
   Scheme,
   Profile,
@@ -24,6 +25,7 @@ import type {
 } from '@/lib/types';
 
 export type Session = {
+  sessionId: string;
   profile: Profile;
   confirmed: string[];
   provenance: Record<string, Provenance>;
@@ -40,9 +42,9 @@ export type Capabilities = {
 };
 
 const HISTORY_KEY = 'schemesathi.history';
-/** Simulated sign-in for the demo: a display name and a flag, nothing more.
- *  No credential is exchanged and nothing is sent anywhere. */
+/** Only a display name and email hash; never a password or raw email. */
 const VISITOR_KEY = 'schemesathi.visitor';
+let activeSessionId = '';
 
 /**
  * The simulated sign-in lives in localStorage, which does not exist during
@@ -77,27 +79,26 @@ const visitorStore = {
 
 const emitVisitor = () => visitorListeners.forEach((cb) => cb());
 
-async function restoreVoicePreference(name: string) {
-  const digest = await crypto.subtle.digest(
-    'SHA-256',
-    new TextEncoder().encode(name.trim().normalize('NFKC').toLowerCase()),
-  );
-  const profileKey = Array.from(new Uint8Array(digest), (b) =>
-    b.toString(16).padStart(2, '0'),
-  ).join('');
-  return api<Session>('voice/login', 'PUT', { profileKey });
-}
-
 function parseVisitor(raw: string): {
   name: string | null;
+  profileKey: string | null;
   onboarded: boolean;
 } {
-  if (!raw) return { name: null, onboarded: false };
+  const empty = { name: null, profileKey: null, onboarded: false };
+  if (!raw) return empty;
   try {
     const v = JSON.parse(raw);
-    return { name: v.name ?? '', onboarded: !!v.onboarded };
+    // Legacy sign-ins only stored a display name: never assign their shared
+    // profile to whichever full email happens to be entered next.
+    if (
+      v.version !== 2 ||
+      typeof v.name !== 'string' ||
+      !/^[a-f0-9]{64}$/.test(v.profileKey)
+    )
+      return empty;
+    return { name: v.name, profileKey: v.profileKey, onboarded: !!v.onboarded };
   } catch {
-    return { name: null, onboarded: false };
+    return empty;
   }
 }
 
@@ -108,7 +109,11 @@ export type HistoryEntry = { at: number; text: string };
  *  situation must not outlive the private session the product promises. */
 function readHistory(): HistoryEntry[] {
   try {
-    return JSON.parse(sessionStorage.getItem(HISTORY_KEY) || '[]');
+    return activeSessionId
+      ? JSON.parse(
+          sessionStorage.getItem(HISTORY_KEY + '.' + activeSessionId) || '[]',
+        )
+      : [];
   } catch {
     return [];
   }
@@ -116,7 +121,11 @@ function readHistory(): HistoryEntry[] {
 
 function writeHistory(entries: HistoryEntry[]) {
   try {
-    sessionStorage.setItem(HISTORY_KEY, JSON.stringify(entries.slice(0, 30)));
+    if (activeSessionId)
+      sessionStorage.setItem(
+        HISTORY_KEY + '.' + activeSessionId,
+        JSON.stringify(entries.slice(0, 30)),
+      );
   } catch {
     /* storage unavailable: history is a convenience, not a requirement */
   }
@@ -130,9 +139,11 @@ export async function api<T = Record<string, unknown>>(
   const r = await fetch('/api/v1/' + path, {
     method,
     credentials: 'same-origin',
+    signal: AbortSignal.timeout(30000),
     headers: {
       'Content-Type': 'application/json',
       'X-Requested-With': 'SchemeSathi',
+      ...(activeSessionId ? { 'X-SchemeSathi-Session': activeSessionId } : {}),
     },
     ...(data === undefined ? {} : { body: JSON.stringify(data) }),
   });
@@ -188,7 +199,7 @@ type Ctx = {
   visitor: string | null;
   signedIn: boolean;
   signIn: (name: string) => Promise<boolean>;
-  signOut: () => void;
+  signOut: () => Promise<boolean>;
   onboarded: boolean;
   completeOnboarding: () => void;
 };
@@ -239,24 +250,49 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const initialized = useRef(false);
   const greeted = useRef(false);
 
+  const clearPrivateState = useCallback(() => {
+    activeSessionId = '';
+    stopSpeech();
+    stopListening.current();
+    greeted.current = false;
+    setWelcomeReady(false);
+    setSession(null);
+    setApplications([]);
+    setDecisions({});
+    setDetail(null);
+    setMessages([]);
+    setConversationId(null);
+    setCheckpoint('GATHERING');
+    setHistory([]);
+    setLanguage('en');
+    setNotice('');
+    setStage('');
+    setBusy(false);
+  }, [stopSpeech]);
+
   const t = copy[visitor === null || pathname === '/welcome' ? 'en' : language];
   const li = languageIndex(language);
 
   const refreshApps = useCallback(async () => {
+    const epoch = turnEpoch.current;
     const r = await api<{ applications: ApplicationRecord[] }>('applications');
-    setApplications(r.applications);
+    if (epoch === turnEpoch.current) setApplications(r.applications);
   }, []);
 
   const refreshDecisions = useCallback(async () => {
+    const epoch = turnEpoch.current;
     const r = await api<{ results: { scheme: Scheme; decision: Decision }[] }>(
       'recommendations',
     );
-    setDecisions(
-      Object.fromEntries(r.results.map((x) => [x.scheme.id, x.decision])),
-    );
+    if (epoch === turnEpoch.current)
+      setDecisions(
+        Object.fromEntries(r.results.map((x) => [x.scheme.id, x.decision])),
+      );
   }, []);
 
   const load = useCallback(async () => {
+    const epoch = ++turnEpoch.current;
+    clearPrivateState();
     setLoading(true);
     setError('');
     try {
@@ -264,33 +300,49 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         api<Capabilities>('capabilities'),
         api<{ schemes: Scheme[] }>('schemes'),
       ]);
+      if (epoch !== turnEpoch.current) return;
       setCaps(c);
       setSchemes(all.schemes);
-      let s;
-      try {
-        s = await api<Session>('sessions');
-      } catch {
-        s = await api<Session>('sessions', 'POST', {});
+      const currentVisitor = parseVisitor(visitorStore.snapshot());
+      if (!currentVisitor.profileKey) {
+        // Also invalidate the old shared anonymous cookie during migration.
+        await api('demo/logout', 'POST', {});
+        return;
       }
-      const currentVisitor = parseVisitor(visitorStore.snapshot()).name;
-      if (currentVisitor !== null)
-        s = await restoreVoicePreference(currentVisitor);
+      const s = await api<Session>('demo/login', 'PUT', {
+        profileKey: currentVisitor.profileKey,
+      });
+      if (epoch !== turnEpoch.current) return;
+      activeSessionId = s.sessionId;
       setSession(s);
-      setLanguage(currentVisitor === null ? 'en' : s.language);
+      setLanguage(s.language);
+      setHistory(readHistory());
       await refreshApps();
       if (s.profileVersion > 0) await refreshDecisions();
     } catch (e) {
-      setError((e as Error).message);
+      if (epoch === turnEpoch.current) setError((e as Error).message);
     } finally {
-      setLoading(false);
+      if (epoch === turnEpoch.current) setLoading(false);
     }
-  }, [refreshApps, refreshDecisions]);
+  }, [refreshApps, refreshDecisions, clearPrivateState]);
 
   useEffect(() => {
     if (initialized.current) return;
     initialized.current = true;
-    setHistory(readHistory());
+    try {
+      sessionStorage.removeItem(HISTORY_KEY);
+    } catch {
+      /* legacy shared history */
+    }
     void load();
+  }, [load]);
+
+  useEffect(() => {
+    const switched = (event: StorageEvent) => {
+      if (event.key === VISITOR_KEY) void load();
+    };
+    window.addEventListener('storage', switched);
+    return () => window.removeEventListener('storage', switched);
   }, [load]);
 
   const cancelRecording = useCallback(() => stopListening.current(), []);
@@ -349,16 +401,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setSession({ ...session, language: l, languageSelected: true });
       if (caps.voice) void speech.play({ kind: 'selected', language: l });
     } catch (e) {
-      setError((e as Error).message);
+      if (epoch === turnEpoch.current) setError((e as Error).message);
     } finally {
-      setBusy(false);
+      if (epoch === turnEpoch.current) setBusy(false);
     }
   };
 
   const ensureConversation = useCallback(async () => {
     if (conversationId) return conversationId;
+    const epoch = turnEpoch.current;
     const c = await api<{ id: string }>('conversations', 'POST', {});
-    setConversationId(c.id);
+    if (epoch === turnEpoch.current) setConversationId(c.id);
     return c.id;
   }, [conversationId]);
 
@@ -414,6 +467,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         headers: {
           'Content-Type': 'application/json',
           'X-Requested-With': 'SchemeSathi',
+          'X-SchemeSathi-Session': activeSessionId,
           // Streaming is opt-in; without this the same endpoint returns JSON.
           Accept: 'text/event-stream',
         },
@@ -529,37 +583,46 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   /** The /profile route's save. Everything reviewed here counts as entered. */
   const saveProfile = async (profile: Profile) => {
+    const epoch = turnEpoch.current;
     setBusy(true);
     setError('');
     try {
       const current = await api<Session>('sessions');
+      if (epoch !== turnEpoch.current) return false;
       const r = await api<{ profileVersion: number }>(
         'profile/confirm',
         'PUT',
         { profile, version: current.profileVersion, confirmed: true },
       );
-      setSession(await api<Session>('sessions'));
+      if (epoch !== turnEpoch.current) return false;
+      const fresh = await api<Session>('sessions');
+      if (epoch !== turnEpoch.current) return false;
+      setSession(fresh);
       if (r.profileVersion > 0) await refreshDecisions();
+      if (epoch !== turnEpoch.current) return false;
       setNotice(t.profileReady);
       return true;
     } catch (e) {
-      setError((e as Error).message);
+      if (epoch === turnEpoch.current) setError((e as Error).message);
       return false;
     } finally {
-      setBusy(false);
+      if (epoch === turnEpoch.current) setBusy(false);
     }
   };
 
   const saveScheme = async (s: Scheme) => {
+    const epoch = turnEpoch.current;
     setBusy(true);
     try {
       await api('applications', 'POST', {
         schemeId: s.id,
         conversationId,
       });
+      if (epoch !== turnEpoch.current) return;
       const r = await api<{ applications: ApplicationRecord[] }>(
         'applications',
       );
+      if (epoch !== turnEpoch.current) return;
       setApplications(r.applications);
       setNotice(t.saved);
 
@@ -585,43 +648,51 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           },
         ]);
     } catch (e) {
-      setError((e as Error).message);
+      if (epoch === turnEpoch.current) setError((e as Error).message);
     } finally {
-      setBusy(false);
+      if (epoch === turnEpoch.current) setBusy(false);
     }
   };
 
   const updateApplication = async (a: ApplicationRecord) => {
+    const epoch = turnEpoch.current;
     setBusy(true);
     try {
       await api('applications/' + a.id, 'PATCH', a);
+      if (epoch !== turnEpoch.current) return false;
       await refreshApps();
+      if (epoch !== turnEpoch.current) return false;
       setNotice(t.updated);
       return true;
     } catch (e) {
-      setError((e as Error).message);
+      if (epoch === turnEpoch.current) setError((e as Error).message);
       return false;
     } finally {
-      setBusy(false);
+      if (epoch === turnEpoch.current) setBusy(false);
     }
   };
 
   const removeApplication = async (id: string) => {
+    const epoch = turnEpoch.current;
     try {
       await api('applications/' + id, 'DELETE');
+      if (epoch !== turnEpoch.current) return;
       await refreshApps();
     } catch (e) {
-      setError((e as Error).message);
+      if (epoch === turnEpoch.current) setError((e as Error).message);
     }
   };
 
   const forget = async () => {
-    turnEpoch.current++;
+    const epoch = ++turnEpoch.current;
     speech.stop();
     cancelRecording();
     setBusy(true);
     try {
       await api('me/data', 'DELETE');
+      if (epoch !== turnEpoch.current) return;
+      writeHistory([]);
+      clearPrivateState();
       setApplications([]);
       setDecisions({});
       setMessages([]);
@@ -633,36 +704,45 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setWelcomeReady(false);
       setSession(null);
       setHistory([]);
-      writeHistory([]);
-      const s = await api<Session>('sessions', 'POST', { language });
-      setSession(s);
       setNotice(t.deleted);
     } catch (e) {
-      setError((e as Error).message);
+      if (epoch === turnEpoch.current) setError((e as Error).message);
     } finally {
-      setBusy(false);
+      if (epoch === turnEpoch.current) setBusy(false);
     }
   };
 
   const sendFeedback = async (rating: string, comment: string) => {
+    const epoch = turnEpoch.current;
     setBusy(true);
     try {
       await api('feedback', 'POST', { rating: +rating, comment });
+      if (epoch !== turnEpoch.current) return;
       setNotice(t.feedbackSaved);
     } catch (e) {
-      setError((e as Error).message);
+      if (epoch === turnEpoch.current) setError((e as Error).message);
     } finally {
-      setBusy(false);
+      if (epoch === turnEpoch.current) setBusy(false);
     }
   };
 
-  const persistVisitor = (name: string | null, done: boolean) => {
+  const persistVisitor = (
+    name: string | null,
+    done: boolean,
+    profileKey?: string,
+  ) => {
     try {
       if (name === null) localStorage.removeItem(VISITOR_KEY);
       else
         localStorage.setItem(
           VISITOR_KEY,
-          JSON.stringify({ name, onboarded: done }),
+          JSON.stringify({
+            version: 2,
+            name,
+            profileKey:
+              profileKey ?? parseVisitor(visitorStore.snapshot()).profileKey,
+            onboarded: done,
+          }),
         );
     } catch {
       /* storage unavailable: the session still works, it just forgets */
@@ -670,49 +750,59 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     emitVisitor();
   };
 
-  const signIn = async (name: string) => {
+  const signIn = async (identifier: string) => {
     if (loginPending.current) return false;
     loginPending.current = true;
+    const epoch = ++turnEpoch.current;
+    clearPrivateState();
     speech.unlock();
     cancelRecording();
     setBusy(true);
     setError('');
     try {
-      let current: Session;
-      try {
-        current = await api<Session>('sessions');
-      } catch {
-        current = await api<Session>('sessions', 'POST', { language: 'en' });
-      }
-      const s = await restoreVoicePreference(name);
-      setSession(s || current);
-      setLanguage((s || current).language);
+      const email = normalizeDemoEmail(identifier);
+      const profileKey = await demoProfileKey(email);
+      const s = await api<Session>('demo/login', 'PUT', { profileKey });
+      if (epoch !== turnEpoch.current) return false;
+      activeSessionId = s.sessionId;
+      setSession(s);
+      setLanguage(s.language);
+      setHistory(readHistory());
+      await refreshApps();
+      if (s.profileVersion > 0) await refreshDecisions();
+      if (epoch !== turnEpoch.current) return false;
       greeted.current = false;
       setWelcomeReady(false);
-      persistVisitor(name, false);
+      persistVisitor(email.split('@')[0].slice(0, 40), false, profileKey);
+      return true;
+    } catch (e) {
+      if (epoch === turnEpoch.current) setError((e as Error).message);
+      return false;
+    } finally {
+      loginPending.current = false;
+      if (epoch === turnEpoch.current) setBusy(false);
+    }
+  };
+  const signOut = async () => {
+    if (loginPending.current) return false;
+    loginPending.current = true;
+    turnEpoch.current++;
+    clearPrivateState();
+    setError('');
+    setBusy(true);
+    setLoading(true);
+    try {
+      await api('demo/logout', 'POST', {});
+      persistVisitor(null, false);
       return true;
     } catch (e) {
       setError((e as Error).message);
       return false;
     } finally {
       loginPending.current = false;
+      setLoading(false);
       setBusy(false);
     }
-  };
-  const signOut = () => {
-    turnEpoch.current++;
-    speech.stop();
-    cancelRecording();
-    greeted.current = false;
-    setWelcomeReady(false);
-    setLanguage('en');
-    setError('');
-    setNotice('');
-    setBusy(false);
-    setStage('');
-    setMessages([]);
-    setConversationId(null);
-    persistVisitor(null, false);
   };
   const completeOnboarding = () => persistVisitor(visitor ?? '', true);
 
@@ -722,11 +812,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const setMemoryConsent = async (v: boolean) => {
+    const epoch = turnEpoch.current;
     try {
       await api('privacy/consent', 'PUT', { enabled: v, language });
+      if (epoch !== turnEpoch.current) return;
       setSession((s) => (s ? { ...s, memoryConsent: v } : s));
     } catch (e) {
-      setError((e as Error).message);
+      if (epoch === turnEpoch.current) setError((e as Error).message);
     }
   };
 
