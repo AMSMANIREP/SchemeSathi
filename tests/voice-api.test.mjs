@@ -560,6 +560,157 @@ test('real routes preserve chat flow, ownership and selected voice language', as
     assert.match(tamil.message.text, /^தற்போது ஆதரிக்கப்படும் திட்டங்கள் எதுவும் இல்லை/);
     assert.doesNotMatch(tamil.message.text, /எரிவாயு|\?/);
 
+    // Match the public deployment: all 50 records are discoverable, while
+    // demo/unreviewed eligibility rules remain unavailable for qualification.
+    const { catalogue } = await import('../lib/catalogue.ts');
+    assert.equal(catalogue.length, 50);
+    for (const scheme of catalogue) {
+      sqlite
+        .prepare(
+          'INSERT INTO scheme_reviews(id,payload,reviewer,created_at) VALUES(?,?,?,?)',
+        )
+        .run(
+          scheme.id,
+          JSON.stringify({ reviewStatus: 'DRAFT', complete: false }),
+          'test-public-policy',
+          new Date().toISOString(),
+        );
+    }
+    const assertDiscovery = (reply, expectedIds, excludedIds, language) => {
+      const cards = reply.message.blocks.filter(
+        (b) => b.kind === 'scheme_card',
+      );
+      assert.ok(cards.length > 0, reply.message.text);
+      assert.ok(
+        cards.some((b) => expectedIds.includes(b.schemeId)),
+        JSON.stringify(cards),
+      );
+      assert.ok(
+        cards.every((b) => !excludedIds.includes(b.schemeId)),
+        JSON.stringify(cards),
+      );
+      assert.ok(cards.every((b) => b.status === 'UNABLE_TO_DETERMINE'));
+      assert.ok(
+        !reply.message.blocks.some((b) =>
+          ['answer_chips', 'save_prompt'].includes(b.kind),
+        ),
+      );
+      const sources = reply.message.blocks.find((b) => b.kind === 'sources');
+      assert.deepEqual(
+        sources.items.map((s) => s.schemeId),
+        cards.map((c) => c.schemeId),
+      );
+      for (const card of cards) {
+        const record = catalogue.find((s) => s.id === card.schemeId);
+        assert.ok(
+          reply.message.text.includes(record.shortName),
+          'voice reply must name results',
+        );
+        assert.equal(
+          sources.items.find((s) => s.schemeId === card.schemeId).url,
+          record.source,
+        );
+      }
+      assert.doesNotMatch(
+        reply.message.text,
+        /no supported schemes|தற்போது ஆதரிக்கப்படும் திட்டங்கள் எதுவும் இல்லை|LPG|எரிவாயு|\?/i,
+      );
+      assert.equal(reply.message.language, language);
+      if (language === 'en')
+        assert.match(reply.message.text, /cannot confirm whether you qualify/);
+      else
+        assert.match(
+          reply.message.text,
+          /தகுதி விதிகள் இன்னும் சரிபார்க்கப்பட வேண்டும்/,
+        );
+    };
+    for (const language of ['en', 'ta']) {
+      const discovery = client();
+      await discovery('sessions', 'POST', { language }, 201);
+      const conversation = await discovery('conversations', 'POST', {}, 201);
+      agentReplies = [
+        toolCall('search_schemes', { query: 'disability' }),
+        toolCall('check_eligibility', { schemeIds: ['adip', 'igndps'] }),
+        toolCall('ask_about', { field: 'lpg' }),
+        {
+          role: 'assistant',
+          content: 'There are no supported schemes as of now. Do you have LPG?',
+        },
+      ];
+      const disability = await discovery(
+        'conversations/' + conversation.id + '/messages',
+        'POST',
+        {
+          message:
+            language === 'ta'
+              ? 'மாற்றுத்திறனாளிகளுக்கான திட்டங்கள் என்ன?'
+              : 'What schemes are available for disability?',
+        },
+        201,
+      );
+      assertDiscovery(
+        disability,
+        ['adip', 'igndps'],
+        ['pmuy', 'pmkvy'],
+        language,
+      );
+      // The model only searches on the next turn: records must still appear.
+      agentReplies = [
+        toolCall('search_schemes', { query: 'skill development training' }),
+        {
+          role: 'assistant',
+          content: 'There are no supported schemes as of now.',
+        },
+      ];
+      const skills = await discovery(
+        'conversations/' + conversation.id + '/messages',
+        'POST',
+        {
+          message:
+            language === 'ta'
+              ? 'அடுத்து திறன் மேம்பாட்டுக்கான திட்டங்கள் என்ன?'
+              : 'Then can you give me schemes related to skill development?',
+        },
+        201,
+      );
+      assertDiscovery(
+        skills,
+        ['pmkvy', 'ddugky', 'nats', 'naps'],
+        ['adip', 'igndps', 'pmuy'],
+        language,
+      );
+      assert.equal(
+        sqlite
+          .prepare('SELECT asked_field FROM conversations WHERE id=?')
+          .get(conversation.id).asked_field,
+        '',
+      );
+      assert.equal(agentReplies.length, 0);
+    }
+
+    // The non-LLM fallback must also search the current topic, not combine
+    // earlier disability requests with a new skills request indefinitely.
+    globalThis.__voiceTestEnv.LLM_API_KEY = '';
+    const fallback = client();
+    await fallback('sessions', 'POST', { language: 'en' }, 201);
+    const fallbackThread = await fallback('conversations', 'POST', {}, 201);
+    for (const [message, expected, excluded] of [
+      ['disability support', ['adip', 'igndps'], ['pmuy', 'pmkvy']],
+      [
+        'skill development training',
+        ['pmkvy', 'ddugky', 'nats', 'naps'],
+        ['adip', 'igndps', 'pmuy'],
+      ],
+    ]) {
+      const reply = await fallback(
+        'conversations/' + fallbackThread.id + '/messages',
+        'POST',
+        { message },
+        201,
+      );
+      assertDiscovery(reply, expected, excluded, 'en');
+    }
+
     const { buildTools } = await import('../lib/agent/tools.ts');
     const reviewed = {
       id: 'training',

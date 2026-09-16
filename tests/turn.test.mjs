@@ -153,8 +153,17 @@ test('unreviewed skill records do not send the citizen into LPG questions', () =
     schemes: [skill, cooking],
     candidates: ['skills'],
   });
-  assert.equal(plan.noSupportedSchemes, true);
+  assert.equal(plan.noSupportedSchemes, false);
+  assert.equal(plan.discoveryOnly, true);
+  assert.match(plan.text, /skills/);
   assert.match(plan.text, /still need verification/);
+  assert.deepEqual(
+    plan.blocks
+      .filter((b) => b.kind === 'scheme_card')
+      .map((b) => [b.schemeId, b.status]),
+    [['skills', 'UNABLE_TO_DETERMINE']],
+  );
+  assert.doesNotMatch(plan.text, /no supported schemes|LPG|\?/i);
   assert.equal(plan.askedField, null);
   assert.equal(nextQuestion([skill, cooking], {}, [], ['skills'], 'en'), null);
 });
@@ -301,9 +310,10 @@ test('a focused turn names what is still missing', () => {
   assert.ok(/landholding/i.test(plan.text), plan.text);
 });
 
-test('with no scheme named, the turn stays general', () => {
+test('a discovery reply names its cards so voice users hear the results too', () => {
   const plan = planTurn({ ...base, questionsAsked: QUESTION_BUDGET });
-  assert.ok(plan.text.startsWith('Here is what'), plan.text);
+  assert.ok(plan.text.startsWith('I found these related schemes'), plan.text);
+  assert.match(plan.text, /farm-one/);
 });
 
 test('a scheme named this message is the whole answer', () => {
@@ -361,9 +371,7 @@ test('asking about a scheme is never deflected into a question', () => {
   assert.ok(/still to establish/i.test(plan.text), plan.text);
 });
 
-test('a scheme nothing can be said about is not offered as an option', () => {
-  // Undetermined means the rules could not decide. Showing it as a card reads
-  // as a suggestion, which is the confident-looking answer the product avoids.
+test('unknown eligibility does not hide a relevant catalogue record', () => {
   const undecided = scheme(
     'unknown-one',
     { all: [rule('bpl', 'eq', 'yes')] },
@@ -383,7 +391,13 @@ test('a scheme nothing can be said about is not offered as an option', () => {
   const ids = plan.blocks
     .filter((b) => b.kind === 'scheme_card')
     .map((b) => b.schemeId);
-  assert.deepEqual(ids, ['farm-one']);
+  assert.deepEqual(ids, ['farm-one', 'unknown-one']);
+  assert.equal(plan.discoveryOnly, true);
+  assert.equal(
+    plan.blocks.find((b) => b.schemeId === 'unknown-one').status,
+    'UNABLE_TO_DETERMINE',
+  );
+  assert.match(plan.text, /cannot confirm whether you qualify/);
 });
 
 test('asking for everything shows the undetermined ones too', () => {

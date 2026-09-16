@@ -363,12 +363,15 @@ async function runTurn(
     .bind(conversation.id)
     .all<{ role: string; text: string }>();
   const history = recent.results.reverse();
-  // A greeting used as the title is not the request. Keep recent user turns
-  // so a short answer does not lose the skill/disability request behind it.
-  const query = history
-    .filter((m) => m.role === 'user')
-    .map((m) => m.text)
-    .join(' ');
+  // Direct answers retain their context; a new request searches its own topic.
+  // Combining every past request kept disability results ahead of new skills.
+  const query =
+    answered !== null
+      ? history
+          .filter((m) => m.role === 'user')
+          .map((m) => m.text)
+          .join(' ')
+      : text;
 
   const lastPresented = (
     JSON.parse(previous?.blocks || '[]') as {
@@ -389,20 +392,9 @@ async function runTurn(
       });
   let focus = detected.schemeId;
 
-  // The planner decides first, then the model speaks — never the reverse.
-  //
-  // A question is left to the planner: it asks about exactly one field and
-  // ships the chips that answer it, whereas a model asked to phrase the
-  // same thing rambles across three and contradicts the chips beneath it.
-  // The model is worth having when there is something to explain, so it is
-  // called only then, and told which programmes are on screen so its words
-  // and the cards cannot disagree.
-  // The model decides whether there is enough to go on before anything
-  // touches the index. A vague opening — "money is tight" — should start a
-  // conversation, not a search: naming a programme off one sentence is a
-  // guess wearing the clothes of an answer. So the agent runs first, and
-  // the schemes it actually looked up become the candidates. With no model
-  // configured the deterministic path retrieves for itself, as before.
+  // The agent searches for the current request. The deterministic planner
+  // then owns cards, eligibility verdicts and permitted profile questions.
+  // Without a model, keyword retrieval supplies the same planner directly.
   let spoken: Awaited<ReturnType<typeof runAgent>> = null;
   try {
     onStatus('thinking');
@@ -431,14 +423,13 @@ async function runTurn(
 
   let candidates: string[];
   if (spoken) {
-    // Search results are candidates, not recommendations. Only schemes the
-    // agent selected for checking may drive profile questions and cards.
-    candidates = spoken.checked;
+    // A model skipping eligibility checks must not hide retrieved records.
+    // The planner evaluates every card and still restricts profile questions.
+    candidates = spoken.checked.length ? spoken.checked : spoken.seen;
   } else {
     onStatus('searching');
     candidates = (await retrieve(query, live)).map((c) => c.schemeId);
   }
-
   // "I don't know what I need" is the one case where asking again is the
   // least useful thing we can do. If the model asked instead of searching,
   // search on whatever is already known — the opening description and the
@@ -491,6 +482,7 @@ async function runTurn(
   let acceptedModel = false;
   const modelAsked =
     !terminal &&
+    !plan.discoveryOnly &&
     spoken?.asking &&
     (conversation.questions_asked as number) < QUESTION_BUDGET
       ? spoken.asking
@@ -501,7 +493,7 @@ async function runTurn(
   // replaced by the deterministic sentence, and prose that asks about a
   // different field than the chips beneath it is set aside entirely.
   let assistantText = plan.text;
-  if (spoken?.text && !terminal) {
+  if (spoken?.text && !terminal && !plan.discoveryOnly) {
     const verdict = validateProse(spoken.text, {
       onScreen: plan.blocks
         .filter((b) => b.kind === 'scheme_card')

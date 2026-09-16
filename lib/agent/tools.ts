@@ -68,7 +68,7 @@ export function buildTools(ctx: ToolContext) {
         const missing = d.missingFields.length
           ? ` | still unestablished: ${d.missingFields.join(', ')}`
           : '';
-        return `${id} | ${d.status}${missing}`;
+        return `${id} | ${d.status}${missing}${d.status === 'UNABLE_TO_DETERMINE' ? ' | Catalogue record exists and can be shown for discovery. Eligibility rules need verification; this is not an empty search result.' : ''}`;
       });
       return lines.join('\n');
     },
@@ -118,7 +118,7 @@ export function buildTools(ctx: ToolContext) {
       if (!canAsk) {
         ctx.blockedQuestion = true;
         ctx.asking = null;
-        return 'Do not ask that question. No relevant supported scheme needs this answer, or the question budget is exhausted. If nothing supported matches, state that clearly and stop.';
+        return 'Do not ask that question. No relevant reviewed rule needs this answer, or the question budget is exhausted. Show any matching catalogue records with their eligibility caveat. Only say no schemes were found if the search actually returned no relevant records.';
       }
       const spec = fields.find((f) => f.key === field);
       if (!spec)

@@ -70,6 +70,8 @@ export type TurnInput = {
 export type TurnPlan = {
   /** A terminal catalogue result; never append another profile question. */
   noSupportedSchemes: boolean;
+  /** Matching records exist, but at least one eligibility verdict is unknown. */
+  discoveryOnly: boolean;
   text: string;
   blocks: Block[];
   checkpoint: Checkpoint;
@@ -110,11 +112,11 @@ const li = languageIndex;
 
 const said = {
   presenting: [
-    'Here is what your details point to so far.',
-    'आपके विवरण के आधार पर अभी यह दिख रहा है।',
-    'ನಿಮ್ಮ ವಿವರಗಳ ಆಧಾರದ ಮೇಲೆ ಇಲ್ಲಿಯವರೆಗೆ ಇದು ಕಾಣಿಸುತ್ತಿದೆ.',
-    'உங்கள் விவரங்களின் அடிப்படையில் இதுவரை கிடைத்த முடிவுகள் இவை.',
-    'നിങ്ങളുടെ വിവരങ്ങളുടെ അടിസ്ഥാനത്തിൽ ഇതുവരെ ലഭിച്ച ഫലങ്ങൾ ഇവയാണ്.',
+    'I found these related schemes in our catalogue:',
+    'हमारे संग्रह में ये संबंधित योजनाएँ मिली हैं:',
+    'ನಮ್ಮ ಪಟ್ಟಿಯಲ್ಲಿ ಈ ಸಂಬಂಧಿತ ಯೋಜನೆಗಳು ಕಂಡುಬಂದಿವೆ:',
+    'எங்கள் பட்டியலில் இந்த தொடர்புடைய திட்டங்கள் உள்ளன:',
+    'ഞങ്ങളുടെ പട്ടികയിൽ ഈ ബന്ധപ്പെട്ട പദ്ധതികളുണ്ട്:',
   ],
   offerSave: [
     'Would you like to keep this one in My applications, so you have the next steps to hand?',
@@ -138,11 +140,11 @@ const said = {
     'നിലവിൽ പിന്തുണയ്ക്കുന്ന പദ്ധതികളൊന്നുമില്ല. ഇത് ഞങ്ങളുടെ നിലവിലെ പട്ടികയിൽ നിങ്ങളുടെ ആവശ്യത്തിന് ബാധകമാണ്; എല്ലാ സർക്കാർ പദ്ധതികൾക്കും അല്ല.',
   ],
   unreviewed: [
-    'Related records still need verification, so this does not mean you are ineligible.',
-    'संबंधित विवरणों का सत्यापन बाकी है; इसका मतलब यह नहीं कि आप अपात्र हैं।',
-    'ಸಂಬಂಧಿತ ದಾಖಲೆಗಳನ್ನು ಇನ್ನೂ ಪರಿಶೀಲಿಸಬೇಕು; ನೀವು ಅನರ್ಹರು ಎಂದರ್ಥವಲ್ಲ.',
-    'தொடர்புடைய பதிவுகள் இன்னும் சரிபார்க்கப்பட வேண்டும்; இதனால் நீங்கள் தகுதியற்றவர் என்று பொருளல்ல.',
-    'ബന്ധപ്പെട്ട രേഖകൾ ഇനിയും പരിശോധിക്കേണ്ടതുണ്ട്; നിങ്ങൾ അയോഗ്യരാണെന്ന് ഇതിന് അർത്ഥമില്ല.',
+    'These records are available to explore, but their eligibility rules still need verification. I cannot confirm whether you qualify. Please check the linked official sources.',
+    'आप इन योजनाओं की जानकारी देख सकते हैं, लेकिन पात्रता नियमों का सत्यापन बाकी है। मैं आपकी पात्रता की पुष्टि नहीं कर सकता। दिए गए आधिकारिक स्रोत देखें।',
+    'ಈ ಯೋಜನೆಗಳ ಮಾಹಿತಿಯನ್ನು ನೋಡಬಹುದು, ಆದರೆ ಅರ್ಹತಾ ನಿಯಮಗಳನ್ನು ಇನ್ನೂ ಪರಿಶೀಲಿಸಬೇಕು. ನಿಮ್ಮ ಅರ್ಹತೆಯನ್ನು ದೃಢೀಕರಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ನೀಡಿರುವ ಅಧಿಕೃತ ಮೂಲಗಳನ್ನು ನೋಡಿ.',
+    'இந்த திட்டங்களின் விவரங்களைப் பார்க்கலாம். ஆனால் தகுதி விதிகள் இன்னும் சரிபார்க்கப்பட வேண்டும். நீங்கள் தகுதியானவரா என்பதை என்னால் உறுதிப்படுத்த முடியாது. இணைக்கப்பட்ட அதிகாரப்பூர்வ ஆதாரங்களைப் பார்க்கவும்.',
+    'ഈ പദ്ധതികളുടെ വിവരങ്ങൾ പരിശോധിക്കാം, പക്ഷേ യോഗ്യതാ ചട്ടങ്ങൾ ഇനിയും പരിശോധിക്കേണ്ടതുണ്ട്. നിങ്ങളുടെ യോഗ്യത ഉറപ്പാക്കാൻ കഴിയില്ല. നൽകിയ ഔദ്യോഗിക ഉറവിടങ്ങൾ പരിശോധിക്കുക.',
   ],
 };
 
@@ -209,6 +211,7 @@ export function planTurn(input: TurnInput): TurnPlan {
         });
       return {
         noSupportedSchemes: false,
+        discoveryOnly: false,
         text: unreadAnswer ? said.didNotCatch[n] + ' ' + q.text : q.text,
         blocks,
         checkpoint: 'ASKED',
@@ -232,14 +235,9 @@ export function planTurn(input: TurnInput): TurnPlan {
   // only carried over from an earlier turn leads but does not narrow, because
   // they may have moved on.
   const asked = focus && schemes.some((s) => s.id === focus) ? focus : null;
-  // A card for a scheme the rules cannot decide tells the citizen nothing and
-  // reads as an option. Proactively, only show what something can be said
-  // about; a scheme they asked about by name is shown whatever the verdict,
-  // because refusing to answer is worse than answering "we cannot tell".
-  const decided = ranked.filter(
-    (id) => decisions.get(id)?.status !== 'UNABLE_TO_DETERMINE',
-  );
-  const offered = showEverything ? ranked : decided;
+  // Discovery and eligibility are separate. Unreviewed records still exist
+  // and may be useful to explore; their cards retain the unknown verdict.
+  const offered = ranked;
 
   const shown = asked
     ? focusNamed
@@ -303,6 +301,9 @@ export function planTurn(input: TurnInput): TurnPlan {
     }
   }
 
+  const discoveryOnly = shown.some(
+    (id) => decisions.get(id)?.status === 'UNABLE_TO_DETERMINE',
+  );
   const opening = asked
     ? aboutScheme(
         schemes.find((s) => s.id === asked)!,
@@ -310,17 +311,18 @@ export function planTurn(input: TurnInput): TurnPlan {
         language,
       )
     : shown.length
-      ? said.presenting[n]
-      : said.nothing[n] +
-        (ranked.some(
-          (id) => decisions.get(id)?.status === 'UNABLE_TO_DETERMINE',
-        )
-          ? ' ' + said.unreviewed[n]
-          : '');
+      ? `${said.presenting[n]} ${shown.map((id) => schemes.find((s) => s.id === id)!.shortName).join('; ')}.`
+      : said.nothing[n];
+  const groundedOpening = discoveryOnly
+    ? `${opening} ${said.unreviewed[n]}`
+    : opening;
 
   return {
     noSupportedSchemes: !shown.length,
-    text: offeredSchemeId ? opening + ' ' + said.offerSave[n] : opening,
+    discoveryOnly,
+    text: offeredSchemeId
+      ? groundedOpening + ' ' + said.offerSave[n]
+      : groundedOpening,
     blocks,
     checkpoint,
     questionsAsked,
